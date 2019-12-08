@@ -156,60 +156,60 @@ class AmazonAPI:
 
                     try:
                         product.url = item.detail_page_url
-                    except (NameError, AttributeError):
+                    except Exception:
                         product.url = None
 
                     """Parse ItemInfo data"""
                     try:
                         item_info = item.item_info
-                    except (NameError, AttributeError):
+                    except Exception:
                         item_info = None
                     try:
                         product.title = item_info.title.display_value
-                    except (NameError, AttributeError):
+                    except Exception:
                         product.title = None
                     try:
                         product.release_date = item_info.product_info.release_date.display_value
-                    except (NameError, AttributeError):
+                    except Exception:
                         product.release_date = None
                     try:
                         product.features = item_info.features.display_values
-                    except (NameError, AttributeError):
+                    except Exception:
                         product.features = None
                     try:
                         product.category = item_info.classifications.product_group.display_value
-                    except (NameError, AttributeError):
+                    except Exception:
                         product.category = None
                     try:
                         product.subcategory = item_info.classifications.binding.display_value
-                    except (NameError, AttributeError):
+                    except Exception:
                         product.subcategory = None
                     try:
                         product.brand = item_info.by_line_info.brand.display_value
-                    except (NameError, AttributeError):
+                    except Exception:
                         product.brand = None
                     try:
                         product.manufacturer = item_info.by_line_info.manufacturer.display_value
-                    except (NameError, AttributeError):
+                    except Exception:
                         product.manufacturer = None
 
                     """Parse Images data"""
                     try:
                         images = item.images
-                    except (NameError, AttributeError):
+                    except Exception:
                         images = None
                     try:
                         product.image_large = images.primary.large.url.replace('.jpg',
                                                                                '._AC_.jpg')
-                    except (NameError, AttributeError):
+                    except Exception:
                         product.image_large = None
                     try:
                         product.image_medium = images.primary.medium.url.replace('_SL', '_AC')
-                    except (NameError, AttributeError):
+                    except Exception:
                         product.image_medium = None
                     try:
                         product.image_small = images.primary.small.url.replace('_SL', '_AC')
-                    except (NameError, AttributeError):
+                    except Exception:
                         product.image_small = None
                     try:
                         product.image_variants = []
@@ -217,37 +217,37 @@ class AmazonAPI:
                             try:
                                 product.image_variants.append(
                                     variant.large.url.replace('.jpg', '._AC_.jpg'))
-                            except (NameError, AttributeError):
+                            except Exception:
                                 pass
                         if not product.image_variants:
                             product.image_variants = None
-                    except (NameError, AttributeError):
+                    except Exception:
                         product.image_variants = None
 
                     """Parse Offers Listings data"""
                     product.prices = Product()
                     try:
                         listings = item.offers.listings[0]
-                    except (NameError, AttributeError):
+                    except Exception:
                         listings = None
                     try:
                         product.prices.availability = listings.availability.message
-                    except (NameError, AttributeError):
+                    except Exception:
                         product.prices.availability = None
                     try:
                         product.prices.price = listings.price.amount
-                    except (NameError, AttributeError):
+                    except Exception:
                         product.prices.price = None
                     try:
                         product.prices.pvp = listings.saving_basis.amount
-                    except (NameError, AttributeError):
+                    except Exception:
                         product.prices.pvp = None
 
                     """Parse Offers Summaries data"""
                     product.offers = Product()
                     try:
                         product.offers = item.offers.summaries
-                    except (NameError, AttributeError):
+                    except Exception:
                         product.offers = None
 
                     return product
