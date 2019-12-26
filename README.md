@@ -1,4 +1,4 @@
-Amazon Product Advertising API V5 wrapper for Python 💰
+Amazon Product Advertising API V5 wrapper for Python
 =======================================================
 A simple Python wrapper for the Amazon Product Advertising API version 5.
 
@@ -12,8 +12,7 @@ Features
 Installation
 -------------
 
-* Add this module to your project
-* PIP support coming in the future
+     pip install python-amazon-paapi5
 
 Usage
 -----
