@@ -7,7 +7,6 @@ from paapi5_python_sdk.condition import Condition
 from paapi5_python_sdk.get_items_request import GetItemsRequest
 from paapi5_python_sdk.get_items_resource import GetItemsResource
 from paapi5_python_sdk.partner_type import PartnerType
-from paapi5_python_sdk.rest import ApiException
 import time
 import logging
 
@@ -242,6 +241,10 @@ class AmazonAPI:
                         product.prices.pvp = listings.saving_basis.amount
                     except Exception:
                         product.prices.pvp = None
+                    try:
+                        product.prices.currency = listings.price.currency
+                    except Exception:
+                        product.prices.currency = None
 
                     """Parse Offers Summaries data"""
                     product.offers = Product()
