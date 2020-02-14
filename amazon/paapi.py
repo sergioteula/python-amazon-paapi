@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-
-"""Amazon Product Advertising API v5 wrapper for Python"""
+"""Amazon Product Advertising API 5.0 wrapper for Python"""
 
 from paapi5_python_sdk.api.default_api import DefaultApi
 from paapi5_python_sdk.condition import Condition
