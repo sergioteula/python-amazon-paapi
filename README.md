@@ -21,22 +21,23 @@ Installation
 
 You can install or upgrade the module with:
 
-     pip install python-amazon-paapi5 --upgrade
-
-Changelog
--------------
-
-Release 0.1.1
-
-     - Added currency support for prices.
+    pip install python-amazon-paapi5 --upgrade
 
 Usage
 -----
 
-     from amazon.paapi import AmazonAPI
-     amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY)
-     product = amazon.get_product(asin)
+    from amazon.paapi import AmazonAPI
+    amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY)
+    product = amazon.get_product(asin)
 
+Changelog
+-------------
+
+    Version 0.1.1
+        - Added currency support for prices.
+
+    Version 0.1.0
+        -First release.
 
 License
 -------
