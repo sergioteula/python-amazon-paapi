@@ -176,16 +176,13 @@ class AmazonAPI:
             return
 
         try:
-            """Wait before doing the request"""
+            # Wait before doing the request
             wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
             if wait_time > 0:
                 time.sleep(wait_time)
             self.last_query_time = time.time()
 
-            """Request to the API"""
             response = api.get_items(request)
-
-            """Parse the response and create a product"""
             if response.items_result is not None:
                 if len(response.items_result.items) > 0:
                     results = []
@@ -198,7 +195,7 @@ class AmazonAPI:
                         except Exception:
                             product.url = None
 
-                        """Parse ItemInfo data"""
+                        # Parse ItemInfo data
                         try:
                             item_info = item.item_info
                         except Exception:
@@ -232,7 +229,7 @@ class AmazonAPI:
                         except Exception:
                             product.manufacturer = None
 
-                        """Parse Images data"""
+                        # Parse Images data
                         try:
                             images = item.images
                         except Exception:
@@ -263,7 +260,7 @@ class AmazonAPI:
                         except Exception:
                             product.image_variants = None
 
-                        """Parse Offers Listings data"""
+                        # Parse Offers Listings data
                         product.prices = Product()
                         try:
                             listings = item.offers.listings[0]
@@ -286,7 +283,7 @@ class AmazonAPI:
                         except Exception:
                             product.prices.currency = None
 
-                        """Parse Offers Summaries data"""
+                        # Parse Offers Summaries data
                         product.offers = Product()
                         try:
                             product.offers = item.offers.summaries
