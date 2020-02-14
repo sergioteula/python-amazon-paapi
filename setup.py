@@ -11,7 +11,7 @@ setuptools.setup(
     description='Amazon Product Advertising API 5.0 wrapper for Python',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    license='GPL-3.0'
+    license='GPL-3.0',
     url='https://github.com/sergioteula/python-amazon-paapi5',
     packages=setuptools.find_packages(),
     install_requires=['amightygirl.paapi5-python-sdk'],
