@@ -1,6 +1,6 @@
 Amazon Product Advertising API 5.0 wrapper for Python
 =======================================================
-A simple Python wrapper for the last version of the Amazon Product Advertising API.
+A simple Python wrapper for the last version of the Amazon Product Advertising API. This module allows to get product information from Amazon using the official API in an easier way.
 
 [![PyPI](https://img.shields.io/pypi/v/python-amazon-paapi5?color=%231182C2&label=PyPI)](https://pypi.org/project/python-amazon-paapi5/)
 [![Python](https://img.shields.io/badge/Python-2.x%20%7C%203.x-%23FFD140)](https://www.python.org/)
@@ -12,9 +12,10 @@ A simple Python wrapper for the last version of the Amazon Product Advertising A
 Features
 --------
 
-* Object oriented interface for simple usage
-* Get information about a product through its ASIN
-* More coming in the future
+* Object oriented interface for simple usage.
+* Get information about a product through its ASIN or URL.
+* Get multiple products at once.
+* Ask for new features through the [issues](https://github.com/sergioteula/python-amazon-paapi5/issues) section.
 
 Installation
 -------------
@@ -23,23 +24,43 @@ You can install or upgrade the module with:
 
     pip install python-amazon-paapi5 --upgrade
 
-Usage
------
+Usage guide
+-----------
+Basic usage:
 
     from amazon.paapi import AmazonAPI
     amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY)
-    product = amazon.get_product(asin)
+    product = amazon.get_product('B01N5IB20Q')
+    print(product.title)
+
+Get multiple product information:
+
+    product = amazon.get_product('B01N5IB20Q,B01F9G43WU')
+    print(product[0].image_large)
+    print(product[1].prices.price)
+
+Use URL insted of ASIN:
+
+    product = amazon.get_product('https://www.amazon.com/dp/B01N5IB20Q')
+
+Get the ASIN from a URL:
+
+    from amazon.paapi import get_asin
+    asin = get_asin('https://www.amazon.com/dp/B01N5IB20Q')
 
 Changelog
 -------------
+
+    Version 1.0.0
+        - Added support for getting multiple product information.
+        - Added compatibiliy with Amazon URL search.
+        - New function for getting the ASIN for a given URL.
+        - Removed Amazon SDK and added as a requirement.
+        - Updated docstrings.
+        - Updated README with changelog, more examples and badges.
 
     Version 0.1.1
         - Added currency support for prices.
 
     Version 0.1.0
         -First release.
-
-License
--------
-
-This software is licensed under the GNU General Public License v3.0 that you can check [here](https://github.com/sergioteula/python-amazon-paapi5/blob/master/LICENSE).
