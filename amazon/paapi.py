@@ -63,6 +63,15 @@ def get_asin(url):
 
 
 class AmazonAPI:
+    """Creates an instance containing your API credentials.
+
+    Args:
+        key (string): Your API key.
+        secret (string): Your API secret.
+        tag (string): The tag you want to use for the URL.
+        country (string): Country code.
+        throttling (float, optional): Reduce this value to wait longer between API calls.
+    """
     def __init__(self, key, secret, tag, country, throttling=0.9):
         self.key = key
         self.secret = secret
