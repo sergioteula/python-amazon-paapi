@@ -44,7 +44,7 @@ DOMAINS = {
 
 
 class Product:
-    pass
+    """Base class for creating the product instance."""
 
 
 def get_asin(url):
@@ -189,6 +189,7 @@ class AmazonAPI:
                     for item in response.items_result.items:
                         product = Product()
                         product.asin = item.asin
+                        product.raw_info = item
 
                         try:
                             product.url = item.detail_page_url
