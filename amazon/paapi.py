@@ -62,6 +62,223 @@ def get_asin(url):
             return c
 
 
+def parse_product(item):
+    product = Product()
+    product.raw_info = item
+
+    # Main
+    product.asin = item.asin
+    try:
+        product.url = item.detail_page_url
+    except Exception:
+        product.url = None
+    try:
+        product.title = item.item_info.title.display_value
+    except Exception:
+        product.title = None
+
+    # Info
+    product.info = Product()
+    try:
+        product.info.contributors = item.item_info.by_line_info.contributors
+    except Exception:
+        product.info.contributors = None
+    try:
+        product.info.manufacturer = item.item_info.by_line_info.manufacturer.display_value
+    except Exception:
+        product.info.manufacturer = None
+    try:
+        product.info.brand = item.item_info.by_line_info.brand.display_value
+    except Exception:
+        product.info.brand = None
+    try:
+        product.info.product_group = item.item_info.classifications.product_group.display_value
+    except Exception:
+        product.info.product_group = None
+    try:
+        product.info.binding = item.item_info.classifications.binding.display_value
+    except Exception:
+        product.info.binding = None
+    try:
+        product.info.is_adult = item.item_info.product_info.is_adult_product.display_value
+    except Exception:
+        product.info.is_adult = None
+    try:
+        product.info.edition = item.item_info.content_info.edition.display_value
+    except Exception:
+        product.info.edition = None
+    try:
+        product.info.warranty = item.item_info.manufacture_info.warranty.display_value
+    except Exception:
+        product.info.warranty = None
+    try:
+        product.info.audience_rating = item.item_info.content_rating.audience_rating.display_value
+    except Exception:
+        product.info.audience_rating = None
+    try:
+        product.info.part_number = item.item_info.manufacture_info.item_part_number.display_value
+    except Exception:
+        product.info.part_number = None
+    try:
+        product.info.model = item.item_info.manufacture_info.model.display_value
+    except Exception:
+        product.info.model = None
+    try:
+        product.info.publication_date = item.item_info.content_info.publication_date.display_value
+    except Exception:
+        product.info.publication_date = None
+    try:
+        product.info.release_date = item.item_info.product_info.release_date.display_value
+    except Exception:
+        product.info.release_date = None
+    product.info.external_ids = Product()
+    try:
+        product.info.external_ids.ean = item.item_info.external_ids.ea_ns.display_values
+    except Exception:
+        product.info.external_ids.ean = None
+    try:
+        product.info.external_ids.isbn = item.item_info.external_ids.isb_ns.display_values
+    except Exception:
+        product.info.external_ids.isbn = None
+    try:
+        product.info.external_ids.upc = item.item_info.external_ids.up_cs.display_values
+    except Exception:
+        product.info.external_ids.upc = None
+
+    # Product
+    product.product = Product()
+    try:
+        product.product.features = item.item_info.features.display_values
+    except Exception:
+        product.product.features = None
+    try:
+        product.product.languages = []
+        for x in item.item_info.content_info.languages.display_values:
+            product.product.languages.append(x.display_value)
+    except Exception:
+        product.product.languages = None
+    try:
+        product.product.pages_count = item.item_info.content_info.pages_count.display_values
+    except Exception:
+        product.product.pages_count = None
+    try:
+        product.product.formats = item.item_info.technical_info.formats.display_values
+    except Exception:
+        product.product.formats = None
+    try:
+        product.product.color = item.item_info.product_info.color.display_value
+    except Exception:
+        product.product.color = None
+    try:
+        product.product.unit_count = item.item_info.product_info.unit_count.display_value
+    except Exception:
+        product.product.unit_count = None
+    product.product.dimensions = Product()
+    try:
+        product.product.dimensions.size = item.item_info.product_info.size.display_value
+    except Exception:
+        product.product.dimensions.size = None
+    product.product.dimensions.height = Product()
+    try:
+        product.product.dimensions.height.value = item.item_info.product_info.item_dimensions.height.display_value
+    except Exception:
+        product.product.dimensions.height.value = None
+    try:
+        product.product.dimensions.height.unit = item.item_info.product_info.item_dimensions.height.unit
+    except Exception:
+        product.product.dimensions.height.unit = None
+    product.product.dimensions.lenght = Product()
+    try:
+        product.product.dimensions.lenght.value = item.item_info.product_info.item_dimensions.lenght.display_value
+    except Exception:
+        product.product.dimensions.lenght.value = None
+    try:
+        product.product.dimensions.lenght.unit = item.item_info.product_info.item_dimensions.lenght.unit
+    except Exception:
+        product.product.dimensions.lenght.unit = None
+    product.product.dimensions.width = Product()
+    try:
+        product.product.dimensions.width.value = item.item_info.product_info.item_dimensions.width.display_value
+    except Exception:
+        product.product.dimensions.width.value = None
+    try:
+        product.product.dimensions.width.unit = item.item_info.product_info.item_dimensions.width.unit
+    except Exception:
+        product.product.dimensions.width.unit = None
+    product.product.weight = Product()
+    try:
+        product.product.weight.value = item.item_info.product_info.item_dimensions.weight.display_value
+    except Exception:
+        product.product.weight.value = None
+    try:
+        product.product.weight.unit = item.item_info.product_info.item_dimensions.weight.unit
+    except Exception:
+        product.product.weight.unit = None
+
+    # Parse Images data
+    try:
+        images = item.images
+    except Exception:
+        images = None
+    try:
+        product.image_large = images.primary.large.url.replace('.jpg',
+                                                                '._AC_.jpg')
+    except Exception:
+        product.image_large = None
+    try:
+        product.image_medium = images.primary.medium.url.replace('_SL', '_AC')
+    except Exception:
+        product.image_medium = None
+    try:
+        product.image_small = images.primary.small.url.replace('_SL', '_AC')
+    except Exception:
+        product.image_small = None
+    try:
+        product.image_variants = []
+        for variant in images.variants:
+            try:
+                product.image_variants.append(
+                    variant.large.url.replace('.jpg', '._AC_.jpg'))
+            except Exception:
+                pass
+        if not product.image_variants:
+            product.image_variants = None
+    except Exception:
+        product.image_variants = None
+
+    # Parse Offers Listings data
+    product.prices = Product()
+    try:
+        listings = item.offers.listings[0]
+    except Exception:
+        listings = None
+    try:
+        product.prices.availability = listings.availability.message
+    except Exception:
+        product.prices.availability = None
+    try:
+        product.prices.price = listings.price.amount
+    except Exception:
+        product.prices.price = None
+    try:
+        product.prices.pvp = listings.saving_basis.amount
+    except Exception:
+        product.prices.pvp = None
+    try:
+        product.prices.currency = listings.price.currency
+    except Exception:
+        product.prices.currency = None
+
+    # Parse Offers Summaries data
+    product.offers = Product()
+    try:
+        product.offers = item.offers.summaries
+    except Exception:
+        product.offers = None
+
+    return product
+
+
 class AmazonAPI:
     """Creates an instance containing your API credentials.
 
@@ -187,110 +404,7 @@ class AmazonAPI:
                 if len(response.items_result.items) > 0:
                     results = []
                     for item in response.items_result.items:
-                        product = Product()
-                        product.asin = item.asin
-                        product.raw_info = item
-
-                        try:
-                            product.url = item.detail_page_url
-                        except Exception:
-                            product.url = None
-
-                        # Parse ItemInfo data
-                        try:
-                            item_info = item.item_info
-                        except Exception:
-                            item_info = None
-                        try:
-                            product.title = item_info.title.display_value
-                        except Exception:
-                            product.title = None
-                        try:
-                            product.release_date = item_info.product_info.release_date.display_value
-                        except Exception:
-                            product.release_date = None
-                        try:
-                            product.features = item_info.features.display_values
-                        except Exception:
-                            product.features = None
-                        try:
-                            product.category = item_info.classifications.product_group.display_value
-                        except Exception:
-                            product.category = None
-                        try:
-                            product.subcategory = item_info.classifications.binding.display_value
-                        except Exception:
-                            product.subcategory = None
-                        try:
-                            product.brand = item_info.by_line_info.brand.display_value
-                        except Exception:
-                            product.brand = None
-                        try:
-                            product.manufacturer = item_info.by_line_info.manufacturer.display_value
-                        except Exception:
-                            product.manufacturer = None
-
-                        # Parse Images data
-                        try:
-                            images = item.images
-                        except Exception:
-                            images = None
-                        try:
-                            product.image_large = images.primary.large.url.replace('.jpg',
-                                                                                   '._AC_.jpg')
-                        except Exception:
-                            product.image_large = None
-                        try:
-                            product.image_medium = images.primary.medium.url.replace('_SL', '_AC')
-                        except Exception:
-                            product.image_medium = None
-                        try:
-                            product.image_small = images.primary.small.url.replace('_SL', '_AC')
-                        except Exception:
-                            product.image_small = None
-                        try:
-                            product.image_variants = []
-                            for variant in images.variants:
-                                try:
-                                    product.image_variants.append(
-                                        variant.large.url.replace('.jpg', '._AC_.jpg'))
-                                except Exception:
-                                    pass
-                            if not product.image_variants:
-                                product.image_variants = None
-                        except Exception:
-                            product.image_variants = None
-
-                        # Parse Offers Listings data
-                        product.prices = Product()
-                        try:
-                            listings = item.offers.listings[0]
-                        except Exception:
-                            listings = None
-                        try:
-                            product.prices.availability = listings.availability.message
-                        except Exception:
-                            product.prices.availability = None
-                        try:
-                            product.prices.price = listings.price.amount
-                        except Exception:
-                            product.prices.price = None
-                        try:
-                            product.prices.pvp = listings.saving_basis.amount
-                        except Exception:
-                            product.prices.pvp = None
-                        try:
-                            product.prices.currency = listings.price.currency
-                        except Exception:
-                            product.prices.currency = None
-
-                        # Parse Offers Summaries data
-                        product.offers = Product()
-                        try:
-                            product.offers = item.offers.summaries
-                        except Exception:
-                            product.offers = None
-
+                        product = parse_product(item)
                         results.append(product)
                     if len(results) == 0:
                         return None

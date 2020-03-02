@@ -22,7 +22,7 @@ Installation
 
 You can install or upgrade the module with:
 
-    pip install python-amazon-paapi5 --upgrade
+    pip install python-amazon-paapi --upgrade
 
 Usage guide
 -----------
