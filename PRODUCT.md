@@ -2,6 +2,7 @@
         asin
         title
         url
+        raw_info
 
         product
             features = []
