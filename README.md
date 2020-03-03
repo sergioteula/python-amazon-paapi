@@ -15,6 +15,9 @@ Features
 * Object oriented interface for simple usage.
 * Get information about a product through its ASIN or URL.
 * Get multiple products at once.
+* Configurable throttling to avoid requests exceptions.
+* Support for all available countries.
+* Reorganized product information [structure](https://github.com/sergioteula/python-amazon-paapi5/blob/master/PRODUCT.md) for simple use.
 * Ask for new features through the [issues](https://github.com/sergioteula/python-amazon-paapi5/issues) section.
 
 Installation
@@ -36,8 +39,8 @@ Basic usage:
 Get multiple product information:
 
     product = amazon.get_product('B01N5IB20Q,B01F9G43WU')
-    print(product[0].image_large)
-    print(product[1].prices.price)
+    print(product[0].images.large)
+    print(product[1].prices.price.value)
 
 Use URL insted of ASIN:
 
@@ -50,6 +53,10 @@ Get the ASIN from a URL:
 
 Changelog
 -------------
+    Version 2.0.0
+        - New structure for product info, adding all available information from the API.
+        - Added raw_data with the information unparsed from the API.
+        -Removed Amazon API version from package name to avoid changes in the future.
 
     Version 1.0.0
         - Added support for getting multiple product information.
