@@ -43,7 +43,7 @@ DOMAINS = {
 }
 
 
-class Product:
+class Class:
     """Base class for creating the product instance."""
 
 
@@ -63,7 +63,7 @@ def get_asin(url):
 
 
 def parse_product(item):
-    product = Product()
+    product = Class()
     product.raw_info = item
 
     # Main
@@ -78,9 +78,14 @@ def parse_product(item):
         product.title = None
 
     # Info
-    product.info = Product()
+    product.info = Class()
     try:
-        product.info.contributors = item.item_info.by_line_info.contributors
+        product.info.contributors = []
+        for x in item.item_info.by_line_info.contributors:
+            contributor = Class()
+            contributor.name = x.name
+            contributor.role = x.role
+            product.info.contributors.append(contributor)
     except Exception:
         product.info.contributors = None
     try:
@@ -131,7 +136,7 @@ def parse_product(item):
         product.info.release_date = item.item_info.product_info.release_date.display_value
     except Exception:
         product.info.release_date = None
-    product.info.external_ids = Product()
+    product.info.external_ids = Class()
     try:
         product.info.external_ids.ean = item.item_info.external_ids.ea_ns.display_values
     except Exception:
@@ -146,7 +151,7 @@ def parse_product(item):
         product.info.external_ids.upc = None
 
     # Product
-    product.product = Product()
+    product.product = Class()
     try:
         product.product.features = item.item_info.features.display_values
     except Exception:
@@ -154,7 +159,7 @@ def parse_product(item):
     try:
         product.product.languages = []
         for x in item.item_info.content_info.languages.display_values:
-            product.product.languages.append(x.display_value)
+            product.product.languages.append(x.display_value + ' ' + x.type)
     except Exception:
         product.product.languages = None
     try:
@@ -173,12 +178,12 @@ def parse_product(item):
         product.product.unit_count = item.item_info.product_info.unit_count.display_value
     except Exception:
         product.product.unit_count = None
-    product.product.dimensions = Product()
+    product.product.dimensions = Class()
     try:
-        product.product.dimensions.size = item.item_info.product_info.size.display_value
+        product.product.size = item.item_info.product_info.size.display_value
     except Exception:
-        product.product.dimensions.size = None
-    product.product.dimensions.height = Product()
+        product.product.size = None
+    product.product.dimensions.height = Class()
     try:
         product.product.dimensions.height.value = item.item_info.product_info.item_dimensions.height.display_value
     except Exception:
@@ -187,7 +192,7 @@ def parse_product(item):
         product.product.dimensions.height.unit = item.item_info.product_info.item_dimensions.height.unit
     except Exception:
         product.product.dimensions.height.unit = None
-    product.product.dimensions.lenght = Product()
+    product.product.dimensions.lenght = Class()
     try:
         product.product.dimensions.lenght.value = item.item_info.product_info.item_dimensions.lenght.display_value
     except Exception:
@@ -196,7 +201,7 @@ def parse_product(item):
         product.product.dimensions.lenght.unit = item.item_info.product_info.item_dimensions.lenght.unit
     except Exception:
         product.product.dimensions.lenght.unit = None
-    product.product.dimensions.width = Product()
+    product.product.dimensions.width = Class()
     try:
         product.product.dimensions.width.value = item.item_info.product_info.item_dimensions.width.display_value
     except Exception:
@@ -205,7 +210,7 @@ def parse_product(item):
         product.product.dimensions.width.unit = item.item_info.product_info.item_dimensions.width.unit
     except Exception:
         product.product.dimensions.width.unit = None
-    product.product.weight = Product()
+    product.product.weight = Class()
     try:
         product.product.weight.value = item.item_info.product_info.item_dimensions.weight.display_value
     except Exception:
@@ -215,39 +220,70 @@ def parse_product(item):
     except Exception:
         product.product.weight.unit = None
 
-    # Parse Images data
+    # Images
+    product.images = Class()
     try:
-        images = item.images
+        product.images.large = item.images.primary.large.url
     except Exception:
-        images = None
+        product.images.large = None
     try:
-        product.image_large = images.primary.large.url.replace('.jpg',
-                                                                '._AC_.jpg')
+        product.images.medium = item.images.primary.medium.url
     except Exception:
-        product.image_large = None
+        product.images.medium = None
     try:
-        product.image_medium = images.primary.medium.url.replace('_SL', '_AC')
+        product.images.small = item.images.primary.small.url
     except Exception:
-        product.image_medium = None
+        product.images.small = None
     try:
-        product.image_small = images.primary.small.url.replace('_SL', '_AC')
-    except Exception:
-        product.image_small = None
-    try:
-        product.image_variants = []
-        for variant in images.variants:
+        product.images.variants = Class()
+        product.images.variants.small = []
+        product.images.variants.medium = []
+        product.images.variants.large = []
+        for variant in item.images.variants:
             try:
-                product.image_variants.append(
-                    variant.large.url.replace('.jpg', '._AC_.jpg'))
+                product.images.variants.large.append(variant.large.url)
+                product.images.variants.medium.append(variant.medium.url)
+                product.images.variants.small.append(variant.small.url)
             except Exception:
                 pass
-        if not product.image_variants:
-            product.image_variants = None
+        if not product.images.variants.small and not product.images.variants.medium and not product.images.variants.large:
+            product.images.variants = None
     except Exception:
-        product.image_variants = None
+        product.images.variants = None
+    product.images.cropped = Class()
+    product.images.cropped.small = []
+    product.images.cropped.medium = []
+    product.images.cropped.large = []
+    try:
+        product.images.cropped.small.append(product.images.small.replace('_SL', '_AC'))
+    except Exception:
+        pass
+    try:
+        product.images.cropped.medium.append(product.images.medium.replace('_SL', '_AC'))
+    except Exception:
+        pass
+    try:
+        product.images.cropped.large.append(product.images.large.replace('.jpg', '._AC_.jpg'))
+    except Exception:
+        pass
+    for x in product.images.variants.small:
+        try:
+            product.images.cropped.small.append(x.replace('_SL', '_AC'))
+        except Exception:
+            pass
+    for x in product.images.variants.medium:
+        try:
+            product.images.cropped.medium.append(x.replace('_SL', '_AC'))
+        except Exception:
+            pass
+    for x in product.images.variants.large:
+        try:
+            product.images.cropped.large.append(x.replace('.jpg', '._AC_.jpg'))
+        except Exception:
+            pass
 
     # Parse Offers Listings data
-    product.prices = Product()
+    product.prices = Class()
     try:
         listings = item.offers.listings[0]
     except Exception:
@@ -270,7 +306,7 @@ def parse_product(item):
         product.prices.currency = None
 
     # Parse Offers Summaries data
-    product.offers = Product()
+    product.offers = Class()
     try:
         product.offers = item.offers.summaries
     except Exception:
