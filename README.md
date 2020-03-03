@@ -2,10 +2,10 @@ Amazon Product Advertising API 5.0 wrapper for Python
 =======================================================
 A simple Python wrapper for the last version of the Amazon Product Advertising API. This module allows to get product information from Amazon using the official API in an easier way.
 
-[![PyPI](https://img.shields.io/pypi/v/python-amazon-paapi5?color=%231182C2&label=PyPI)](https://pypi.org/project/python-amazon-paapi5/)
+[![PyPI](https://img.shields.io/pypi/v/python-amazon-paapi5?color=%231182C2&label=PyPI)](https://pypi.org/project/python-amazon-paapi/)
 [![Python](https://img.shields.io/badge/Python-2.x%20%7C%203.x-%23FFD140)](https://www.python.org/)
-[![License](https://img.shields.io/badge/License-GPL--3.0-%23e83633)](https://github.com/sergioteula/python-amazon-paapi5/blob/master/LICENSE)
-[![Support](https://img.shields.io/badge/Support-Good-brightgreen)](https://github.com/sergioteula/python-amazon-paapi5/issues)
+[![License](https://img.shields.io/badge/License-GPL--3.0-%23e83633)](https://github.com/sergioteula/python-amazon-paapi/blob/master/LICENSE)
+[![Support](https://img.shields.io/badge/Support-Good-brightgreen)](https://github.com/sergioteula/python-amazon-paapi/issues)
 [![Amazon API](https://img.shields.io/badge/Amazon%20API-5.0-%23FD9B15)](https://webservices.amazon.com/paapi5/documentation/)
 
 
@@ -17,8 +17,8 @@ Features
 * Get multiple products at once.
 * Configurable throttling to avoid requests exceptions.
 * Support for all available countries.
-* Reorganized product information [structure](https://github.com/sergioteula/python-amazon-paapi5/blob/master/PRODUCT.md) for simple use.
-* Ask for new features through the [issues](https://github.com/sergioteula/python-amazon-paapi5/issues) section.
+* Reorganized product information [structure](https://github.com/sergioteula/python-amazon-paapi/blob/master/PRODUCT.md) for simple use.
+* Ask for new features through the [issues](https://github.com/sergioteula/python-amazon-paapi/issues) section.
 
 Installation
 -------------
