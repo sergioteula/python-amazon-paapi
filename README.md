@@ -56,7 +56,7 @@ Changelog
     Version 2.0.0
         - New structure for product info, adding all available information from the API.
         - Added raw_data with the information unparsed from the API.
-        -Removed Amazon API version from package name to avoid changes in the future.
+        - Removed Amazon API version from package name to avoid changes in the future.
 
     Version 1.0.0
         - Added support for getting multiple product information.
