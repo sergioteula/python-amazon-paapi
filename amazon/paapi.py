@@ -188,6 +188,7 @@ class AmazonAPI:
                     results = []
                     for item in response.items_result.items:
                         product = Product()
+                        product.item = item  # gives you pointer access to all data
                         product.asin = item.asin
 
                         try:
