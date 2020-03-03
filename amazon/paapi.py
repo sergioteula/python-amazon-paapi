@@ -285,9 +285,9 @@ def parse_product(item):
     # Trade In
     product.trade_in = Class()
     try:
-        product.trade_in.elegible = item.item_info.trade_in_info.is_eligible_for_trade_in
+        product.trade_in.eligible = item.item_info.trade_in_info.is_eligible_for_trade_in
     except Exception:
-        product.trade_in.elegible = None
+        product.trade_in.eligible = None
     try:
         product.trade_in.price = item.item_info.trade_in_info.price.amount
     except Exception:
@@ -419,13 +419,13 @@ def parse_product(item):
     except Exception:
         product.prices.other.amazon_fulfilled = None
     try:
-        product.prices.other.free_shipping_elegible = listings.delivery_info.is_free_shipping_eligible
+        product.prices.other.free_shipping_eligible = listings.delivery_info.is_free_shipping_eligible
     except Exception:
-        product.prices.other.free_shipping_elegible = None
+        product.prices.other.free_shipping_eligible = None
     try:
-        product.prices.other.prime_elegible = listings.delivery_info.is_prime_eligible
+        product.prices.other.prime_eligible = listings.delivery_info.is_prime_eligible
     except Exception:
-        product.prices.other.prime_elegible = None
+        product.prices.other.prime_eligible = None
     try:
         product.prices.other.prime_exclusive = listings.program_eligibility.is_prime_exclusive
     except Exception:
