@@ -282,35 +282,234 @@ def parse_product(item):
         except Exception:
             pass
 
-    # Parse Offers Listings data
-    product.prices = Class()
+    # Trade In
+    product.trade_in = Class()
+    try:
+        product.trade_in.elegible = item.item_info.trade_in_info.is_eligible_for_trade_in
+    except Exception:
+        product.trade_in.elegible = None
+    try:
+        product.trade_in.price = item.item_info.trade_in_info.price.amount
+    except Exception:
+        product.trade_in.price = None
+    try:
+        product.trade_in.currency = item.item_info.trade_in_info.price.currency
+    except Exception:
+        product.trade_in.currency = None
+
+    # Prices
     try:
         listings = item.offers.listings[0]
     except Exception:
         listings = None
+    product.prices = Class()
+    product.prices.price = Class()
     try:
-        product.prices.availability = listings.availability.message
+        product.prices.price.value = listings.price.amount
     except Exception:
-        product.prices.availability = None
+        product.prices.price.value = None
     try:
-        product.prices.price = listings.price.amount
+        product.prices.price.currency = listings.price.currency
     except Exception:
-        product.prices.price = None
+        product.prices.price.currency = None
     try:
-        product.prices.pvp = listings.saving_basis.amount
+        product.prices.price.per_unit = listings.price.price_per_unit
     except Exception:
-        product.prices.pvp = None
+        product.prices.price.per_unit = None
     try:
-        product.prices.currency = listings.price.currency
+        product.prices.price.display = listings.price.display_amount
     except Exception:
-        product.prices.currency = None
+        product.prices.price.display = None
+    product.prices.price.savings = Class()
+    try:
+        product.prices.price.savings.value = listings.price.savings.amount
+    except Exception:
+        product.prices.price.savings.value = None
+    try:
+        product.prices.price.savings.currency = listings.price.savings.currency
+    except Exception:
+        product.prices.price.savings.currency = None
+    try:
+        product.prices.price.savings.per_unit = listings.price.savings.price_per_unit
+    except Exception:
+        product.prices.price.savings.per_unit = None
+    try:
+        product.prices.price.savings.display = listings.price.savings.display_amount
+    except Exception:
+        product.prices.price.savings.display = None
+    try:
+        product.prices.price.savings.percentage = listings.price.savings.percentage
+    except Exception:
+        product.prices.price.savings.percentage = None
+    product.prices.pvp = Class()
+    try:
+        product.prices.pvp.value = listings.saving_basis.amount
+    except Exception:
+        product.prices.pvp.value = None
+    try:
+        product.prices.pvp.currency = listings.saving_basis.currency
+    except Exception:
+        product.prices.pvp.currency = None
+    try:
+        product.prices.pvp.per_unit = listings.saving_basis.price_per_unit
+    except Exception:
+        product.prices.pvp.per_unit = None
+    try:
+        product.prices.pvp.display = listings.saving_basis.display_amount
+    except Exception:
+        product.prices.pvp.display = None
+    product.prices.availability = Class()
+    try:
+        product.prices.availability.message = listings.availability.message
+    except Exception:
+        product.prices.availability.message = None
+    try:
+        product.prices.availability.type = listings.availability.type
+    except Exception:
+        product.prices.availability.type = None
+    try:
+        product.prices.availability.max_order_quantity = listings.availability.max_order_quantity
+    except Exception:
+        product.prices.availability.max_order_quantity = None
+    try:
+        product.prices.availability.min_order_quantity = listings.availability.min_order_quantity
+    except Exception:
+        product.prices.availability.min_order_quantity = None
+    product.prices.condition = Class()
+    try:
+        product.prices.condition.condition = listings.condition.value
+    except Exception:
+        product.prices.condition = None
+    try:
+        product.prices.condition.condition_display = listings.condition.display_value
+    except Exception:
+        product.prices.condition_display = None
+    try:
+        product.prices.condition.sub_condition = listings.condition.sub_condition.value
+    except Exception:
+        product.prices.sub_condition = None
+    try:
+        product.prices.condition.sub_condition_display = listings.condition.sub_condition.display_value
+    except Exception:
+        product.prices.sub_condition_display = None
+    product.prices.merchant = Class()
+    try:
+        product.prices.merchant.default_shipping_country = listings.merchant_info.default_shipping_country
+    except Exception:
+        product.prices.merchant.default_shipping_country = None
+    try:
+        product.prices.merchant.merchant_id = listings.merchant_info.id
+    except Exception:
+        product.prices.merchant.merchant_id = None
+    try:
+        product.prices.merchant.name = listings.merchant_info.name
+    except Exception:
+        product.prices.merchant.name = None
+    product.prices.other = Class()
+    try:
+        product.prices.other.buybox_winner = listings.is_buy_box_winner
+    except Exception:
+        product.prices.other.buybox_winner = None
+    try:
+        product.prices.other.loyalty_points = listings.loyalty_points
+    except Exception:
+        product.prices.other.loyalty_points = None
+    try:
+        product.prices.other.amazon_fulfilled = listings.delivery_info.is_amazon_fulfilled
+    except Exception:
+        product.prices.other.amazon_fulfilled = None
+    try:
+        product.prices.other.free_shipping_elegible = listings.delivery_info.is_free_shipping_eligible
+    except Exception:
+        product.prices.other.free_shipping_elegible = None
+    try:
+        product.prices.other.prime_elegible = listings.delivery_info.is_prime_eligible
+    except Exception:
+        product.prices.other.prime_elegible = None
+    try:
+        product.prices.other.prime_exclusive = listings.program_eligibility.is_prime_exclusive
+    except Exception:
+        product.prices.other.prime_exclusive = None
+    try:
+        product.prices.other.prime_pantry = listings.program_eligibility.is_prime_pantry
+    except Exception:
+        product.prices.other.prime_pantry = None
+    try:
+        product.prices.other.violates_map = listings.violates_map
+    except Exception:
+        product.prices.other.violates_map = None
+    try:
+        product.prices.other.offer_id = listings.id
+    except Exception:
+        product.prices.other.offer_id = None
 
-    # Parse Offers Summaries data
-    product.offers = Class()
+
+    # Offers Summary
     try:
-        product.offers = item.offers.summaries
+        summaries = item.offers.summaries
+        product.offers_summary = []
     except Exception:
-        product.offers = None
+        summaries = None
+        product.offers_summary = None
+    if summaries:
+        for x in summaries:
+            offer = Class()
+            offer.highest_price = Class()
+            offer.lowest_price = Class()
+            try:
+                offer.highest_price.value = x.highest_price.amount
+            except Exception:
+                offer.highest_price.value = None
+            try:
+                offer.highest_price.currency = x.highest_price.currency
+            except Exception:
+                offer.highest_price.currency = None
+            try:
+                offer.highest_price.per_unit = x.highest_price.price_per_unit
+            except Exception:
+                offer.highest_price.per_unit = None
+            try:
+                offer.highest_price.display = x.highest_price.display_amount
+            except Exception:
+                offer.highest_price.display = None
+            try:
+                offer.lowest_price.value = x.lowest_price.amount
+            except Exception:
+                offer.lowest_price.value = None
+            try:
+                offer.lowest_price.currency = x.lowest_price.currency
+            except Exception:
+                offer.lowest_price.currency = None
+            try:
+                offer.lowest_price.per_unit = x.lowest_price.price_per_unit
+            except Exception:
+                offer.lowest_price.per_unit = None
+            try:
+                offer.lowest_price.display = x.lowest_price.display_amount
+            except Exception:
+                offer.lowest_price.display = None
+            offer.condition = Class()
+            try:
+                offer.condition.condition = x.condition.value
+            except Exception:
+                offer.condition.condition = None
+            try:
+                offer.condition.condition.condition_display = x.condition.display_value
+            except Exception:
+                offer.condition.condition_display = None
+            try:
+                offer.condition.condition.sub_condition = x.condition.sub_condition.value
+            except Exception:
+                offer.condition.sub_condition = None
+            try:
+                offer.condition.condition.sub_condition_display = x.condition.sub_condition.display_value
+            except Exception:
+                offer.condition.sub_condition_display = None
+            try:
+                offer.offer_count = x.offer_count
+            except Exception:
+                offer.offer_count = None
+            product.offers_summary.append(offer)
 
     return product
 
@@ -336,7 +535,7 @@ class AmazonAPI:
         self.marketplace = 'www.amazon.' + DOMAINS[country]
         self.last_query_time = time.time()
 
-    def get_product(self, product_id, condition=Condition.NEW):
+    def get_product(self, product_id, condition=Condition.ANY):
         """Find product information for a specific product on Amazon.
 
         Args:
