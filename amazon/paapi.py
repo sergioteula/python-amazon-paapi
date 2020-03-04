@@ -7,6 +7,7 @@ from paapi5_python_sdk.get_items_resource import GetItemsResource
 from paapi5_python_sdk.partner_type import PartnerType
 import time
 import logging
+import re
 
 
 REGIONS = {
