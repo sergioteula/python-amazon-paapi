@@ -443,7 +443,6 @@ def parse_product(item):
     except Exception:
         product.prices.other.offer_id = None
 
-
     # Offers Summary
     try:
         summaries = item.offers.summaries
@@ -623,9 +622,8 @@ class AmazonAPI:
                                       condition=condition,
                                       item_ids=asin_list,
                                       resources=product_resources)
-        except ValueError as exception:
-            logging.error('Error in forming GetItemsRequest: %s' % (exception))
-            return
+        except Exception as exception:
+            raise exception
 
         try:
             # Wait before doing the request
@@ -651,5 +649,4 @@ class AmazonAPI:
                     return None
 
         except Exception as exception:
-            logging.error(str(exception))
-            return None
+            raise exception
