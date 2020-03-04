@@ -53,6 +53,9 @@ Get the ASIN from a URL:
 
 Changelog
 -------------
+    Version 2.0.1
+        - Improved exception handling.
+
     Version 2.0.0
         - New structure for product info, adding all available information from the API.
         - Added raw_data with the information unparsed from the API.
