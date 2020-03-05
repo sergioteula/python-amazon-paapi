@@ -268,21 +268,21 @@ def parse_product(item):
         product.images.cropped.large.append(product.images.large.replace('.jpg', '._AC_.jpg'))
     except Exception:
         pass
-    for x in product.images.variants.small:
-        try:
-            product.images.cropped.small.append(x.replace('_SL', '_AC'))
-        except Exception:
-            pass
-    for x in product.images.variants.medium:
-        try:
-            product.images.cropped.medium.append(x.replace('_SL', '_AC'))
-        except Exception:
-            pass
-    for x in product.images.variants.large:
-        try:
-            product.images.cropped.large.append(x.replace('.jpg', '._AC_.jpg'))
-        except Exception:
-            pass
+    try:
+    	for x in product.images.variants.small:
+        	product.images.cropped.small.append(x.replace('_SL', '_AC'))
+    except Exception:
+        pass
+    try:
+    	for x in product.images.variants.medium:
+        	product.images.cropped.medium.append(x.replace('_SL', '_AC'))
+    except Exception:
+        pass
+    try:
+    	for x in product.images.variants.large:
+        	product.images.cropped.large.append(x.replace('.jpg', '._AC_.jpg'))
+    except Exception:
+        pass
 
     # Trade In
     product.trade_in = Class()
