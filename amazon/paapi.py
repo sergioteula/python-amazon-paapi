@@ -57,7 +57,7 @@ def get_asin(url):
     Returns:
         string: Product ASIN. None if ASIN not found.
     """
-    if re.search("[A-Z0-9]{10}", url):
+    if re.search("^[A-Z0-9]{10}$", url):
         return url
     # since asin is alphanumeric and 10 digit
     have_asin = re.search(r"(dp|gp/product)/([a-zA-Z0-9]{10})", url)
