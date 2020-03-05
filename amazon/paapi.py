@@ -7,6 +7,7 @@ from paapi5_python_sdk.get_items_resource import GetItemsResource
 from paapi5_python_sdk.partner_type import PartnerType
 import time
 import logging
+import re
 
 
 REGIONS = {
@@ -56,10 +57,11 @@ def get_asin(url):
     Returns:
         string: Product ASIN. None if ASIN not found.
     """
-    split_url = url.split('?')[0].replace('?', '/').replace('&', '/').split('/')
-    for c in list(reversed(split_url)):
-        if len(c) == 10 and c.isalnum():
-            return c
+    if re.search("^[A-Z0-9]{10}$", url):
+        return url
+    # since asin is alphanumeric and 10 digit
+    have_asin = re.search(r"(dp|gp/product)/([a-zA-Z0-9]{10})", url)
+    return have_asin.group(2) if have_asin else None
 
 
 def parse_product(item):
@@ -534,12 +536,12 @@ class AmazonAPI:
         self.marketplace = 'www.amazon.' + DOMAINS[country]
         self.last_query_time = time.time()
 
-    def get_product(self, product_id, condition=Condition.ANY):
+    def get_products(self, product_ids: [str, list], condition=Condition.ANY):
         """Find product information for a specific product on Amazon.
 
         Args:
-            product_id (string): Product ASIN or URL. You can send multiple products separated
-                by commas.
+            product_ids (string): One or more ItemIds like ASIN that uniquely identify an item or product URL. (Max 10)
+            Seperated by comma or as a list.
             condition (class, optional): Specify the product condition. Defaults to NEW.
 
         Returns:
@@ -552,11 +554,12 @@ class AmazonAPI:
                          secret_key=self.secret,
                          host=self.host,
                          region=self.region)
-
-        product_id = product_id.split(',')
-        asin_list = []
-        for x in product_id:
-            asin_list.append(get_asin(x.strip()))
+        
+        # clean up input data into a list stripping any extra white space
+        asin_or_url_list = [x.strip() for x in product_ids.split(",")] if isinstance(product_ids, str) else product_ids
+        
+        # extract asin if supplied input is product url and remove any duplicate asin from cleaned list
+        asin_list = list(set([get_asin(x) for x in asin_or_url_list[:10]]))
 
         product_resources = [
             GetItemsResource.BROWSENODEINFO_BROWSENODES,
