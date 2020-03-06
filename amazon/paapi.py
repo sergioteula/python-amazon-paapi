@@ -6,7 +6,6 @@ from paapi5_python_sdk.get_items_request import GetItemsRequest
 from paapi5_python_sdk.get_items_resource import GetItemsResource
 from paapi5_python_sdk.partner_type import PartnerType
 import time
-import logging
 import re
 
 
@@ -48,7 +47,7 @@ class Class:
     """Base class for creating the product instance."""
 
 
-def get_asin(url):
+def get_asin(url: str):
     """Find the ASIN from a given URL.
 
     Args:
@@ -57,14 +56,23 @@ def get_asin(url):
     Returns:
         string: Product ASIN. None if ASIN not found.
     """
-    if re.search("^[A-Z0-9]{10}$", url):
+    # Return if url parameter already is the ASIN
+    if re.search(r'^[A-Z0-9]{10}$', url):
         return url
-    # since asin is alphanumeric and 10 digit
-    have_asin = re.search(r"(dp|gp/product)/([a-zA-Z0-9]{10})", url)
+    # Extract ASIN from URL searching for alphanumeric and 10 digits
+    have_asin = re.search(r'(dp|gp/product)/([a-zA-Z0-9]{10})', url)
     return have_asin.group(2) if have_asin else None
 
 
 def parse_product(item):
+    """Parse item data and creates product instance.
+
+    Args:
+        item (instance): The instance with the data from Amazon API.
+
+    Returns:
+        instance: Product instance with parsed data.
+    """
     product = Class()
     product.raw_info = item
 
@@ -269,18 +277,18 @@ def parse_product(item):
     except Exception:
         pass
     try:
-    	for x in product.images.variants.small:
-        	product.images.cropped.small.append(x.replace('_SL', '_AC'))
+        for x in product.images.variants.small:
+            product.images.cropped.small.append(x.replace('_SL', '_AC'))
     except Exception:
         pass
     try:
-    	for x in product.images.variants.medium:
-        	product.images.cropped.medium.append(x.replace('_SL', '_AC'))
+        for x in product.images.variants.medium:
+            product.images.cropped.medium.append(x.replace('_SL', '_AC'))
     except Exception:
         pass
     try:
-    	for x in product.images.variants.large:
-        	product.images.cropped.large.append(x.replace('.jpg', '._AC_.jpg'))
+        for x in product.images.variants.large:
+            product.images.cropped.large.append(x.replace('.jpg', '._AC_.jpg'))
     except Exception:
         pass
 
@@ -522,10 +530,10 @@ class AmazonAPI:
         key (string): Your API key.
         secret (string): Your API secret.
         tag (string): The tag you want to use for the URL.
-        country (string): Country code.
+        country (string): Country code (AU, BR, CA, FR, DE, IN, IT, JP, MX, ES, TR, AE, UK, US).
         throttling (float, optional): Reduce this value to wait longer between API calls.
     """
-    def __init__(self, key, secret, tag, country, throttling=0.9):
+    def __init__(self, key: str, secret: str, tag: str, country: str, throttling=0.9):
         self.key = key
         self.secret = secret
         self.tag = tag
@@ -540,9 +548,9 @@ class AmazonAPI:
         """Find product information for a specific product on Amazon.
 
         Args:
-            product_ids (string): One or more ItemIds like ASIN that uniquely identify an item or product URL. (Max 10)
-            Seperated by comma or as a list.
-            condition (class, optional): Specify the product condition. Defaults to NEW.
+            product_ids (string): One or more item ids like ASIN or product URL (max 10).
+            Could be a string separated by comma or as a list.
+            condition (class, optional): Specify the product condition. Defaults to ANY.
 
         Returns:
             class instance: An instance of the class Product containing all the available
@@ -554,11 +562,11 @@ class AmazonAPI:
                          secret_key=self.secret,
                          host=self.host,
                          region=self.region)
-        
-        # clean up input data into a list stripping any extra white space
+
+        # Clean up input data into a list stripping any extra white space
         asin_or_url_list = [x.strip() for x in product_ids.split(",")] if isinstance(product_ids, str) else product_ids
-        
-        # extract asin if supplied input is product url and remove any duplicate asin from cleaned list
+
+        # Extract ASIN if supplied input is product URL and remove any duplicate ASIN
         asin_list = list(set([get_asin(x) for x in asin_or_url_list[:10]]))
 
         product_resources = [
