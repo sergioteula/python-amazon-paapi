@@ -53,6 +53,10 @@ Get the ASIN from a URL:
 
 Changelog
 -------------
+    Version 2.0.2
+        - Added some type hints.
+        - Solved bug with images exception.
+
     Version 2.0.1
         - Improved exception handling.
 
