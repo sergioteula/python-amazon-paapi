@@ -33,18 +33,18 @@ Basic usage:
 
     from amazon.paapi import AmazonAPI
     amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY)
-    product = amazon.get_product('B01N5IB20Q')
+    product = amazon.get_products('B01N5IB20Q')
     print(product.title)
 
 Get multiple product information:
 
-    product = amazon.get_product('B01N5IB20Q,B01F9G43WU')
+    product = amazon.get_products('B01N5IB20Q,B01F9G43WU')
     print(product[0].images.large)
     print(product[1].prices.price.value)
 
 Use URL insted of ASIN:
 
-    product = amazon.get_product('https://www.amazon.com/dp/B01N5IB20Q')
+    product = amazon.get_products('https://www.amazon.com/dp/B01N5IB20Q')
 
 Get the ASIN from a URL:
 
