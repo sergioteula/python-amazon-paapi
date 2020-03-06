@@ -47,6 +47,12 @@ class Class:
     """Base class for creating the product instance."""
 
 
+def _chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+
+
 def get_asin(url: str):
     """Find the ASIN from a given URL.
 
@@ -567,7 +573,10 @@ class AmazonAPI:
         asin_or_url_list = [x.strip() for x in product_ids.split(",")] if isinstance(product_ids, str) else product_ids
 
         # Extract ASIN if supplied input is product URL and remove any duplicate ASIN
-        asin_list = list(set([get_asin(x) for x in asin_or_url_list[:10]]))
+        asin_full_list = list(set([get_asin(x) for x in asin_or_url_list]))
+
+        # Creates lists of 10 items each
+        asin_full_list = list(_chunks(asin_full_list, 10))
 
         product_resources = [
             GetItemsResource.BROWSENODEINFO_BROWSENODES,
@@ -626,38 +635,35 @@ class AmazonAPI:
             GetItemsResource.RENTALOFFERS_LISTINGS_DELIVERYINFO_SHIPPINGCHARGES,
             GetItemsResource.RENTALOFFERS_LISTINGS_MERCHANTINFO]
 
-        try:
-            request = GetItemsRequest(partner_tag=self.tag,
-                                      partner_type=PartnerType.ASSOCIATES,
-                                      marketplace=self.marketplace,
-                                      condition=condition,
-                                      item_ids=asin_list,
-                                      resources=product_resources)
-        except Exception as exception:
-            raise exception
+        results = []
+        for asin_list in asin_full_list:
+            try:
+                request = GetItemsRequest(partner_tag=self.tag,
+                                          partner_type=PartnerType.ASSOCIATES,
+                                          marketplace=self.marketplace,
+                                          condition=condition,
+                                          item_ids=asin_list,
+                                          resources=product_resources)
+            except Exception as exception:
+                raise exception
 
-        try:
-            # Wait before doing the request
-            wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
-            if wait_time > 0:
-                time.sleep(wait_time)
-            self.last_query_time = time.time()
+            try:
+                # Wait before doing the request
+                wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
+                if wait_time > 0:
+                    time.sleep(wait_time)
+                self.last_query_time = time.time()
 
-            response = api.get_items(request)
-            if response.items_result is not None:
-                if len(response.items_result.items) > 0:
-                    results = []
-                    for item in response.items_result.items:
-                        product = parse_product(item)
-                        results.append(product)
-                    if len(results) == 0:
-                        return None
-                    elif len(results) == 1:
-                        return results[0]
-                    else:
-                        return results
-                else:
-                    return None
+                response = api.get_items(request)
+                if response.items_result is not None:
+                    if len(response.items_result.items) > 0:
+                        for item in response.items_result.items:
+                            product = parse_product(item)
+                            results.append(product)
+            except Exception as exception:
+                raise exception
 
-        except Exception as exception:
-            raise exception
+        if results:
+            return results
+        else:
+            return None
