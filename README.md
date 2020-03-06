@@ -34,7 +34,7 @@ Basic usage:
 
     from amazon.paapi import AmazonAPI
     amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY)
-    product = amazon.get_products('B01N5IB20Q')
+    product = amazon.get_product('B01N5IB20Q')
     print(product.title)
 
 Get multiple product information:
@@ -45,7 +45,7 @@ Get multiple product information:
 
 Use URL insted of ASIN:
 
-    product = amazon.get_products('https://www.amazon.com/dp/B01N5IB20Q')
+    product = amazon.get_product('https://www.amazon.com/dp/B01N5IB20Q')
 
 Get the ASIN from a URL:
 
@@ -54,6 +54,9 @@ Get the ASIN from a URL:
 
 Changelog
 -------------
+    Version 2.1.1
+        - Added get_product for single requests.
+
     Version 2.1.0
         - Changed get_product method name to get_products.
         - Removed Amazon 10 products limitation.

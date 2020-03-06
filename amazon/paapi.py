@@ -559,10 +559,7 @@ class AmazonAPI:
             condition (class, optional): Specify the product condition. Defaults to ANY.
 
         Returns:
-            class instance: An instance of the class Product containing all the available
-                information when only 1 product is returned.
-            list of class instances: A list containing 1 instance of the class Product for
-                each returned product.
+            list of instances: A list containing 1 instance for each product.
         """
         api = DefaultApi(access_key=self.key,
                          secret_key=self.secret,
@@ -667,3 +664,19 @@ class AmazonAPI:
             return results
         else:
             return None
+
+    def get_product(self, product_id: str, condition=Condition.ANY):
+        """Find product information for a specific product on Amazon.
+
+        Args:
+            product_id (string): One item id like ASIN or product URL.
+            condition (class, optional): Specify the product condition. Defaults to ANY.
+
+        Returns:
+            class instance: An instance containing all the available information for the product.
+        """
+        if isinstance(product_id, list):
+            raise Exception('product_id should be a string with an ASIN or product URL')
+        if isinstance(product_id, str):
+            product_id = product_id.split(',')[0].strip()
+        return self.get_products(product_id, condition=condition)[0]
