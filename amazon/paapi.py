@@ -554,7 +554,7 @@ class AmazonAPI:
         """Find product information for a specific product on Amazon.
 
         Args:
-            product_ids (string): One or more item ids like ASIN or product URL (max 10).
+            product_ids (string): One or more item ids like ASIN or product URL.
             Could be a string separated by comma or as a list.
             condition (class, optional): Specify the product condition. Defaults to ANY.
 
