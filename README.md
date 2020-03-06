@@ -19,6 +19,7 @@ Features
 * Support for all available countries.
 * Reorganized product information [structure](https://github.com/sergioteula/python-amazon-paapi/blob/master/PRODUCT.md) for simple use.
 * Ask for new features through the [issues](https://github.com/sergioteula/python-amazon-paapi/issues) section.
+* Join our [Telegram group](https://t.me/PythonAmazonPAAPI) for support or development.
 
 Installation
 -------------
