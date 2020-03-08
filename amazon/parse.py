@@ -3,6 +3,7 @@
 
 class Class:
     """Base class for creating the product instance."""
+    pass
 
 
 def parse_product(item):

@@ -8,11 +8,16 @@ an easier way.
 from paapi5_python_sdk.api.default_api import DefaultApi
 from paapi5_python_sdk.condition import Condition
 from paapi5_python_sdk.get_items_request import GetItemsRequest
+from paapi5_python_sdk.search_items_request import SearchItemsRequest
+from paapi5_python_sdk.get_variations_request import GetVariationsRequest
+from paapi5_python_sdk.get_browse_nodes_request import GetBrowseNodesRequest
 from paapi5_python_sdk.partner_type import PartnerType
+
 import time
-from constant import DOMAINS, REGIONS, PRODUCT_RESOURCES
+
+from constant import DOMAINS, REGIONS, PRODUCT_RESOURCES, SEARCH_RESOURCES
 from exception import AmazonException
-from parser import parse_product
+from parse import parse_product
 from tools import get_asin, chunks
 
 
@@ -36,6 +41,8 @@ class AmazonAPI:
         self.region = REGIONS[country]
         self.marketplace = 'www.amazon.' + DOMAINS[country]
         self.last_query_time = time.time()
+        self.api = DefaultApi(access_key=self.key, secret_key=self.secret, host=self.host,
+                              region=self.region)
 
     def get_products(self, product_ids: [str, list], condition=Condition.ANY):
         """Find product information for multiple products on Amazon.
@@ -48,10 +55,6 @@ class AmazonAPI:
         Returns:
             list of instances: A list containing 1 instance for each product.
         """
-        api = DefaultApi(access_key=self.key,
-                         secret_key=self.secret,
-                         host=self.host,
-                         region=self.region)
 
         # Clean up input data into a list stripping any extra white space
         asin_or_url_list = ([x.strip() for x in product_ids.split(",")]
@@ -82,7 +85,7 @@ class AmazonAPI:
                     time.sleep(wait_time)
                 self.last_query_time = time.time()
 
-                response = api.get_items(request)
+                response = self.api.get_items(request)
                 if response.items_result is not None:
                     if len(response.items_result.items) > 0:
                         for item in response.items_result.items:
@@ -114,3 +117,65 @@ class AmazonAPI:
                 raise AmazonException('ValueError', 'only 1 product ID is allowed, use '
                                                     'get_products for multiple requests')
         return self.get_products(product_id, condition=condition)[0]
+
+    def search_products(self, item_count=10, item_page=1, actor=None, artist=None, author=None,
+                        availability=None, brand=None, browse_node_id=None, condition=None,
+                        currency_of_preference=None, delivery_flags=None, keywords=None,
+                        languages_of_preference=None, max_price=None, merchant='All', min_price=None,
+                        min_reviews_rating=None, min_saving_percent=None, offer_count=1,
+                        search_index='All', sort_by=None, title=None,
+                        async_req=False):
+        try:
+            if item_count > 10 or item_count < 1:
+                item_count = 10
+
+            request = SearchItemsRequest(
+                partner_tag=self.tag,
+                partner_type=PartnerType.ASSOCIATES,
+                actor=actor,
+                artist=artist,
+                author=author,
+                availability=availability,
+                brand=brand,
+                browse_node_id=browse_node_id,
+                condition=condition,
+                currency_of_preference=currency_of_preference,
+                delivery_flags=delivery_flags,
+                item_count=item_count,
+                item_page=item_page,
+                keywords=keywords,
+                languages_of_preference=languages_of_preference,
+                max_price=max_price,
+                merchant=merchant,
+                min_price=min_price,
+                min_reviews_rating=min_reviews_rating,
+                min_saving_percent=min_saving_percent,
+                offer_count=offer_count,
+                resources=SEARCH_RESOURCES,
+                search_index=search_index,
+                sort_by=sort_by,
+                title=title
+            )
+        except Exception as exception:
+            raise AmazonException(exception.status, exception.reason)
+
+        try:
+            # Wait before doing the request
+            wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
+            if wait_time > 0:
+                time.sleep(wait_time)
+            self.last_query_time = time.time()
+
+            if async_req:
+                thread = self.api.search_items(request, async_req=True)
+                response = thread.get()
+            else:
+                response = self.api.search_items(request)
+            if response.search_result is not None:
+                resp = [parse_product(item) for item in response.search_result.items]
+                return resp
+            if response.errors is not None:
+                raise AmazonException(response.errors[0].code, response.errors[0].message)
+
+        except Exception as exception:
+            raise AmazonException(exception.status, exception.reason)
