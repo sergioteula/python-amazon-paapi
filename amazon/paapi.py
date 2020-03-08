@@ -51,8 +51,9 @@ class AmazonAPI:
         Args:
             product_ids (str|list): One or more item IDs like ASIN or product URL.
                 Use a string separated by comma or as a list.
-            condition (str, optional): Specify the product condition (ANY,
-                COLLECTIBLE, NEW, REFURBISHED, USED). Defaults to ANY.
+            condition (str, optional): Specify the product condition.
+                Allowed values: ANY, COLLECTIBLE, NEW, REFURBISHED, USED.
+                Defaults to ANY.
             async_req (bool, optional): Specify if a thread should be created to
                 run the request. Defaults to False.
 
@@ -109,8 +110,9 @@ class AmazonAPI:
 
         Args:
             product_id (str): One item ID like ASIN or product URL.
-            condition (str, optional): Specify the product condition (ANY,
-                COLLECTIBLE, NEW, REFURBISHED, USED). Defaults to ANY.
+            condition (str, optional): Specify the product condition.
+                Allowed values: ANY, COLLECTIBLE, NEW, REFURBISHED, USED.
+                Defaults to ANY.
             async_req (bool, optional): Specify if a thread should be created to
                 run the request. Defaults to False.
 
@@ -131,9 +133,65 @@ class AmazonAPI:
                         artist=None, author=None, availability=None, brand=None, browse_node=None,
                         condition=None, currency=None, delivery=None, keywords=None, languages=None,
                         max_price=None, min_price=None, min_rating=None, min_discount=None,
-                        merchant='All', search_index='All', sort_by=None, title=None,
+                        merchant=None, search_index=None, sort_by=None, title=None,
                         async_req=False):
+        """Search products on Amazon using different parameters. At least one of the
+        following parameters should be used: keywords, actor, artist, author, brand,
+        title.
 
+        Args:
+            item_count (int, optional): The total number of products to get.
+                Defaults to 10.
+            item_page (int, optional): The page where the results start from.
+                Defaults to 1.
+            items_per_page (int, optional): Products on each page. Should be between
+                1 and 10. Defaults to 10.
+            actor (str, optional): Actor name associated with the item.
+            artist (str, optional): Artist name associated with the item.
+            author (str, optional): Author name associated with the item.
+            availability (str, optional): Filters available items on Amazon. By
+                default, all requests returns available items only.
+                Allowed values: Available, IncludeOutOfStock.
+            brand (str, optional): Brand name associated with the item.
+            browse_node (str, optional): A unique ID assigned by Amazon that
+                identifies a product category or subcategory.
+            condition (str, optional): The condition parameter filters offers by
+                condition type. By default, condition equals Any.
+                Allowed values: ANY, COLLECTIBLE, NEW, REFURBISHED, USED.
+            currency (str, optional): Currency of preference in which the prices
+                information should be returned in response.
+            delivery (list, optional): The delivery flag filters items which
+                satisfy a certain delivery program promoted by the specific
+                Amazon Marketplace. Allowed values: AmazonGlobal, FreeShipping,
+                FulfilledByAmazon, Prime.
+            keywords (str, optional): A word or phrase that describes an item.
+            languages (list, optional): Languages in order of preference in which
+                the item information should be returned in response.
+            max_price (int, optional): Filters search results to items with at
+                least one offer price below the specified value.
+            min_price (int, optional): Filters search results to items with at
+                least one offer price above the specified value.
+            min_rating (int, optional): Filters search results to items with
+                customer review ratings above specified value.
+            min_discount (int, optional): Filters search results to items with
+                at least one offer having saving percentage above the specified
+                value.
+            merchant (str, optional): Filters search results to return items
+                having at least one offer sold by target merchant. By default
+                the value All is passed. Allowed values: All, Amazon.
+            search_index (str, optional): Indicates the product category to
+                search.
+            sort_by (str, optional): The way in which items in the response
+                are sorted. Allowed values: AvgCustomerReviews, Featured,
+                NewestArrivals, Price:HighToLow, Price:LowToHigh, Relevance.
+            title (str, optional): Title associated with the item.
+            async_req (bool, optional): Specify if a thread should be created to
+                run the request. Defaults to False.
+
+        Returns:
+            list of instances: A list containing 1 instance for each product
+                or None if no results.
+        """
         if items_per_page > 10 or items_per_page < 1:
             raise AmazonException('ValueError', 'items_per_page should be between 1 and 10')
 
@@ -146,7 +204,7 @@ class AmazonAPI:
 
         results = []
         for last_page in last_page_list:
-            if last_page:
+            if last_page and len(last_page_list) > 1:
                 items_per_page = last_page_items
             try:
                 request = SearchItemsRequest(
@@ -199,6 +257,10 @@ class AmazonAPI:
                     raise AmazonException(response.errors[0].code, response.errors[0].message)
 
             except Exception as exception:
-                raise AmazonException(exception.status, exception.reason)
+                raise AmazonException(exception.reason, exception.body)
             item_page += 1
-        return results
+
+        if results:
+            return results
+        else:
+            return None
