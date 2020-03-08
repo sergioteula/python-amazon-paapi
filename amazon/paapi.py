@@ -13,7 +13,7 @@ import time
 from constant import DOMAINS, REGIONS, PRODUCT_RESOURCES
 from exception import AmazonException
 from parser import parse_product
-from tools import get_asin, _chunks
+from tools import get_asin, chunks
 
 
 class AmazonAPI:
@@ -54,13 +54,14 @@ class AmazonAPI:
                          region=self.region)
 
         # Clean up input data into a list stripping any extra white space
-        asin_or_url_list = [x.strip() for x in product_ids.split(",")] if isinstance(product_ids, str) else product_ids
+        asin_or_url_list = ([x.strip() for x in product_ids.split(",")]
+                            if isinstance(product_ids, str) else product_ids)
 
         # Extract ASIN if supplied input is product URL and remove any duplicate ASIN
         asin_full_list = list(set([get_asin(x) for x in asin_or_url_list]))
 
         # Creates lists of 10 items each
-        asin_full_list = list(_chunks(asin_full_list, 10))
+        asin_full_list = list(chunks(asin_full_list, 10))
 
         results = []
         for asin_list in asin_full_list:
@@ -72,7 +73,7 @@ class AmazonAPI:
                                           item_ids=asin_list,
                                           resources=PRODUCT_RESOURCES)
             except Exception as exception:
-                raise exception
+                raise AmazonException(exception.status, exception.reason)
 
             try:
                 # Wait before doing the request
