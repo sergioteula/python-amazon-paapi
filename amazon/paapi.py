@@ -20,10 +20,10 @@ class AmazonAPI:
     """Creates an instance containing your API credentials.
 
     Args:
-        key (string): Your API key.
-        secret (string): Your API secret.
-        tag (string): The tag you want to use for the URL.
-        country (string): Country code (AU, BR, CA, FR, DE, IN, IT, JP, MX, ES, TR, AE, UK, US).
+        key (str): Your API key.
+        secret (str): Your API secret.
+        tag (str): The tag you want to use for the URL.
+        country (str): Country code (AU, BR, CA, FR, DE, IN, IT, JP, MX, ES, TR, AE, UK, US).
         throttling (float, optional): Reduce this value to wait longer between API calls.
     """
     def __init__(self, key: str, secret: str, tag: str, country: str, throttling=0.9):
@@ -38,12 +38,12 @@ class AmazonAPI:
         self.last_query_time = time.time()
 
     def get_products(self, product_ids: [str, list], condition=Condition.ANY):
-        """Find product information for a specific product on Amazon.
+        """Find product information for multiple products on Amazon.
 
         Args:
-            product_ids (string): One or more item ids like ASIN or product URL.
-            Could be a string separated by comma or as a list.
-            condition (class, optional): Specify the product condition. Defaults to ANY.
+            product_ids (str|list): One or more item IDs like ASIN or product URL.
+            Use a string separated by comma or as a list.
+            condition (str, optional): Specify the product condition. Defaults to ANY.
 
         Returns:
             list of instances: A list containing 1 instance for each product.
@@ -99,17 +99,17 @@ class AmazonAPI:
         """Find product information for a specific product on Amazon.
 
         Args:
-            product_id (string): One item id like ASIN or product URL.
-            condition (class, optional): Specify the product condition. Defaults to ANY.
+            product_id (str): One item ID like ASIN or product URL.
+            condition (str, optional): Specify the product condition. Defaults to ANY.
 
         Returns:
-            class instance: An instance containing all the available information for the product.
+            instance: An instance containing all the available information for the product.
         """
         if isinstance(product_id, list):
             raise AmazonException('TypeError', 'product ID should be string, not list')
         if isinstance(product_id, str):
             check_product_id = product_id.split(',')
-            if check_product_id > 1:
+            if len(check_product_id) > 1:
                 raise AmazonException('ValueError', 'only 1 product ID is allowed, use '
                                                     'get_products for multiple requests')
         return self.get_products(product_id, condition=condition)[0]
