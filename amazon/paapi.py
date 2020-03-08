@@ -45,7 +45,7 @@ class AmazonAPI:
         self.api = DefaultApi(access_key=self.key, secret_key=self.secret, host=self.host,
                               region=self.region)
 
-    def get_products(self, product_ids: [str, list], condition='ANY'):
+    def get_products(self, product_ids: [str, list], condition='ANY', async_req=False):
         """Find product information for multiple products on Amazon.
 
         Args:
@@ -53,13 +53,15 @@ class AmazonAPI:
                 Use a string separated by comma or as a list.
             condition (str, optional): Specify the product condition (ANY,
                 COLLECTIBLE, NEW, REFURBISHED, USED). Defaults to ANY.
+            async_req (bool, optional): Specify if a thread should be created to
+                run the request. Defaults to False.
 
         Returns:
             list of instances: A list containing 1 instance for each product
                 or None if no results.
         """
 
-        # Clean up input data
+        # Clean up input data and remove 10 items limit from Amazon API
         if isinstance(product_ids, str):
             product_ids = [x.strip() for x in product_ids.split(',')]
         asin_full_list = list(set([get_asin(x) for x in product_ids]))
@@ -85,7 +87,11 @@ class AmazonAPI:
                 self.last_query_time = time.time()
 
                 # Send the request and create results
-                response = self.api.get_items(request)
+                if async_req:
+                    thread = self.api.get_items(request, async_req=True)
+                    response = thread.get()
+                else:
+                    response = self.api.get_items(request)
                 if response.items_result is not None:
                     if len(response.items_result.items) > 0:
                         for item in response.items_result.items:
@@ -98,13 +104,15 @@ class AmazonAPI:
         else:
             return None
 
-    def get_product(self, product_id: str, condition='ANY'):
+    def get_product(self, product_id: str, condition='ANY', async_req=False):
         """Find product information for a specific product on Amazon.
 
         Args:
             product_id (str): One item ID like ASIN or product URL.
             condition (str, optional): Specify the product condition (ANY,
                 COLLECTIBLE, NEW, REFURBISHED, USED). Defaults to ANY.
+            async_req (bool, optional): Specify if a thread should be created to
+                run the request. Defaults to False.
 
         Returns:
             instance: An instance containing all the available information
@@ -117,66 +125,80 @@ class AmazonAPI:
             if len(check_product_id) > 1:
                 raise AmazonException('ValueError', 'Only 1 product ID is allowed, use '
                                                     'get_products for multiple requests')
-        return self.get_products(product_id, condition=condition)[0]
+        return self.get_products(product_id, condition=condition, async_req=async_req)[0]
 
-    def search_products(self, item_count=10, item_page=1, actor=None, artist=None, author=None,
-                        availability=None, brand=None, browse_node_id=None, condition=None,
-                        currency_of_preference=None, delivery_flags=None, keywords=None,
-                        languages_of_preference=None, max_price=None, merchant='All', min_price=None,
-                        min_reviews_rating=None, min_saving_percent=None, offer_count=1,
-                        search_index='All', sort_by=None, title=None,
+    def search_products(self, item_count=10, item_page=1, items_per_page=10, actor=None,
+                        artist=None, author=None, availability=None, brand=None, browse_node=None,
+                        condition=None, currency=None, delivery=None, keywords=None, languages=None,
+                        max_price=None, min_price=None, min_rating=None, min_discount=None,
+                        merchant='All', search_index='All', sort_by=None, title=None,
                         async_req=False):
-        try:
-            if item_count > 10 or item_count < 1:
-                item_count = 10
 
-            request = SearchItemsRequest(
-                partner_tag=self.tag,
-                partner_type=PartnerType.ASSOCIATES,
-                actor=actor,
-                artist=artist,
-                author=author,
-                availability=availability,
-                brand=brand,
-                browse_node_id=browse_node_id,
-                condition=condition,
-                currency_of_preference=currency_of_preference,
-                delivery_flags=delivery_flags,
-                item_count=item_count,
-                item_page=item_page,
-                keywords=keywords,
-                languages_of_preference=languages_of_preference,
-                max_price=max_price,
-                merchant=merchant,
-                min_price=min_price,
-                min_reviews_rating=min_reviews_rating,
-                min_saving_percent=min_saving_percent,
-                offer_count=offer_count,
-                resources=SEARCH_RESOURCES,
-                search_index=search_index,
-                sort_by=sort_by,
-                title=title
-            )
-        except Exception as exception:
-            raise AmazonException(exception.status, exception.reason)
+        if items_per_page > 10 or items_per_page < 1:
+            raise AmazonException('ValueError', 'items_per_page should be between 1 and 10')
 
-        try:
-            # Wait before doing the request
-            wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
-            if wait_time > 0:
-                time.sleep(wait_time)
-            self.last_query_time = time.time()
+        # Remove 10 items limit from Amazon API
+        last_page_list = [False for x in range(int(item_count / items_per_page))]
+        if last_page_list:
+            last_page_list.pop()
+        last_page_list.append(True)
+        last_page_items = item_count % items_per_page
 
-            if async_req:
-                thread = self.api.search_items(request, async_req=True)
-                response = thread.get()
-            else:
-                response = self.api.search_items(request)
-            if response.search_result is not None:
-                resp = [parse_product(item) for item in response.search_result.items]
-                return resp
-            if response.errors is not None:
-                raise AmazonException(response.errors[0].code, response.errors[0].message)
+        results = []
+        for last_page in last_page_list:
+            if last_page:
+                items_per_page = last_page_items
+            try:
+                request = SearchItemsRequest(
+                    partner_tag=self.tag,
+                    partner_type=PartnerType.ASSOCIATES,
+                    actor=actor,
+                    artist=artist,
+                    author=author,
+                    availability=availability,
+                    brand=brand,
+                    browse_node_id=browse_node,
+                    condition=condition,
+                    currency_of_preference=currency,
+                    delivery_flags=delivery,
+                    item_count=items_per_page,
+                    item_page=item_page,
+                    keywords=keywords,
+                    languages_of_preference=languages,
+                    max_price=max_price,
+                    merchant=merchant,
+                    min_price=min_price,
+                    min_reviews_rating=min_rating,
+                    min_saving_percent=min_discount,
+                    offer_count=1,
+                    resources=SEARCH_RESOURCES,
+                    search_index=search_index,
+                    sort_by=sort_by,
+                    title=title
+                )
+            except Exception as exception:
+                raise AmazonException(exception.status, exception.reason)
 
-        except Exception as exception:
-            raise AmazonException(exception.status, exception.reason)
+            try:
+                # Wait before doing the request
+                wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
+                if wait_time > 0:
+                    time.sleep(wait_time)
+                self.last_query_time = time.time()
+
+                # Send the request and create results
+                if async_req:
+                    thread = self.api.search_items(request, async_req=True)
+                    response = thread.get()
+                else:
+                    response = self.api.search_items(request)
+                if response.search_result is not None:
+                    for item in response.search_result.items:
+                        results.append(parse_product(item))
+                if response.errors is not None:
+                    raise AmazonException(response.errors[0].code, response.errors[0].message)
+
+            except Exception as exception:
+                raise AmazonException(exception.status, exception.reason)
+            item_page += 1
+        return results
