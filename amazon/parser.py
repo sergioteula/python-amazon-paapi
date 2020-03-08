@@ -247,6 +247,8 @@ def parse_product(item):
         product.trade_in.currency = item.item_info.trade_in_info.price.currency
     except Exception:
         product.trade_in.currency = None
+    if not product.trade_in.eligible and not product.trade_in.price and not product.trade_in.currency:
+        product.trade_in = None
 
     # Prices
     try:
