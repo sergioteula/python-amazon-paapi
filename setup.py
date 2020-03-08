@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name='python-amazon-paapi',
-    version='2.1.1',
+    version='3.0.0',
     author='Sergio Abad',
     author_email='sergio.abad@bytelix.com',
     description='Amazon Product Advertising API 5.0 wrapper for Python',
