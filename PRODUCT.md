@@ -1,5 +1,6 @@
     product
         asin
+        parent_asin
         title
         url
         raw_info
