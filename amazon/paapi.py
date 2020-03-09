@@ -73,6 +73,8 @@ class AmazonAPI:
         # Clean up input data and remove 10 items limit from Amazon API
         if isinstance(product_ids, str):
             product_ids = [x.strip() for x in product_ids.split(',')]
+        elif not isinstance(product_ids, list):
+            raise AmazonException('TypeError', 'Arg product_ids should be a list or string')
         asin_full_list = list(set([get_asin(x) for x in product_ids]))
         asin_full_list = list(chunks(asin_full_list, 10))
 
@@ -275,6 +277,8 @@ class AmazonAPI:
             except Exception as exception:
                 raise AmazonException(exception.reason, exception.body)
             item_page += 1
+            if item_page > 10:
+                break
 
         if results:
             return results
