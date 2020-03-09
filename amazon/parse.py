@@ -28,6 +28,10 @@ def parse_product(item):
         product.title = item.item_info.title.display_value
     except Exception:
         product.title = None
+    try:
+        product.parent_asin = item.parent_asin
+    except Exception:
+        product.parent_asin = None
 
     # Info
     product.info = Class()
