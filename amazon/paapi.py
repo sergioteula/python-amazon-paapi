@@ -9,8 +9,8 @@ from paapi5_python_sdk.api.default_api import DefaultApi
 from paapi5_python_sdk.get_items_request import GetItemsRequest
 from paapi5_python_sdk.search_items_request import SearchItemsRequest
 from paapi5_python_sdk.get_variations_request import GetVariationsRequest
-from paapi5_python_sdk.get_browse_nodes_request import GetBrowseNodesRequest
 from paapi5_python_sdk.partner_type import PartnerType
+from paapi5_python_sdk.rest import ApiException
 
 import time
 
@@ -37,7 +37,7 @@ class AmazonAPI:
         self.key = key
         self.secret = secret
         self.tag = tag
-        if 1 <= throttling > 0:
+        if 1 >= throttling > 0:
             self.throttling = throttling
         elif throttling <= 0:
             raise AmazonException('ValueError', 'Throttling should be greater than 0')
@@ -91,19 +91,25 @@ class AmazonAPI:
             except Exception as exception:
                 raise AmazonException(exception.status, exception.reason)
 
-            try:
-                # Wait before doing the request
-                wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
-                if wait_time > 0:
-                    time.sleep(wait_time)
-                self.last_query_time = time.time()
+            for x in range(3):
+                try:
+                    # Wait before doing the request
+                    wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
+                    if wait_time > 0:
+                        time.sleep(wait_time)
+                    self.last_query_time = time.time()
 
-                # Send the request and create results
-                if async_req:
-                    thread = self.api.get_items(request, async_req=True)
-                    response = thread.get()
-                else:
-                    response = self.api.get_items(request)
+                    # Send the request and create results
+                    if async_req:
+                        thread = self.api.get_items(request, async_req=True)
+                        response = thread.get()
+                    else:
+                        response = self.api.get_items(request)
+                    break
+                except ApiException as e:
+                    if x == 2:
+                        raise AmazonException('ApiException', e)
+            try:
                 if response.items_result is not None:
                     if len(response.items_result.items) > 0:
                         for item in response.items_result.items:
@@ -142,10 +148,10 @@ class AmazonAPI:
 
     def search_products(self, item_count=10, item_page=1, items_per_page=10, actor=None,
                         artist=None, author=None, availability=None, brand=None, browse_node=None,
-                        condition=None, currency=None, delivery=None, keywords=None, languages=None,
-                        max_price=None, min_price=None, min_rating=None, min_discount=None,
-                        merchant=None, search_index=None, sort_by=None, title=None,
-                        async_req=False):
+                        condition='Any', currency=None, delivery=None, keywords=None,
+                        languages=None, max_price=None, min_price=None, min_rating=None,
+                        min_discount=None, merchant=None, search_index=None, sort_by=None,
+                        title=None, async_req=False):
         """Search products on Amazon using different parameters. At least one of the
         following parameters should be used: keywords, actor, artist, author, brand,
         title.
@@ -214,17 +220,8 @@ class AmazonAPI:
                                                 'provided: keywords, actor, artist, author, brand,'
                                                 'title')
 
-        # Remove 10 items limit from Amazon API
-        last_page_list = [False for x in range(int(item_count / items_per_page))]
-        if last_page_list:
-            last_page_list.pop()
-        last_page_list.append(True)
-        last_page_items = item_count % items_per_page
-
         results = []
-        for last_page in last_page_list:
-            if last_page and len(last_page_list) > 1:
-                items_per_page = last_page_items
+        while len(results) < item_count:
             try:
                 request = SearchItemsRequest(
                     partner_tag=self.tag,
@@ -252,28 +249,41 @@ class AmazonAPI:
                     search_index=search_index,
                     sort_by=sort_by,
                     title=title)
-            except Exception as exception:
-                raise AmazonException(exception.status, exception.reason)
+            except KeyError:
+                raise AmazonException('KeyError', 'Invalid condition value')
+            except ValueError as e:
+                raise AmazonException('ValueError', e)
+            except Exception as e:
+                raise AmazonException('Error', e)
 
+            for x in range(3):
+                try:
+                    # Wait before doing the request
+                    wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
+                    if wait_time > 0:
+                        time.sleep(wait_time)
+                    self.last_query_time = time.time()
+
+                    # Send the request and create results
+                    if async_req:
+                        thread = self.api.search_items(request, async_req=True)
+                        response = thread.get()
+                    else:
+                        response = self.api.search_items(request)
+                    break
+                except ApiException as e:
+                    if x == 2:
+                        raise AmazonException('ApiException', e)
             try:
-                # Wait before doing the request
-                wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
-                if wait_time > 0:
-                    time.sleep(wait_time)
-                self.last_query_time = time.time()
-
-                # Send the request and create results
-                if async_req:
-                    thread = self.api.search_items(request, async_req=True)
-                    response = thread.get()
-                else:
-                    response = self.api.search_items(request)
                 if response.search_result is not None:
                     for item in response.search_result.items:
                         results.append(parse_product(item))
+                        if len(results) >= item_count:
+                            break
+                else:
+                    break
                 if response.errors is not None:
                     raise AmazonException(response.errors[0].code, response.errors[0].message)
-
             except Exception as exception:
                 raise AmazonException(exception.reason, exception.body)
             item_page += 1
@@ -285,7 +295,7 @@ class AmazonAPI:
         else:
             return None
 
-    def get_variations(self, asin, item_count=10, item_page=1, items_per_page=10, condition=None,
+    def get_variations(self, asin, item_count=10, item_page=1, items_per_page=10, condition='Any',
                        currency=None, languages=None, merchant=None, async_req=False):
 
         if items_per_page > 10 or items_per_page < 1:
@@ -295,17 +305,8 @@ class AmazonAPI:
         if item_page > 10 or item_page < 1:
             raise AmazonException('ValueError', 'Arg item_page should be between 1 and 10')
 
-        # Remove 10 items limit from Amazon API
-        last_page_list = [False for x in range(int(item_count / items_per_page))]
-        if last_page_list:
-            last_page_list.pop()
-        last_page_list.append(True)
-        last_page_items = item_count % items_per_page
-
         results = []
-        for last_page in last_page_list:
-            if last_page and len(last_page_list) > 1:
-                items_per_page = last_page_items
+        while len(results) < item_count:
             try:
                 request = GetVariationsRequest(
                     partner_tag=self.tag,
@@ -320,25 +321,39 @@ class AmazonAPI:
                     variation_count=items_per_page,
                     variation_page=item_page,
                     resources=VARIATION_RESOURCES)
-            except Exception as exception:
-                raise AmazonException(exception.status, exception.reason)
+            except KeyError:
+                raise AmazonException('KeyError', 'Invalid condition value')
+            except ValueError as e:
+                raise AmazonException('ValueError', e)
+            except Exception as e:
+                raise AmazonException('Error', e)
 
+            for x in range(3):
+                try:
+                    # Wait before doing the request
+                    wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
+                    if wait_time > 0:
+                        time.sleep(wait_time)
+                    self.last_query_time = time.time()
+
+                    # Send the request and create results
+                    if async_req:
+                        thread = self.api.get_variations(request, async_req=True)
+                        response = thread.get()
+                    else:
+                        response = self.api.get_variations(request)
+                    break
+                except ApiException as e:
+                    if x == 2:
+                        raise AmazonException('ApiException', e)
             try:
-                # Wait before doing the request
-                wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
-                if wait_time > 0:
-                    time.sleep(wait_time)
-                self.last_query_time = time.time()
-
-                # Send the request and create results
-                if async_req:
-                    thread = self.api.get_variations(request, async_req=True)
-                    response = thread.get()
-                else:
-                    response = self.api.get_variations(request)
                 if response.variations_result is not None:
                     for item in response.variations_result.items:
                         results.append(parse_product(item))
+                        if len(results) >= item_count:
+                            break
+                else:
+                    break
                 if response.errors is not None:
                     raise AmazonException(response.errors[0].code, response.errors[0].message)
 
