@@ -298,7 +298,30 @@ class AmazonAPI:
 
     def get_variations(self, asin, item_count=10, item_page=1, items_per_page=10, condition='Any',
                        merchant='All', async_req=False):
+        """Returns a set of items that are the same product, but differ according to a
+        consistent theme, for example size and color.
 
+        Args:
+            asin (str): One item ID like ASIN or product URL.
+            item_count (int, optional): The total number of products to get. Should be between
+                1 and 100. Defaults to 10.
+            item_page (int, optional): The page where the results start from. Should be between
+                1 and 10. Defaults to 1.
+            items_per_page (int, optional): Products on each page. Should be between
+                1 and 10. Defaults to 10.
+            condition (str, optional): The condition parameter filters offers by
+                condition type. Allowed values: Any, Collectible, New, Refurbished, Used.
+                Defaults to Any.
+            merchant (str, optional): Filters search results to return items
+                having at least one offer sold by target merchant. Allowed values:
+                All, Amazon. Defaults to All.
+            async_req (bool, optional): Specify if a thread should be created to
+                run the request. Defaults to False.
+
+        Returns:
+            list of instances: A list containing 1 instance for each product
+                or None if no results.
+        """
         if items_per_page > 10 or items_per_page < 1:
             raise AmazonException('ValueError', 'Arg items_per_page should be between 1 and 10')
         if item_count > 100 or item_count < 1:
@@ -313,7 +336,7 @@ class AmazonAPI:
                     partner_tag=self.tag,
                     partner_type=PartnerType.ASSOCIATES,
                     marketplace=self.marketplace,
-                    asin=asin,
+                    asin=get_asin(asin),
                     condition=CONDITION[condition],
                     merchant=merchant,
                     offer_count=1,
