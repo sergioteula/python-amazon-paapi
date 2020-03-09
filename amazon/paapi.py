@@ -14,7 +14,8 @@ from paapi5_python_sdk.partner_type import PartnerType
 
 import time
 
-from constant import DOMAINS, REGIONS, PRODUCT_RESOURCES, SEARCH_RESOURCES, CONDITION
+from constant import DOMAINS, REGIONS, CONDITION
+from constant import PRODUCT_RESOURCES, SEARCH_RESOURCES, VARIATION_RESOURCES
 from exception import AmazonException
 from parse import parse_product
 from tools import get_asin, chunks
@@ -234,7 +235,7 @@ class AmazonAPI:
                     availability=availability,
                     brand=brand,
                     browse_node_id=browse_node,
-                    condition=condition,
+                    condition=CONDITION[condition],
                     currency_of_preference=currency,
                     delivery_flags=delivery,
                     item_count=items_per_page,
@@ -250,8 +251,7 @@ class AmazonAPI:
                     resources=SEARCH_RESOURCES,
                     search_index=search_index,
                     sort_by=sort_by,
-                    title=title
-                )
+                    title=title)
             except Exception as exception:
                 raise AmazonException(exception.status, exception.reason)
 
@@ -270,6 +270,74 @@ class AmazonAPI:
                     response = self.api.search_items(request)
                 if response.search_result is not None:
                     for item in response.search_result.items:
+                        results.append(parse_product(item))
+                if response.errors is not None:
+                    raise AmazonException(response.errors[0].code, response.errors[0].message)
+
+            except Exception as exception:
+                raise AmazonException(exception.reason, exception.body)
+            item_page += 1
+            if item_page > 10:
+                break
+
+        if results:
+            return results
+        else:
+            return None
+
+    def get_variations(self, asin, item_count=10, item_page=1, items_per_page=10, condition=None,
+                       currency=None, languages=None, merchant=None, async_req=False):
+
+        if items_per_page > 10 or items_per_page < 1:
+            raise AmazonException('ValueError', 'Arg items_per_page should be between 1 and 10')
+        if item_count > 100 or item_count < 1:
+            raise AmazonException('ValueError', 'Arg item_count should be between 1 and 100')
+        if item_page > 10 or item_page < 1:
+            raise AmazonException('ValueError', 'Arg item_page should be between 1 and 10')
+
+        # Remove 10 items limit from Amazon API
+        last_page_list = [False for x in range(int(item_count / items_per_page))]
+        if last_page_list:
+            last_page_list.pop()
+        last_page_list.append(True)
+        last_page_items = item_count % items_per_page
+
+        results = []
+        for last_page in last_page_list:
+            if last_page and len(last_page_list) > 1:
+                items_per_page = last_page_items
+            try:
+                request = GetVariationsRequest(
+                    partner_tag=self.tag,
+                    partner_type=PartnerType.ASSOCIATES,
+                    marketplace=self.marketplace,
+                    asin=asin,
+                    condition=CONDITION[condition],
+                    currency_of_preference=currency,
+                    languages_of_preference=languages,
+                    merchant=merchant,
+                    offer_count=1,
+                    variation_count=items_per_page,
+                    variation_page=item_page,
+                    resources=VARIATION_RESOURCES)
+            except Exception as exception:
+                raise AmazonException(exception.status, exception.reason)
+
+            try:
+                # Wait before doing the request
+                wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
+                if wait_time > 0:
+                    time.sleep(wait_time)
+                self.last_query_time = time.time()
+
+                # Send the request and create results
+                if async_req:
+                    thread = self.api.get_variations(request, async_req=True)
+                    response = thread.get()
+                else:
+                    response = self.api.get_variations(request)
+                if response.variations_result is not None:
+                    for item in response.variations_result.items:
                         results.append(parse_product(item))
                 if response.errors is not None:
                     raise AmazonException(response.errors[0].code, response.errors[0].message)
