@@ -65,6 +65,9 @@ Get the ASIN from a URL:
 
 Changelog
 -------------
+    Version 3.0.1
+        - Solved import bug.
+
     Version 3.0.0
         - Added search_products and get_variations methods.
         - Removed Amazon API requests limit for all methods.
