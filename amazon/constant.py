@@ -44,11 +44,11 @@ DOMAINS = {
 
 """Condition values."""
 CONDITION = {
-    'ANY': Condition.ANY,
-    'COLLECTIBLE': Condition.COLLECTIBLE,
-    'NEW': Condition.NEW,
-    'REFURBISHED': Condition.REFURBISHED,
-    'USED': Condition.USED
+    'Any': Condition.ANY,
+    'Collectible': Condition.COLLECTIBLE,
+    'New': Condition.NEW,
+    'Refurbished': Condition.REFURBISHED,
+    'Used': Condition.USED
 }
 
 """Product resources to get from Amazon API."""

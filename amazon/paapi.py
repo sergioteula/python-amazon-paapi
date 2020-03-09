@@ -36,24 +36,32 @@ class AmazonAPI:
         self.key = key
         self.secret = secret
         self.tag = tag
-        self.throttling = throttling
+        if 1 <= throttling > 0:
+            self.throttling = throttling
+        elif throttling <= 0:
+            raise AmazonException('ValueError', 'Throttling should be greater than 0')
+        elif throttling > 1:
+            raise AmazonException('ValueError', 'Throttling should be 1 or less')
         self.country = country
-        self.host = 'webservices.amazon.' + DOMAINS[country]
-        self.region = REGIONS[country]
-        self.marketplace = 'www.amazon.' + DOMAINS[country]
+        try:
+            self.host = 'webservices.amazon.' + DOMAINS[country]
+            self.region = REGIONS[country]
+            self.marketplace = 'www.amazon.' + DOMAINS[country]
+        except KeyError:
+            raise AmazonException('KeyError', 'Invalid country code')
         self.last_query_time = time.time()
         self.api = DefaultApi(access_key=self.key, secret_key=self.secret, host=self.host,
                               region=self.region)
 
-    def get_products(self, product_ids: [str, list], condition='ANY', async_req=False):
+    def get_products(self, product_ids: [str, list], condition='Any', async_req=False):
         """Find product information for multiple products on Amazon.
 
         Args:
             product_ids (str|list): One or more item IDs like ASIN or product URL.
                 Use a string separated by comma or as a list.
             condition (str, optional): Specify the product condition.
-                Allowed values: ANY, COLLECTIBLE, NEW, REFURBISHED, USED.
-                Defaults to ANY.
+                Allowed values: Any, Collectible, New, Refurbished, Used.
+                Defaults to Any.
             async_req (bool, optional): Specify if a thread should be created to
                 run the request. Defaults to False.
 
@@ -105,14 +113,14 @@ class AmazonAPI:
         else:
             return None
 
-    def get_product(self, product_id: str, condition='ANY', async_req=False):
+    def get_product(self, product_id: str, condition='Any', async_req=False):
         """Find product information for a specific product on Amazon.
 
         Args:
             product_id (str): One item ID like ASIN or product URL.
             condition (str, optional): Specify the product condition.
-                Allowed values: ANY, COLLECTIBLE, NEW, REFURBISHED, USED.
-                Defaults to ANY.
+                Allowed values: Any, Collectible, New, Refurbished, Used.
+                Defaults to Any.
             async_req (bool, optional): Specify if a thread should be created to
                 run the request. Defaults to False.
 
@@ -140,10 +148,10 @@ class AmazonAPI:
         title.
 
         Args:
-            item_count (int, optional): The total number of products to get.
-                Defaults to 10.
-            item_page (int, optional): The page where the results start from.
-                Defaults to 1.
+            item_count (int, optional): The total number of products to get. Should be between
+                1 and 100. Defaults to 10.
+            item_page (int, optional): The page where the results start from. Should be between
+                1 and 10. Defaults to 1.
             items_per_page (int, optional): Products on each page. Should be between
                 1 and 10. Defaults to 10.
             actor (str, optional): Actor name associated with the item.
@@ -157,7 +165,7 @@ class AmazonAPI:
                 identifies a product category or subcategory.
             condition (str, optional): The condition parameter filters offers by
                 condition type. By default, condition equals Any.
-                Allowed values: ANY, COLLECTIBLE, NEW, REFURBISHED, USED.
+                Allowed values: Any, Collectible, New, Refurbished, Used.
             currency (str, optional): Currency of preference in which the prices
                 information should be returned in response.
             delivery (list, optional): The delivery flag filters items which
@@ -193,7 +201,15 @@ class AmazonAPI:
                 or None if no results.
         """
         if items_per_page > 10 or items_per_page < 1:
-            raise AmazonException('ValueError', 'items_per_page should be between 1 and 10')
+            raise AmazonException('ValueError', 'Arg items_per_page should be between 1 and 10')
+        if item_count > 100 or item_count < 1:
+            raise AmazonException('ValueError', 'Arg item_count should be between 1 and 100')
+        if item_page > 10 or item_page < 1:
+            raise AmazonException('ValueError', 'Arg item_page should be between 1 and 10')
+        if not keywords and not actor and not artist and not author and not brand and not title:
+            raise AmazonException('ValueError', 'At least one of the following args must be '
+                                                'provided: keywords, actor, artist, author, brand,'
+                                                'title')
 
         # Remove 10 items limit from Amazon API
         last_page_list = [False for x in range(int(item_count / items_per_page))]
