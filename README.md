@@ -14,7 +14,8 @@ Features
 
 * Object oriented interface for simple usage.
 * Get information about a product through its ASIN or URL.
-* Get multiple products at once without the 10 products limitation from Amazon.
+* Get item variations or search for products on Amazon.
+* Get multiple results at once without the 10 items limitation from Amazon.
 * Configurable throttling to avoid requests exceptions.
 * Support for all available countries.
 * Reorganized product information [structure](https://github.com/sergioteula/python-amazon-paapi/blob/master/PRODUCT.md) for simple use.
@@ -54,6 +55,16 @@ Get the ASIN from a URL:
 
 Changelog
 -------------
+    Version 3.0.0
+        - Added search_products and get_variations methods.
+        - Removed Amazon API requests limit for all methods.
+        - Created AmazonException for better exception handling.
+        - Added asynchronous requests compatibility.
+        - Added parent_ASIN to product instance.
+        - Cleaned code for more consistent style.
+        - Updated docstrings for all methods.
+        - Updated project structure.
+
     Version 2.1.1
         - Added get_product for single requests.
 
@@ -85,3 +96,7 @@ Changelog
 
     Version 0.1.0
         -First release.
+
+License
+-------------
+Copyright © 2020 Sergio Abad. See [license](https://github.com/sergioteula/python-amazon-paapi/blob/master/LICENSE) for details.
