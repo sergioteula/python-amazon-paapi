@@ -3,7 +3,6 @@
 from paapi5_python_sdk.get_items_resource import GetItemsResource
 from paapi5_python_sdk.search_items_resource import SearchItemsResource
 from paapi5_python_sdk.get_variations_resource import GetVariationsResource
-from paapi5_python_sdk.get_browse_nodes_resource import GetBrowseNodesResource
 from paapi5_python_sdk.condition import Condition
 
 """Available regions for the Amazon API."""
@@ -228,10 +227,4 @@ VARIATION_RESOURCES = [
     GetVariationsResource.VARIATIONSUMMARY_PRICE_HIGHESTPRICE,
     GetVariationsResource.VARIATIONSUMMARY_PRICE_LOWESTPRICE,
     GetVariationsResource.VARIATIONSUMMARY_VARIATIONDIMENSION
-]
-
-"""Browse node resources to get from Amazon API."""
-BROWSE_RESOURCES = [
-    GetBrowseNodesResource.ANCESTOR,
-    GetBrowseNodesResource.CHILDREN
 ]
