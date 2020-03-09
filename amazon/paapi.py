@@ -14,11 +14,11 @@ from paapi5_python_sdk.rest import ApiException
 
 import time
 
-from constant import DOMAINS, REGIONS, CONDITION
-from constant import PRODUCT_RESOURCES, SEARCH_RESOURCES, VARIATION_RESOURCES
-from exception import AmazonException
-from parse import parse_product
-from tools import get_asin, chunks
+from .constant import DOMAINS, REGIONS, CONDITION
+from .constant import PRODUCT_RESOURCES, SEARCH_RESOURCES, VARIATION_RESOURCES
+from .exception import AmazonException
+from .parse import parse_product
+from .tools import get_asin, chunks
 
 
 class AmazonAPI:
