@@ -33,7 +33,7 @@ class AmazonAPI:
         throttling (float, optional): Reduce this value to wait longer
             between API calls.
     """
-    def __init__(self, key: str, secret: str, tag: str, country: str, throttling=0.9):
+    def __init__(self, key: str, secret: str, tag: str, country: str, throttling=0.8):
         self.key = key
         self.secret = secret
         self.tag = tag
@@ -54,7 +54,8 @@ class AmazonAPI:
         self.api = DefaultApi(access_key=self.key, secret_key=self.secret, host=self.host,
                               region=self.region)
 
-    def get_products(self, product_ids: [str, list], condition='Any', async_req=False):
+    def get_products(self, product_ids: [str, list], condition='Any', merchant='All',
+                     async_req=False):
         """Find product information for multiple products on Amazon.
 
         Args:
@@ -63,6 +64,9 @@ class AmazonAPI:
             condition (str, optional): Specify the product condition.
                 Allowed values: Any, Collectible, New, Refurbished, Used.
                 Defaults to Any.
+            merchant (str, optional): Filters search results to return items
+                having at least one offer sold by target merchant. Allowed values:
+                All, Amazon. Defaults to All.
             async_req (bool, optional): Specify if a thread should be created to
                 run the request. Defaults to False.
 
@@ -85,11 +89,14 @@ class AmazonAPI:
                 request = GetItemsRequest(partner_tag=self.tag,
                                           partner_type=PartnerType.ASSOCIATES,
                                           marketplace=self.marketplace,
+                                          merchant=merchant,
                                           condition=CONDITION[condition],
                                           item_ids=asin_list,
                                           resources=PRODUCT_RESOURCES)
-            except Exception as exception:
-                raise AmazonException(exception.status, exception.reason)
+            except KeyError:
+                raise AmazonException('KeyError', 'Invalid condition value')
+            except Exception as e:
+                raise AmazonException('GetItemsError', e)
 
             for x in range(3):
                 try:
@@ -114,15 +121,16 @@ class AmazonAPI:
                     if len(response.items_result.items) > 0:
                         for item in response.items_result.items:
                             results.append(parse_product(item))
-            except Exception as exception:
-                raise AmazonException(exception.status, exception.reason)
+            except Exception as e:
+                raise AmazonException('ResponseError', e)
 
         if results:
             return results
         else:
             return None
 
-    def get_product(self, product_id: str, condition='Any', async_req=False):
+    def get_product(self, product_id: str, condition='Any', merchant='All',
+                    async_req=False):
         """Find product information for a specific product on Amazon.
 
         Args:
@@ -130,6 +138,9 @@ class AmazonAPI:
             condition (str, optional): Specify the product condition.
                 Allowed values: Any, Collectible, New, Refurbished, Used.
                 Defaults to Any.
+            merchant (str, optional): Filters search results to return items
+                having at least one offer sold by target merchant. Allowed values:
+                All, Amazon. Defaults to All.
             async_req (bool, optional): Specify if a thread should be created to
                 run the request. Defaults to False.
 
@@ -138,20 +149,20 @@ class AmazonAPI:
                 for the product or None if no results.
         """
         if isinstance(product_id, list):
-            raise AmazonException('TypeError', 'Product ID should be string, not list')
+            raise AmazonException('TypeError', 'Arg product_id should be string')
         if isinstance(product_id, str):
             check_product_id = product_id.split(',')
             if len(check_product_id) > 1:
                 raise AmazonException('ValueError', 'Only 1 product ID is allowed, use '
                                                     'get_products for multiple requests')
-        return self.get_products(product_id, condition=condition, async_req=async_req)[0]
+        return self.get_products(product_id, condition=condition, merchant=merchant,
+                                 async_req=async_req)[0]
 
-    def search_products(self, item_count=10, item_page=1, items_per_page=10, actor=None,
-                        artist=None, author=None, availability=None, brand=None, browse_node=None,
-                        condition='Any', currency=None, delivery=None, keywords=None,
-                        languages=None, max_price=None, min_price=None, min_rating=None,
-                        min_discount=None, merchant=None, search_index=None, sort_by=None,
-                        title=None, async_req=False):
+    def search_products(self, item_count=10, item_page=1, items_per_page=10, keywords=None,
+                        actor=None, artist=None, author=None, brand=None, title=None,
+                        availability='Available', browse_node=None, condition='Any', delivery=None,
+                        max_price=None, min_price=None, min_rating=None, min_discount=None,
+                        merchant='All', search_index='All', sort_by=None, async_req=False):
         """Search products on Amazon using different parameters. At least one of the
         following parameters should be used: keywords, actor, artist, author, brand,
         title.
@@ -163,27 +174,23 @@ class AmazonAPI:
                 1 and 10. Defaults to 1.
             items_per_page (int, optional): Products on each page. Should be between
                 1 and 10. Defaults to 10.
+            keywords (str, optional): A word or phrase that describes an item.
             actor (str, optional): Actor name associated with the item.
             artist (str, optional): Artist name associated with the item.
             author (str, optional): Author name associated with the item.
-            availability (str, optional): Filters available items on Amazon. By
-                default, all requests returns available items only.
-                Allowed values: Available, IncludeOutOfStock.
             brand (str, optional): Brand name associated with the item.
+            title (str, optional): Title associated with the item.
+            availability (str, optional): Filters available items on Amazon. Allowed values:
+            Available, IncludeOutOfStock. Defaults to Available.
             browse_node (str, optional): A unique ID assigned by Amazon that
                 identifies a product category or subcategory.
             condition (str, optional): The condition parameter filters offers by
-                condition type. By default, condition equals Any.
-                Allowed values: Any, Collectible, New, Refurbished, Used.
-            currency (str, optional): Currency of preference in which the prices
-                information should be returned in response.
+                condition type. Allowed values: Any, Collectible, New, Refurbished, Used.
+                Defaults to Any.
             delivery (list, optional): The delivery flag filters items which
                 satisfy a certain delivery program promoted by the specific
                 Amazon Marketplace. Allowed values: AmazonGlobal, FreeShipping,
                 FulfilledByAmazon, Prime.
-            keywords (str, optional): A word or phrase that describes an item.
-            languages (list, optional): Languages in order of preference in which
-                the item information should be returned in response.
             max_price (int, optional): Filters search results to items with at
                 least one offer price below the specified value.
             min_price (int, optional): Filters search results to items with at
@@ -194,14 +201,13 @@ class AmazonAPI:
                 at least one offer having saving percentage above the specified
                 value.
             merchant (str, optional): Filters search results to return items
-                having at least one offer sold by target merchant. By default
-                the value All is passed. Allowed values: All, Amazon.
+                having at least one offer sold by target merchant. Allowed values:
+                All, Amazon. Defaults to All.
             search_index (str, optional): Indicates the product category to
-                search.
+                search. Defaults to All.
             sort_by (str, optional): The way in which items in the response
                 are sorted. Allowed values: AvgCustomerReviews, Featured,
                 NewestArrivals, Price:HighToLow, Price:LowToHigh, Relevance.
-            title (str, optional): Title associated with the item.
             async_req (bool, optional): Specify if a thread should be created to
                 run the request. Defaults to False.
 
@@ -219,7 +225,6 @@ class AmazonAPI:
             raise AmazonException('ValueError', 'At least one of the following args must be '
                                                 'provided: keywords, actor, artist, author, brand,'
                                                 'title')
-
         results = []
         while len(results) < item_count:
             try:
@@ -233,12 +238,10 @@ class AmazonAPI:
                     brand=brand,
                     browse_node_id=browse_node,
                     condition=CONDITION[condition],
-                    currency_of_preference=currency,
                     delivery_flags=delivery,
                     item_count=items_per_page,
                     item_page=item_page,
                     keywords=keywords,
-                    languages_of_preference=languages,
                     max_price=max_price,
                     merchant=merchant,
                     min_price=min_price,
@@ -251,10 +254,8 @@ class AmazonAPI:
                     title=title)
             except KeyError:
                 raise AmazonException('KeyError', 'Invalid condition value')
-            except ValueError as e:
-                raise AmazonException('ValueError', e)
             except Exception as e:
-                raise AmazonException('Error', e)
+                raise AmazonException('SearchItemsError', e)
 
             for x in range(3):
                 try:
@@ -284,8 +285,8 @@ class AmazonAPI:
                     break
                 if response.errors is not None:
                     raise AmazonException(response.errors[0].code, response.errors[0].message)
-            except Exception as exception:
-                raise AmazonException(exception.reason, exception.body)
+            except Exception as e:
+                raise AmazonException('ResponseError', e)
             item_page += 1
             if item_page > 10:
                 break
@@ -296,7 +297,7 @@ class AmazonAPI:
             return None
 
     def get_variations(self, asin, item_count=10, item_page=1, items_per_page=10, condition='Any',
-                       currency=None, languages=None, merchant=None, async_req=False):
+                       merchant='All', async_req=False):
 
         if items_per_page > 10 or items_per_page < 1:
             raise AmazonException('ValueError', 'Arg items_per_page should be between 1 and 10')
@@ -314,8 +315,6 @@ class AmazonAPI:
                     marketplace=self.marketplace,
                     asin=asin,
                     condition=CONDITION[condition],
-                    currency_of_preference=currency,
-                    languages_of_preference=languages,
                     merchant=merchant,
                     offer_count=1,
                     variation_count=items_per_page,
@@ -323,10 +322,8 @@ class AmazonAPI:
                     resources=VARIATION_RESOURCES)
             except KeyError:
                 raise AmazonException('KeyError', 'Invalid condition value')
-            except ValueError as e:
-                raise AmazonException('ValueError', e)
             except Exception as e:
-                raise AmazonException('Error', e)
+                raise AmazonException('GetVariationsError', e)
 
             for x in range(3):
                 try:
@@ -356,9 +353,8 @@ class AmazonAPI:
                     break
                 if response.errors is not None:
                     raise AmazonException(response.errors[0].code, response.errors[0].message)
-
-            except Exception as exception:
-                raise AmazonException(exception.reason, exception.body)
+            except Exception as e:
+                raise AmazonException('ResponseError', e)
             item_page += 1
             if item_page > 10:
                 break
