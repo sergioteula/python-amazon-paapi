@@ -48,9 +48,19 @@ Use URL insted of ASIN:
 
     product = amazon.get_product('https://www.amazon.com/dp/B01N5IB20Q')
 
+Get product variations:
+
+    product = amazon.get_variations('B01N5IB20Q')
+    print(product[0].title)
+
+Search product:
+
+    product = amazon.search_products(item_count=25, keywords='speaker')
+    print(product[14].url)
+
 Get the ASIN from a URL:
 
-    from amazon.paapi import get_asin
+    from amazon.tools import get_asin
     asin = get_asin('https://www.amazon.com/dp/B01N5IB20Q')
 
 Changelog
