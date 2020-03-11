@@ -65,6 +65,9 @@ Get the ASIN from a URL:
 
 Changelog
 -------------
+    Version 3.0.2
+        - Changed to MIT License.
+
     Version 3.0.1
         - Solved import bug.
 
