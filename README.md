@@ -1,6 +1,6 @@
 Amazon Product Advertising API 5.0 wrapper for Python
 =======================================================
-A simple Python wrapper for the last version of the Amazon Product Advertising API. This module allows to get product information from Amazon using the official API in an easier way.
+A simple Python wrapper for the [last version of the Amazon Product Advertising API](https://pypi.org/project/amightygirl.paapi5-python-sdk/). This module allows to get product information from Amazon using the official API in an easier way.
 
 [![PyPI](https://img.shields.io/pypi/v/python-amazon-paapi?color=%231182C2&label=PyPI)](https://pypi.org/project/python-amazon-paapi/)
 [![Python](https://img.shields.io/badge/Python-2.x%20%7C%203.x-%23FFD140)](https://www.python.org/)
