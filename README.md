@@ -31,46 +31,43 @@ You can install or upgrade the module with:
 
 Usage guide
 -----------
-Basic usage:
+**Basic usage:**
 
     from amazon.paapi import AmazonAPI
     amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY)
     product = amazon.get_product('B01N5IB20Q')
     print(product.title)
 
-Get multiple product information:
+**Get multiple product information:**
 
     product = amazon.get_products('B01N5IB20Q,B01F9G43WU')
     print(product[0].images.large)
     print(product[1].prices.price.value)
 
-Use URL insted of ASIN:
+**Use URL insted of ASIN:**
 
     product = amazon.get_product('https://www.amazon.com/dp/B01N5IB20Q')
 
-Get product variations:
+**Get product variations:**
 
     product = amazon.get_variations('B01N5IB20Q')
     print(product[0].title)
 
-Search product:
+**Search product:**
 
     product = amazon.search_products(item_count=25, keywords='speaker')
     print(product[14].url)
 
-Get the ASIN from a URL:
+**Get the ASIN from a URL:**
 
     from amazon.tools import get_asin
     asin = get_asin('https://www.amazon.com/dp/B01N5IB20Q')
 
-Throttling:
+**Throttling:**
 
-Throttling value must be `0 < value <= 1`. This value throttles requests to a maxiumum of one request per `1 / value` seconds. Note that this value is a per-worker throttling, so applications with multiple workers may make more requests per second. Throttling value is [set by default to `0.8`](https://github.com/sergioteula/python-amazon-paapi/blob/master/amazon/paapi.py#L36) or one request per 1.25 seconds.
+Throttling value must be `0 < value <= 1`. This value throttles requests to a maximum of one request per `1 / value` seconds. Note that this value is a per-worker throttling, so applications with multiple workers may make more requests per second. Throttling value is [set by default to `0.8`](https://github.com/sergioteula/python-amazon-paapi/blob/master/amazon/paapi.py#L36) or one request per 1.25 seconds.
 
-    from amazon.paapi import AmazonAPI
-    amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY, throttling=0.5)  # Max one request per two seconds.
-    product = amazon.get_product('B01N5IB20Q')
-    print(product.title)
+    amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY, throttling=0.5)  # Max one request every two seconds
 
 Changelog
 -------------
