@@ -63,6 +63,15 @@ Get the ASIN from a URL:
     from amazon.tools import get_asin
     asin = get_asin('https://www.amazon.com/dp/B01N5IB20Q')
 
+Throttling:
+
+Throttling value must be `0 < value <= 1`. This value throttles requests to a maxiumum of one request per `1 / value` seconds. Note that this value is a per-worker throttling, so applications with multiple workers may make more requests per second. Throttling value is [set by default to `0.8`](https://github.com/sergioteula/python-amazon-paapi/blob/master/amazon/paapi.py#L36) or one request per 1.25 seconds.
+
+    from amazon.paapi import AmazonAPI
+    amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY, throttling=0.5)  # Max one request per two seconds.
+    product = amazon.get_product('B01N5IB20Q')
+    print(product.title)
+
 Changelog
 -------------
     Version 3.0.2
