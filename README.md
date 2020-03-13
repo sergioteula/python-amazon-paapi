@@ -17,7 +17,7 @@ Features
 * Get item variations or search for products on Amazon.
 * Get multiple results at once without the 10 items limitation from Amazon.
 * Configurable throttling to avoid requests exceptions.
-* Support for all available countries.
+* Support for [all available countries](https://github.com/sergioteula/python-amazon-paapi/blob/master/amazon/paapi.py#L31).
 * Reorganized product information [structure](https://github.com/sergioteula/python-amazon-paapi/blob/master/PRODUCT.md) for simple use.
 * Ask for new features through the [issues](https://github.com/sergioteula/python-amazon-paapi/issues) section.
 * Join our [Telegram group](https://t.me/PythonAmazonPAAPI) for support or development.
