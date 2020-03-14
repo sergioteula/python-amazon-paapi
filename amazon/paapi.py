@@ -12,13 +12,13 @@ from paapi5_python_sdk.get_variations_request import GetVariationsRequest
 from paapi5_python_sdk.partner_type import PartnerType
 from paapi5_python_sdk.rest import ApiException
 
-import time
+from amazon.constant import DOMAINS, REGIONS, CONDITION
+from amazon.constant import PRODUCT_RESOURCES, SEARCH_RESOURCES, VARIATION_RESOURCES
+from amazon.exception import AmazonException
+from amazon.parse import parse_product
+from amazon.tools import get_asin, chunks
 
-from .constant import DOMAINS, REGIONS, CONDITION
-from .constant import PRODUCT_RESOURCES, SEARCH_RESOURCES, VARIATION_RESOURCES
-from .exception import AmazonException
-from .parse import parse_product
-from .tools import get_asin, chunks
+import time
 
 
 class AmazonAPI:
