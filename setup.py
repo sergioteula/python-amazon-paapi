@@ -14,7 +14,11 @@ setuptools.setup(
     license='MIT',
     url='https://github.com/sergioteula/python-amazon-paapi',
     packages=setuptools.find_packages(),
-    install_requires=['amightygirl.paapi5-python-sdk'],
+    install_requires=['certifi',
+                      'six',
+                      'python_dateutil',
+                      'setuptools',
+                      'urllib3'],
     classifiers=[
         'Programming Language :: Python',
         'License :: OSI Approved :: MIT License',
