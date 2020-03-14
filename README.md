@@ -65,9 +65,10 @@ Usage guide
 
 **Throttling:**
 
-Throttling value must be `0 < value <= 1`. This value throttles requests to a maximum of one request per `1 / value` seconds. Note that this value is a per-worker throttling, so applications with multiple workers may make more requests per second. Throttling value is [set by default](https://github.com/sergioteula/python-amazon-paapi/blob/master/amazon/paapi.py#L36) to `0.8` or one request per 1.25 seconds.
+Throttling value must be `greater than 0` or `False` to disable it. This value throttles requests to a maximum of one request every `1 / value` seconds. Note that this value is a per-worker throttling, so applications with multiple workers may make more requests per second. Throttling value is [set by default](https://github.com/sergioteula/python-amazon-paapi/blob/master/amazon/paapi.py#L36) to `0.8` or one request every 1.25 seconds.
 
     amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY, throttling=0.5)  # Max one request every two seconds
+    amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY, throttling=False)  # Unlimited requests per second
 
 Changelog
 -------------
