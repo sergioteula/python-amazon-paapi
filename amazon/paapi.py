@@ -30,19 +30,24 @@ class AmazonAPI:
         tag (str): The tag you want to use for the URL.
         country (str): Country code. Use one of the following:
             AU, BR, CA, FR, DE, IN, IT, JP, MX, ES, TR, AE, UK, US.
-        throttling (float, optional): Reduce this value to wait longer
-            between API calls.
+        throttling (float, optional): It should be greater than 0 or False to disable throttling.
+        This value determines wait time between API calls.
     """
     def __init__(self, key: str, secret: str, tag: str, country: str, throttling=0.8):
         self.key = key
         self.secret = secret
         self.tag = tag
-        if 1 >= throttling > 0:
-            self.throttling = throttling
-        elif throttling <= 0:
-            raise AmazonException('ValueError', 'Throttling should be greater than 0')
-        elif throttling > 1:
-            raise AmazonException('ValueError', 'Throttling should be 1 or less')
+        try:
+            if throttling is True:
+                raise ValueError
+            elif throttling is False:
+                self.throttling = False
+            else:
+                self.throttling = float(throttling)
+                if not self.throttling > 0:
+                    raise ValueError
+        except ValueError:
+            raise AmazonException('ValueError', 'Throttling should be False or greater than 0')
         self.country = country
         try:
             self.host = 'webservices.amazon.' + DOMAINS[country]
@@ -101,9 +106,10 @@ class AmazonAPI:
             for x in range(3):
                 try:
                     # Wait before doing the request
-                    wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
-                    if wait_time > 0:
-                        time.sleep(wait_time)
+                    if self.throttling:
+                        wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
+                        if wait_time > 0:
+                            time.sleep(wait_time)
                     self.last_query_time = time.time()
 
                     # Send the request and create results
@@ -260,9 +266,10 @@ class AmazonAPI:
             for x in range(3):
                 try:
                     # Wait before doing the request
-                    wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
-                    if wait_time > 0:
-                        time.sleep(wait_time)
+                    if self.throttling:
+                        wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
+                        if wait_time > 0:
+                            time.sleep(wait_time)
                     self.last_query_time = time.time()
 
                     # Send the request and create results
@@ -351,9 +358,10 @@ class AmazonAPI:
             for x in range(3):
                 try:
                     # Wait before doing the request
-                    wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
-                    if wait_time > 0:
-                        time.sleep(wait_time)
+                    if self.throttling:
+                        wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
+                        if wait_time > 0:
+                            time.sleep(wait_time)
                     self.last_query_time = time.time()
 
                     # Send the request and create results
