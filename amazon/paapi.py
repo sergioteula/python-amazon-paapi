@@ -12,13 +12,13 @@ from paapi5_python_sdk.get_variations_request import GetVariationsRequest
 from paapi5_python_sdk.partner_type import PartnerType
 from paapi5_python_sdk.rest import ApiException
 
-import time
+from amazon.constant import DOMAINS, REGIONS, CONDITION
+from amazon.constant import PRODUCT_RESOURCES, SEARCH_RESOURCES, VARIATION_RESOURCES
+from amazon.exception import AmazonException
+from amazon.parse import parse_product
+from amazon.tools import get_asin, chunks
 
-from .constant import DOMAINS, REGIONS, CONDITION
-from .constant import PRODUCT_RESOURCES, SEARCH_RESOURCES, VARIATION_RESOURCES
-from .exception import AmazonException
-from .parse import parse_product
-from .tools import get_asin, chunks
+import time
 
 
 class AmazonAPI:
@@ -30,19 +30,24 @@ class AmazonAPI:
         tag (str): The tag you want to use for the URL.
         country (str): Country code. Use one of the following:
             AU, BR, CA, FR, DE, IN, IT, JP, MX, ES, TR, AE, UK, US.
-        throttling (float, optional): Reduce this value to wait longer
-            between API calls.
+        throttling (float, optional): It should be greater than 0 or False to disable throttling.
+        This value determines wait time between API calls.
     """
     def __init__(self, key: str, secret: str, tag: str, country: str, throttling=0.8):
         self.key = key
         self.secret = secret
         self.tag = tag
-        if 1 >= throttling > 0:
-            self.throttling = throttling
-        elif throttling <= 0:
-            raise AmazonException('ValueError', 'Throttling should be greater than 0')
-        elif throttling > 1:
-            raise AmazonException('ValueError', 'Throttling should be 1 or less')
+        try:
+            if throttling is True:
+                raise ValueError
+            elif throttling is False:
+                self.throttling = False
+            else:
+                self.throttling = float(throttling)
+                if self.throttling <= 0:
+                    raise ValueError
+        except ValueError:
+            raise AmazonException('ValueError', 'Throttling should be False or greater than 0')
         self.country = country
         try:
             self.host = 'webservices.amazon.' + DOMAINS[country]
@@ -53,6 +58,13 @@ class AmazonAPI:
         self.last_query_time = time.time()
         self.api = DefaultApi(access_key=self.key, secret_key=self.secret, host=self.host,
                               region=self.region)
+
+    def _throttle(self):
+        if self.throttling:
+            wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
+            if wait_time > 0:
+                time.sleep(wait_time)
+        self.last_query_time = time.time()
 
     def get_products(self, product_ids: [str, list], condition='Any', merchant='All',
                      async_req=False):
@@ -100,13 +112,8 @@ class AmazonAPI:
 
             for x in range(3):
                 try:
-                    # Wait before doing the request
-                    wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
-                    if wait_time > 0:
-                        time.sleep(wait_time)
-                    self.last_query_time = time.time()
-
                     # Send the request and create results
+                    self._throttle()
                     if async_req:
                         thread = self.api.get_items(request, async_req=True)
                         response = thread.get()
@@ -259,13 +266,8 @@ class AmazonAPI:
 
             for x in range(3):
                 try:
-                    # Wait before doing the request
-                    wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
-                    if wait_time > 0:
-                        time.sleep(wait_time)
-                    self.last_query_time = time.time()
-
                     # Send the request and create results
+                    self._throttle()
                     if async_req:
                         thread = self.api.search_items(request, async_req=True)
                         response = thread.get()
@@ -277,10 +279,11 @@ class AmazonAPI:
                         raise AmazonException('ApiException', e)
             try:
                 if response.search_result is not None:
-                    for item in response.search_result.items:
-                        results.append(parse_product(item))
-                        if len(results) >= item_count:
-                            break
+                    if response.search_result.items is not None:
+                        for item in response.search_result.items:
+                            results.append(parse_product(item))
+                            if len(results) >= item_count:
+                                break
                 else:
                     break
                 if response.errors is not None:
@@ -350,13 +353,8 @@ class AmazonAPI:
 
             for x in range(3):
                 try:
-                    # Wait before doing the request
-                    wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
-                    if wait_time > 0:
-                        time.sleep(wait_time)
-                    self.last_query_time = time.time()
-
                     # Send the request and create results
+                    self._throttle()
                     if async_req:
                         thread = self.api.get_variations(request, async_req=True)
                         response = thread.get()
@@ -368,10 +366,11 @@ class AmazonAPI:
                         raise AmazonException('ApiException', e)
             try:
                 if response.variations_result is not None:
-                    for item in response.variations_result.items:
-                        results.append(parse_product(item))
-                        if len(results) >= item_count:
-                            break
+                    if response.variations_result.items is not None:
+                        for item in response.variations_result.items:
+                            results.append(parse_product(item))
+                            if len(results) >= item_count:
+                                break
                 else:
                     break
                 if response.errors is not None:
