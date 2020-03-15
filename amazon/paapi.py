@@ -279,10 +279,11 @@ class AmazonAPI:
                         raise AmazonException('ApiException', e)
             try:
                 if response.search_result is not None:
-                    for item in response.search_result.items:
-                        results.append(parse_product(item))
-                        if len(results) >= item_count:
-                            break
+                    if response.search_result.items is not None:
+                        for item in response.search_result.items:
+                            results.append(parse_product(item))
+                            if len(results) >= item_count:
+                                break
                 else:
                     break
                 if response.errors is not None:
@@ -365,10 +366,11 @@ class AmazonAPI:
                         raise AmazonException('ApiException', e)
             try:
                 if response.variations_result is not None:
-                    for item in response.variations_result.items:
-                        results.append(parse_product(item))
-                        if len(results) >= item_count:
-                            break
+                    if response.variations_result.items is not None:
+                        for item in response.variations_result.items:
+                            results.append(parse_product(item))
+                            if len(results) >= item_count:
+                                break
                 else:
                     break
                 if response.errors is not None:
