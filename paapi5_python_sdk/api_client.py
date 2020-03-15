@@ -86,7 +86,7 @@ class ApiClient(object):
             configuration = Configuration()
         self.configuration = configuration
 
-        self.pool = ThreadPool()
+        self.pool = None
         self.rest_client = rest.RESTClientObject(configuration)
         self.default_headers = {}
         if header_name is not None:
@@ -94,15 +94,16 @@ class ApiClient(object):
         self.cookie = cookie
         # Set default User-Agent.
         self.user_agent = 'paapi5-python-sdk/1.0.0'
- 
+
         self.access_key = access_key
         self.secret_key = secret_key
         self.host = host
         self.region = region
 
     def __del__(self):
-        self.pool.close()
-        self.pool.join()
+        if self.pool is not None:
+            self.pool.close()
+            self.pool.join()
 
     @property
     def user_agent(self):
@@ -349,6 +350,8 @@ class ApiClient(object):
                                    _return_http_data_only, collection_formats,
                                    _preload_content, _request_timeout)
         else:
+            if self.pool is None:
+                self.pool = ThreadPool()
             thread = self.pool.apply_async(self.__call_api, (resource_path,
                                            method, api_name, path_params, query_params,
                                            header_params, body,
