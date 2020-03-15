@@ -75,7 +75,7 @@ Changelog
     Version 3.1.0
         - Added paapi5-python-sdk and removed amightygirl.paapi5-python-sdk.
         - Improved throttling and now possible to disable it.
-        - Updated documentation.
+        - Bug fixes.
 
     Version 3.0.2
         - Changed to MIT License.
