@@ -44,7 +44,7 @@ class AmazonAPI:
                 self.throttling = False
             else:
                 self.throttling = float(throttling)
-                if not self.throttling > 0:
+                if self.throttling <= 0:
                     raise ValueError
         except ValueError:
             raise AmazonException('ValueError', 'Throttling should be False or greater than 0')
@@ -58,6 +58,13 @@ class AmazonAPI:
         self.last_query_time = time.time()
         self.api = DefaultApi(access_key=self.key, secret_key=self.secret, host=self.host,
                               region=self.region)
+
+    def _throttle(self):
+        if self.throttling:
+            wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
+            if wait_time > 0:
+                time.sleep(wait_time)
+        self.last_query_time = time.time()
 
     def get_products(self, product_ids: [str, list], condition='Any', merchant='All',
                      async_req=False):
@@ -105,14 +112,8 @@ class AmazonAPI:
 
             for x in range(3):
                 try:
-                    # Wait before doing the request
-                    if self.throttling:
-                        wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
-                        if wait_time > 0:
-                            time.sleep(wait_time)
-                    self.last_query_time = time.time()
-
                     # Send the request and create results
+                    self._throttle()
                     if async_req:
                         thread = self.api.get_items(request, async_req=True)
                         response = thread.get()
@@ -265,14 +266,8 @@ class AmazonAPI:
 
             for x in range(3):
                 try:
-                    # Wait before doing the request
-                    if self.throttling:
-                        wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
-                        if wait_time > 0:
-                            time.sleep(wait_time)
-                    self.last_query_time = time.time()
-
                     # Send the request and create results
+                    self._throttle()
                     if async_req:
                         thread = self.api.search_items(request, async_req=True)
                         response = thread.get()
@@ -357,14 +352,8 @@ class AmazonAPI:
 
             for x in range(3):
                 try:
-                    # Wait before doing the request
-                    if self.throttling:
-                        wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
-                        if wait_time > 0:
-                            time.sleep(wait_time)
-                    self.last_query_time = time.time()
-
                     # Send the request and create results
+                    self._throttle()
                     if async_req:
                         thread = self.api.get_variations(request, async_req=True)
                         response = thread.get()
