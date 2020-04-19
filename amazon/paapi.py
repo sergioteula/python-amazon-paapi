@@ -289,6 +289,8 @@ class AmazonAPI:
                 if response.errors is not None:
                     raise AmazonException(response.errors[0].code, response.errors[0].message)
             except Exception as e:
+                if e.status == "NoResults":
+                    break
                 raise AmazonException('ResponseError', e)
             item_page += 1
             if item_page > 10:
