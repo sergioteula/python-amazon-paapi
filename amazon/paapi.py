@@ -9,13 +9,15 @@ from paapi5_python_sdk.api.default_api import DefaultApi
 from paapi5_python_sdk.get_items_request import GetItemsRequest
 from paapi5_python_sdk.search_items_request import SearchItemsRequest
 from paapi5_python_sdk.get_variations_request import GetVariationsRequest
+from paapi5_python_sdk.get_browse_nodes_request import GetBrowseNodesRequest
 from paapi5_python_sdk.partner_type import PartnerType
 from paapi5_python_sdk.rest import ApiException
 
 from amazon.constant import DOMAINS, REGIONS, CONDITION
 from amazon.constant import PRODUCT_RESOURCES, SEARCH_RESOURCES, VARIATION_RESOURCES
+from amazon.constant import BROWSE_RESOURCES
 from amazon.exception import AmazonException
-from amazon.parse import parse_product
+from amazon.parse import parse_product, AmazonBrowseNode, parse_browsenode
 from amazon.tools import get_asin, chunks
 
 import time
@@ -387,3 +389,56 @@ class AmazonAPI:
             return results
         else:
             return None
+
+    def get_browsenodes(self, browse_nodes, async_req=False):
+        """Get browse nodes information from Amazon.
+
+        Args:
+            browse_nodes (list): List of strings containing the browse node ids.
+            async_req (bool, optional): Specify if a thread should be created to
+                run the request. Defaults to False.
+
+        Returns:
+            dict: A dictionary containing the browse node information.
+        """
+
+        if isinstance(browse_nodes, list) is False:
+            raise Exception('Browse nodes parameter should be a list')
+        elif not browse_nodes:
+            raise Exception('Browse nodes parameter can\'t be empty')
+
+        try:
+            request = GetBrowseNodesRequest(
+                partner_tag=self.tag,
+                partner_type=PartnerType.ASSOCIATES,
+                marketplace=self.marketplace,
+                browse_node_ids=browse_nodes,
+                languages_of_preference=None,
+                resources=BROWSE_RESOURCES)
+        except ValueError as e:
+            raise AmazonException("ValueError", e)
+
+        try:
+            self._throttle()
+            if async_req:
+                thread = self.api.get_browse_nodes(request, async_req=True)
+                response = thread.get()
+            else:
+                response = self.api.get_browse_nodes(request)
+        except ApiException as e:
+            raise AmazonException('ApiException', e)
+
+        try:
+            if response.browse_nodes_result is not None:
+                res = [AmazonBrowseNode(item) for item in response.browse_nodes_result.browse_nodes]
+                return parse_browsenode(res)
+            if response.errors is not None:
+                raise AmazonException(response.errors[0].code, response.errors[0].message)
+        except TypeError as e:
+            raise AmazonException("TypeError", e)
+        except ValueError as e:
+            raise AmazonException(ValueError, e)
+        except AmazonException as e:
+            raise AmazonException(e.status, e.reason)
+        except Exception as e:
+            raise AmazonException("General", e)
