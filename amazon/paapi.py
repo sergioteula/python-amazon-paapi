@@ -286,6 +286,8 @@ class AmazonAPI:
                             results.append(parse_product(item))
                             if len(results) >= item_count:
                                 break
+                        if len(response.search_result.items) < items_per_page:
+                            break
                 else:
                     break
                 if response.errors is not None:
@@ -373,6 +375,8 @@ class AmazonAPI:
                             results.append(parse_product(item))
                             if len(results) >= item_count:
                                 break
+                        if len(response.variations_result.items) < items_per_page:
+                            break
                 else:
                     break
                 if response.errors is not None:
