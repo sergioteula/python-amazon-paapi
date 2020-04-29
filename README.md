@@ -80,6 +80,7 @@ Changelog
     Version 3.2.0
         - Added new method for getting browse nodes information.
         - Removed the 10 pages limit on search_products and get_variations methods.
+        - Solved unnecessary API call on search_products and get_variations methods.
 
     Version 3.1.0
         - Added paapi5-python-sdk and removed amightygirl.paapi5-python-sdk.
