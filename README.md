@@ -15,6 +15,7 @@ Features
 * Object oriented interface for simple usage.
 * Get information about a product through its ASIN or URL.
 * Get item variations or search for products on Amazon.
+* Get browse nodes information.
 * Get multiple results at once without the 10 items limitation from Amazon.
 * Configurable throttling to avoid requests exceptions.
 * Support for [all available countries](https://github.com/sergioteula/python-amazon-paapi/blob/master/amazon/paapi.py#L31).
@@ -58,6 +59,10 @@ Usage guide
     product = amazon.search_products(item_count=25, keywords='speaker')
     print(product[14].url)
 
+**Get browse node information:**
+
+    node = amazon.get_browsenodes(browse_nodes=browsenodes_list)
+
 **Get the ASIN from a URL:**
 
     from amazon.tools import get_asin
@@ -72,6 +77,11 @@ Throttling value must be `greater than 0` or `False` to disable it. This value t
 
 Changelog
 -------------
+    Version 3.2.0
+        - Added new method for getting browse nodes information.
+        - Removed the 10 pages limit on search_products and get_variations methods.
+        - Solved unnecessary API call on search_products and get_variations methods.
+
     Version 3.1.0
         - Added paapi5-python-sdk and removed amightygirl.paapi5-python-sdk.
         - Improved throttling and now possible to disable it.
