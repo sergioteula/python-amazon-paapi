@@ -295,8 +295,6 @@ class AmazonAPI:
                     break
                 raise AmazonException('ResponseError', e)
             item_page += 1
-            if item_page > 10:
-                break
 
         if results:
             return results
@@ -382,8 +380,6 @@ class AmazonAPI:
             except Exception as e:
                 raise AmazonException('ResponseError', e)
             item_page += 1
-            if item_page > 10:
-                break
 
         if results:
             return results
