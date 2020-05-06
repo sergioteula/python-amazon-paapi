@@ -8,7 +8,7 @@ class _AmazonValueUnitSerializer(serializers.Serializer):
 
 class _AmazonDimensionsSerializer(serializers.Serializer):
     height = _AmazonValueUnitSerializer()
-    lenght = _AmazonValueUnitSerializer()
+    length = _AmazonValueUnitSerializer()
     width = _AmazonValueUnitSerializer()
 
 
