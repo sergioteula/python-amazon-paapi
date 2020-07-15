@@ -75,8 +75,34 @@ Throttling value must be `greater than 0` or `False` to disable it. This value t
     amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY, throttling=0.5)  # Max one request every two seconds
     amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY, throttling=False)  # Unlimited requests per second
 
+**API support**
+We provide a serializer for django rest framework, which speeds up your api
+implementation.
+
+    from amazon.paapi import AmazonAPI
+    from amazon.serializers import AmazonProductSerializer
+    from rest_framework import serializers
+    amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY)
+
+    product = amazon.get_product('B01N5IB20Q')
+    serialized_product = AmazonProductSerializer(product)
+    serialized.data  # this prints serialized product
+
+if you like to serialize a list of products:
+
+    products = amazon.search_products(item_count=40, keywords='Harry')
+    serialized_products = AmazonProductSerializer(products, many=True)
+    serialized_products.data
+
+For more Information how to work with serializers see the documentation of
+[django rest framework](https://www.django-rest-framework.org/api-guide/serializers/)
+
+
 Changelog
 -------------
+    Version 3.2.1 (unreleased)
+        - Added serializer class for django rest framework
+        - Added serialized data for your convenience
     Version 3.2.0
         - Added new method for getting browse nodes information.
         - Removed the 10 pages limit on search_products and get_variations methods.
