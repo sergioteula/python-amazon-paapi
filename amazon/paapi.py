@@ -164,8 +164,12 @@ class AmazonAPI:
             if len(check_product_id) > 1:
                 raise AmazonException('ValueError', 'Only 1 product ID is allowed, use '
                                                     'get_products for multiple requests')
-        return self.get_products(product_id, condition=condition, merchant=merchant,
-                                 async_req=async_req)[0]
+        product = self.get_products(product_id, condition=condition, merchant=merchant,
+                                    async_req=async_req)
+        if product:
+            return product[0]
+        else:
+            return None
 
     def search_products(self, item_count=10, item_page=1, items_per_page=10, keywords=None,
                         actor=None, artist=None, author=None, brand=None, title=None,
