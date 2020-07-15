@@ -225,15 +225,15 @@ def parse_product(item):
         product.product.dimensions.height.unit = item.item_info.product_info.item_dimensions.height.unit
     except Exception:
         product.product.dimensions.height.unit = None
-    product.product.dimensions.lenght = Class()
+    product.product.dimensions.length = Class()
     try:
-        product.product.dimensions.lenght.value = item.item_info.product_info.item_dimensions.lenght.display_value
+        product.product.dimensions.length.value = item.item_info.product_info.item_dimensions.length.display_value
     except Exception:
-        product.product.dimensions.lenght.value = None
+        product.product.dimensions.length.value = None
     try:
-        product.product.dimensions.lenght.unit = item.item_info.product_info.item_dimensions.lenght.unit
+        product.product.dimensions.length.unit = item.item_info.product_info.item_dimensions.length.unit
     except Exception:
-        product.product.dimensions.lenght.unit = None
+        product.product.dimensions.length.unit = None
     product.product.dimensions.width = Class()
     try:
         product.product.dimensions.width.value = item.item_info.product_info.item_dimensions.width.display_value

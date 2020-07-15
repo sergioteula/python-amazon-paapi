@@ -17,7 +17,7 @@
                 height
                     value
                     unit
-                lenght
+                length
                     value
                     unit
                 width

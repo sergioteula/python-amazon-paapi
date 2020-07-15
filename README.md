@@ -18,6 +18,7 @@ Features
 * Get browse nodes information.
 * Get multiple results at once without the 10 items limitation from Amazon.
 * Configurable throttling to avoid requests exceptions.
+* Built-in serializer for Django REST framework.
 * Support for [all available countries](https://github.com/sergioteula/python-amazon-paapi/blob/master/amazon/paapi.py#L31).
 * Reorganized product information [structure](https://github.com/sergioteula/python-amazon-paapi/blob/master/PRODUCT.md) for simple use.
 * Ask for new features through the [issues](https://github.com/sergioteula/python-amazon-paapi/issues) section.
@@ -29,6 +30,10 @@ Installation
 You can install or upgrade the module with:
 
     pip install python-amazon-paapi --upgrade
+
+If you get `ModuleNotFoundError`, try installing this:
+
+    pip install amightygirl.paapi5-python-sdk
 
 Usage guide
 -----------
@@ -75,34 +80,32 @@ Throttling value must be `greater than 0` or `False` to disable it. This value t
     amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY, throttling=0.5)  # Max one request every two seconds
     amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY, throttling=False)  # Unlimited requests per second
 
-**API support**
-We provide a serializer for django rest framework, which speeds up your api
+**Serializer for Django:**
+
+We provide a serializer for Django REST framework, which speeds up your API
 implementation.
 
-    from amazon.paapi import AmazonAPI
     from amazon.serializers import AmazonProductSerializer
     from rest_framework import serializers
-    amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY)
 
-    product = amazon.get_product('B01N5IB20Q')
     serialized_product = AmazonProductSerializer(product)
-    serialized.data  # this prints serialized product
+    serialized_product.data
 
-if you like to serialize a list of products:
+If you want to serialize a list of products:
 
-    products = amazon.search_products(item_count=40, keywords='Harry')
     serialized_products = AmazonProductSerializer(products, many=True)
     serialized_products.data
 
-For more Information how to work with serializers see the documentation of
-[django rest framework](https://www.django-rest-framework.org/api-guide/serializers/)
+For more information on how to work with serializers, check the documentation for
+[Django REST framework](https://www.django-rest-framework.org/api-guide/serializers/).
 
 
 Changelog
 -------------
-    Version 3.2.1 (unreleased)
-        - Added serializer class for django rest framework
-        - Added serialized data for your convenience
+    Version 3.3.0
+        - Added serializer class for Django REST framework.
+        - Solved bugs and typos.
+
     Version 3.2.0
         - Added new method for getting browse nodes information.
         - Removed the 10 pages limit on search_products and get_variations methods.
