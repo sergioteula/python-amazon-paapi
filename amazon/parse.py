@@ -1,5 +1,7 @@
 """Data parser for instance creation."""
+import pprint
 
+import six
 
 class Class:
     """Base class for creating the product instance."""
@@ -46,7 +48,7 @@ class AmazonBrowseNode():
                 ))
             else:
                 result[attr] = value
-        if issubclass(BrowseNode, dict):
+        if issubclass(AmazonBrowseNode, dict):
             for key, value in self.items():
                 result[key] = value
 
@@ -59,7 +61,7 @@ class AmazonBrowseNode():
         return self.to_str()
 
     def __eq__(self, other):
-        if not isinstance(other, BrowseNode):
+        if not isinstance(other, AmazonBrowseNode):
             return False
 
         return self.__dict__ == other.__dict__
