@@ -196,7 +196,7 @@ def parse_product(item):
     except Exception:
         product.product.languages = None
     try:
-        product.product.pages_count = item.item_info.content_info.pages_count.display_values
+        product.product.pages_count = item.item_info.content_info.pages_count.display_value
     except Exception:
         product.product.pages_count = None
     try:
