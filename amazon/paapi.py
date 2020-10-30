@@ -234,10 +234,10 @@ class AmazonAPI:
             raise AmazonException('ValueError', 'Arg item_count should be between 1 and 100')
         if item_page < 1:
             raise AmazonException('ValueError', 'Arg item_page should be 1 or higher')
-        if not keywords and not actor and not artist and not author and not brand and not title:
+        if not keywords and not actor and not artist and not author and not brand and not title and not browse_node and not search_index:
             raise AmazonException('ValueError', 'At least one of the following args must be '
-                                                'provided: keywords, actor, artist, author, brand,'
-                                                'title')
+                                                'provided: keywords, actor, artist, author, brand, '
+                                                'title, browse_node, search_index')
         results = []
         while len(results) < item_count:
             try:
