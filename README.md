@@ -102,6 +102,11 @@ For more information on how to work with serializers, check the documentation fo
 
 Changelog
 -------------
+    Version 3.3.1
+        - Allow searching by browse_node or search_index alone.
+        - Added license files for Amazon SDK.
+        - Solved bugs and typos.
+
     Version 3.3.0
         - Added serializer class for Django REST framework.
         - Solved bugs and typos.
