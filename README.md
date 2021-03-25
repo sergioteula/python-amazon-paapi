@@ -39,62 +39,82 @@ Usage guide
 -----------
 **Basic usage:**
 
-    from amazon.paapi import AmazonAPI
-    amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY)
-    product = amazon.get_product('B01N5IB20Q')
-    print(product.title)
+````python
+from amazon.paapi import AmazonAPI
+amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY)
+product = amazon.get_product('B01N5IB20Q')
+print(product.title)
+````
 
 **Get multiple product information:**
 
-    product = amazon.get_products('B01N5IB20Q,B01F9G43WU')
-    print(product[0].images.large)
-    print(product[1].prices.price.value)
+````python
+product = amazon.get_products('B01N5IB20Q,B01F9G43WU')
+print(product[0].images.large)
+print(product[1].prices.price.value)
+````
 
 **Use URL insted of ASIN:**
 
-    product = amazon.get_product('https://www.amazon.com/dp/B01N5IB20Q')
+````python
+product = amazon.get_product('https://www.amazon.com/dp/B01N5IB20Q')
+````
 
 **Get product variations:**
 
-    product = amazon.get_variations('B01N5IB20Q')
-    print(product[0].title)
+````python
+product = amazon.get_variations('B01N5IB20Q')
+print(product[0].title)
+````
 
 **Search product:**
 
-    product = amazon.search_products(item_count=25, keywords='speaker')
-    print(product[14].url)
+````python
+product = amazon.search_products(item_count=25, keywords='speaker')
+print(product[14].url)
+````
 
 **Get browse node information:**
 
-    node = amazon.get_browsenodes(browse_nodes=browsenodes_list)
+````python
+node = amazon.get_browsenodes(browse_nodes=browsenodes_list)
+````
 
 **Get the ASIN from a URL:**
 
-    from amazon.tools import get_asin
-    asin = get_asin('https://www.amazon.com/dp/B01N5IB20Q')
+````python
+from amazon.tools import get_asin
+asin = get_asin('https://www.amazon.com/dp/B01N5IB20Q')
+````
 
 **Throttling:**
 
 Throttling value must be `greater than 0` or `False` to disable it. This value throttles requests to a maximum of one request every `1 / value` seconds. Note that this value is a per-worker throttling, so applications with multiple workers may make more requests per second. Throttling value is [set by default](https://github.com/sergioteula/python-amazon-paapi/blob/master/amazon/paapi.py#L36) to `0.8` or one request every 1.25 seconds.
 
-    amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY, throttling=0.5)  # Max one request every two seconds
-    amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY, throttling=False)  # Unlimited requests per second
+````python
+amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY, throttling=0.5)  # Max one request every two seconds
+amazon = AmazonAPI(KEY, SECRET, TAG, COUNTRY, throttling=False)  # Unlimited requests per second
+````
 
 **Serializer for Django:**
 
 We provide a serializer for Django REST framework, which speeds up your API
 implementation.
 
-    from amazon.serializers import AmazonProductSerializer
-    from rest_framework import serializers
+````python
+from amazon.serializers import AmazonProductSerializer
+from rest_framework import serializers
 
-    serialized_product = AmazonProductSerializer(product)
-    serialized_product.data
+serialized_product = AmazonProductSerializer(product)
+serialized_product.data
+````
 
 If you want to serialize a list of products:
 
-    serialized_products = AmazonProductSerializer(products, many=True)
-    serialized_products.data
+````python
+serialized_products = AmazonProductSerializer(products, many=True)
+serialized_products.data
+````
 
 For more information on how to work with serializers, check the documentation for
 [Django REST framework](https://www.django-rest-framework.org/api-guide/serializers/).
@@ -102,6 +122,12 @@ For more information on how to work with serializers, check the documentation fo
 
 Changelog
 -------------
+    Version 3.3.2
+        - Allow sending several products ids on get_product.
+        - Updated get_asin for new URL format.
+        - Added NL region support.
+        - Removed type hints.
+
     Version 3.3.1
         - Allow searching by browse_node or search_index alone.
         - Added license files for Amazon SDK.
