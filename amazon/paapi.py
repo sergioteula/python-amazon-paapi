@@ -35,7 +35,7 @@ class AmazonAPI:
         throttling (float, optional): It should be greater than 0 or False to disable throttling.
         This value determines wait time between API calls.
     """
-    def __init__(self, key: str, secret: str, tag: str, country: str, throttling=0.8):
+    def __init__(self, key, secret, tag, country, throttling=0.8):
         self.key = key
         self.secret = secret
         self.tag = tag
@@ -68,7 +68,7 @@ class AmazonAPI:
                 time.sleep(wait_time)
         self.last_query_time = time.time()
 
-    def get_products(self, product_ids: [str, list], condition='Any', merchant='All',
+    def get_products(self, product_ids, condition='Any', merchant='All',
                      async_req=False):
         """Find product information for multiple products on Amazon.
 
@@ -138,12 +138,12 @@ class AmazonAPI:
         else:
             return None
 
-    def get_product(self, product_id: str, condition='Any', merchant='All',
+    def get_product(self, product_id, condition='Any', merchant='All',
                     async_req=False):
         """Find product information for a specific product on Amazon.
 
         Args:
-            product_id (str): One item ID like ASIN or product URL.
+            product_id (str, list): One item ID like ASIN or product URL.
             condition (str, optional): Specify the product condition.
                 Allowed values: Any, Collectible, New, Refurbished, Used.
                 Defaults to Any.
