@@ -158,12 +158,10 @@ class AmazonAPI:
                 for the product or None if no results.
         """
         if isinstance(product_id, list):
-            raise AmazonException('TypeError', 'Arg product_id should be string')
+            product_id = product_id[0]
         if isinstance(product_id, str):
-            check_product_id = product_id.split(',')
-            if len(check_product_id) > 1:
-                raise AmazonException('ValueError', 'Only 1 product ID is allowed, use '
-                                                    'get_products for multiple requests')
+            product_id = product_id.split(',')[0]
+
         product = self.get_products(product_id, condition=condition, merchant=merchant,
                                     async_req=async_req)
         if product:
