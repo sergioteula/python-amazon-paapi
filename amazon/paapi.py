@@ -31,7 +31,7 @@ class AmazonAPI:
         secret (str): Your API secret.
         tag (str): The tag you want to use for the URL.
         country (str): Country code. Use one of the following:
-            AU, BR, CA, FR, DE, IN, NL, IT, JP, MX, ES, TR, AE, UK, US.
+            AU, BR, CA, FR, DE, IN, NL, IT, JP, MX, ES, TR, AE, UK, US, SE.
         throttling (float, optional): It should be greater than 0 or False to disable throttling.
         This value determines wait time between API calls.
     """
