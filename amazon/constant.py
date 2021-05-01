@@ -22,7 +22,8 @@ REGIONS = {
     'TR': 'eu-west-1',
     'AE': 'eu-west-1',
     'UK': 'eu-west-1',
-    'US': 'us-east-1'
+    'US': 'us-east-1',
+    'SE': 'eu-west-1'
 }
 
 """Domains for each region on the Amazon API."""
@@ -41,7 +42,8 @@ DOMAINS = {
     'TR': 'com.tr',
     'AE': 'ae',
     'UK': 'co.uk',
-    'US': 'com'
+    'US': 'com',
+    'SE': 'se'
 }
 
 """Condition values."""
