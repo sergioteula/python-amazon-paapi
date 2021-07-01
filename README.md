@@ -121,4 +121,4 @@ For more information on how to work with serializers, check the documentation fo
 
 License
 -------------
-Copyright © 2020 Sergio Abad. See [license](https://github.com/sergioteula/python-amazon-paapi/blob/master/LICENSE) for details.
+Copyright © 2020 Sergio Abad. See [license](https://github.com/sergioteula/python-amazon-paapi/blob/master/LICENSE) for details. test
