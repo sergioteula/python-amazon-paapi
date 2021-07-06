@@ -23,7 +23,7 @@ from amazon_paapi.tools import get_asin, chunks
 import time
 
 
-class AmazonAPI:
+class AmazonApi:
     """Creates an instance containing your API credentials.
 
     Args:
