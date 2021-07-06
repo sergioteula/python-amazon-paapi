@@ -22,18 +22,19 @@ import time
 
 
 class AmazonApi:
-    """Creates an instance containing your API credentials.
+    """Provides methods to get information from Amazon using your API credentials.
 
     Args:
         key (str): Your API key.
         secret (str): Your API secret.
-        tag (str): The tag you want to use for the URL.
-        country (str): Country code. Use one of the following:
+        tag (str): Your affiliate tracking id, used to create the affiliate link.
+        country (str): Country code for your affiliate account. Compatible with
             AU, BR, CA, FR, DE, IN, IT, JP, MX, NL, PL, SG, SA, ES, TR, AE, UK, US, SE.
-        throttling (float, optional): It should be greater than 0 or False to disable throttling.
-        This value determines wait time between API calls.
+        throttling (float, optional): Wait time in seconds between API calls. Use it to avoid
+            reaching Amazon limits. Defaults to 1 second.
     """
-    def __init__(self, key, secret, tag, country, throttling=0.8):
+
+    def __init__(self, key: str, secret: str, tag: str, country: str, throttling: float = 1, **kwargs):
         self.key = key
         self.secret = secret
         self.tag = tag
@@ -47,7 +48,8 @@ class AmazonApi:
                 if self.throttling <= 0:
                     raise ValueError
         except ValueError:
-            raise AmazonException('ValueError', 'Throttling should be False or greater than 0')
+            raise AmazonException(
+                'ValueError', 'Throttling should be False or greater than 0')
         self.country = country
         try:
             self.host = 'webservices.amazon.' + constants.DOMAINS[country]
@@ -61,7 +63,8 @@ class AmazonApi:
 
     def _throttle(self):
         if self.throttling:
-            wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
+            wait_time = 1 / self.throttling - \
+                (time.time() - self.last_query_time)
             if wait_time > 0:
                 time.sleep(wait_time)
         self.last_query_time = time.time()
@@ -91,7 +94,8 @@ class AmazonApi:
         if isinstance(product_ids, str):
             product_ids = [x.strip() for x in product_ids.split(',')]
         elif not isinstance(product_ids, list):
-            raise AmazonException('TypeError', 'Arg product_ids should be a list or string')
+            raise AmazonException(
+                'TypeError', 'Arg product_ids should be a list or string')
         asin_full_list = list(set([get_asin(x) for x in product_ids]))
         asin_full_list = list(chunks(asin_full_list, 10))
 
@@ -225,11 +229,14 @@ class AmazonApi:
                 or None if no results.
         """
         if items_per_page > 10 or items_per_page < 1:
-            raise AmazonException('ValueError', 'Arg items_per_page should be between 1 and 10')
+            raise AmazonException(
+                'ValueError', 'Arg items_per_page should be between 1 and 10')
         if item_count > 100 or item_count < 1:
-            raise AmazonException('ValueError', 'Arg item_count should be between 1 and 100')
+            raise AmazonException(
+                'ValueError', 'Arg item_count should be between 1 and 100')
         if item_page < 1:
-            raise AmazonException('ValueError', 'Arg item_page should be 1 or higher')
+            raise AmazonException(
+                'ValueError', 'Arg item_page should be 1 or higher')
         if not keywords and not actor and not artist and not author and not brand and not title and not browse_node and not search_index:
             raise AmazonException('ValueError', 'At least one of the following args must be '
                                                 'provided: keywords, actor, artist, author, brand, '
@@ -291,7 +298,8 @@ class AmazonApi:
                 else:
                     break
                 if response.errors is not None:
-                    raise AmazonException(response.errors[0].code, response.errors[0].message)
+                    raise AmazonException(
+                        response.errors[0].code, response.errors[0].message)
             except Exception as e:
                 if e.status == "NoResults":
                     break
@@ -330,11 +338,14 @@ class AmazonApi:
                 or None if no results.
         """
         if items_per_page > 10 or items_per_page < 1:
-            raise AmazonException('ValueError', 'Arg items_per_page should be between 1 and 10')
+            raise AmazonException(
+                'ValueError', 'Arg items_per_page should be between 1 and 10')
         if item_count > 100 or item_count < 1:
-            raise AmazonException('ValueError', 'Arg item_count should be between 1 and 100')
+            raise AmazonException(
+                'ValueError', 'Arg item_count should be between 1 and 100')
         if item_page < 1:
-            raise AmazonException('ValueError', 'Arg item_page should be 1 or higher')
+            raise AmazonException(
+                'ValueError', 'Arg item_page should be 1 or higher')
 
         results = []
         while len(results) < item_count:
@@ -360,7 +371,8 @@ class AmazonApi:
                     # Send the request and create results
                     self._throttle()
                     if async_req:
-                        thread = self.api.get_variations(request, async_req=True)
+                        thread = self.api.get_variations(
+                            request, async_req=True)
                         response = thread.get()
                     else:
                         response = self.api.get_variations(request)
@@ -380,7 +392,8 @@ class AmazonApi:
                 else:
                     break
                 if response.errors is not None:
-                    raise AmazonException(response.errors[0].code, response.errors[0].message)
+                    raise AmazonException(
+                        response.errors[0].code, response.errors[0].message)
             except Exception as e:
                 raise AmazonException('ResponseError', e)
             item_page += 1
@@ -430,10 +443,12 @@ class AmazonApi:
 
         try:
             if response.browse_nodes_result is not None:
-                res = [AmazonBrowseNode(item) for item in response.browse_nodes_result.browse_nodes]
+                res = [AmazonBrowseNode(
+                    item) for item in response.browse_nodes_result.browse_nodes]
                 return parse_browsenode(res)
             if response.errors is not None:
-                raise AmazonException(response.errors[0].code, response.errors[0].message)
+                raise AmazonException(
+                    response.errors[0].code, response.errors[0].message)
         except TypeError as e:
             raise AmazonException("TypeError", e)
         except ValueError as e:
