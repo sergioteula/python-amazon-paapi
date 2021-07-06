@@ -5,20 +5,20 @@ This module allows to get product information from Amazon using the official API
 an easier way.
 """
 
-from amazon_paapi.sdk.api.default_api import DefaultApi
-from amazon_paapi.sdk.models.get_items_request import GetItemsRequest
-from amazon_paapi.sdk.models.search_items_request import SearchItemsRequest
-from amazon_paapi.sdk.models.get_variations_request import GetVariationsRequest
-from amazon_paapi.sdk.models.get_browse_nodes_request import GetBrowseNodesRequest
-from amazon_paapi.sdk.models.partner_type import PartnerType
-from amazon_paapi.sdk.rest import ApiException
+from .sdk.api.default_api import DefaultApi
+from .sdk.models.get_items_request import GetItemsRequest
+from .sdk.models.search_items_request import SearchItemsRequest
+from .sdk.models.get_variations_request import GetVariationsRequest
+from .sdk.models.get_browse_nodes_request import GetBrowseNodesRequest
+from .sdk.models.partner_type import PartnerType
+from .sdk.rest import ApiException
 
-from amazon_paapi.constant import DOMAINS, REGIONS, CONDITION
-from amazon_paapi.constant import PRODUCT_RESOURCES, SEARCH_RESOURCES, VARIATION_RESOURCES
-from amazon_paapi.constant import BROWSE_RESOURCES
-from amazon_paapi.exception import AmazonException
-from amazon_paapi.parse import parse_product, AmazonBrowseNode, parse_browsenode
-from amazon_paapi.tools import get_asin, chunks
+from .constant import DOMAINS, REGIONS, CONDITION
+from .constant import PRODUCT_RESOURCES, SEARCH_RESOURCES, VARIATION_RESOURCES
+from .constant import BROWSE_RESOURCES
+from .exception import AmazonException
+from .parse import parse_product, AmazonBrowseNode, parse_browsenode
+from .tools import get_asin, chunks
 
 import time
 
