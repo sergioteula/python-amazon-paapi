@@ -323,7 +323,7 @@ class ApiException(Exception):
             self.headers = None
 
     def __str__(self):
-        """Custom error messages for exception"""
+        """Custom error messages for exceptions"""
         error_message = "({0})\n"\
                         "Reason: {1}\n".format(self.status, self.reason)
         if self.headers:
