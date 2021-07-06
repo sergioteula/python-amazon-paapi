@@ -18,6 +18,7 @@ from .exceptions import AmazonException, InvalidArgumentException
 from .parse import parse_product, AmazonBrowseNode, parse_browsenode
 from .tools import get_asin, chunks
 
+from typing import Union
 import time
 
 
@@ -51,25 +52,19 @@ class AmazonApi:
 
         self._api = DefaultApi(key, secret, self._host, self._region)
 
-    def get_products(self, product_ids, condition='Any', merchant='All',
-                     async_req=False):
+    def get_products(self, product_ids: Union[str, list], condition='Any', merchant='All', **kwargs):
         """Find product information for multiple products on Amazon.
 
         Args:
-            product_ids (str|list): One or more item IDs like ASIN or product URL.
-                Use a string separated by comma or as a list.
-            condition (str, optional): Specify the product condition.
-                Allowed values: Any, Collectible, New, Refurbished, Used.
-                Defaults to Any.
-            merchant (str, optional): Filters search results to return items
-                having at least one offer sold by target merchant. Allowed values:
-                All, Amazon. Defaults to All.
-            async_req (bool, optional): Specify if a thread should be created to
-                run the request. Defaults to False.
+            product_ids (str|list): One or more item IDs like ASIN or product URL. Use a string
+                separated by comma or a list of strings.
+            condition (str, optional): Specify the product condition. Allowed values are
+                Any, Collectible, New, Refurbished and Used. Defaults to Any.
+            merchant (str, optional): Filters search results to return items having at least one
+                offer sold by the target merchant. Allowed values are All and Amazon. Defaults to All.
 
         Returns:
-            list of instances: A list containing 1 instance for each product
-                or None if no results.
+            list: A list containing 1 instance for each product or None if no results.
         """
 
         # Clean up input data and remove 10 items limit from Amazon API
