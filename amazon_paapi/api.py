@@ -14,7 +14,7 @@ from .sdk.models.partner_type import PartnerType
 from .sdk.rest import ApiException
 
 from . import constants
-from .exceptions import AmazonException
+from .exceptions import AmazonException, InvalidArgumentException
 from .parse import parse_product, AmazonBrowseNode, parse_browsenode
 from .tools import get_asin, chunks
 
@@ -35,39 +35,28 @@ class AmazonApi:
     """
 
     def __init__(self, key: str, secret: str, tag: str, country: str, throttling: float = 1, **kwargs):
-        self.key = key
-        self.secret = secret
-        self.tag = tag
+        self._key = key
+        self._secret = secret
+        self._tag = tag
+        self._country = country
+        self._throttling = float(throttling)
+        self._last_query_time = time.time() - throttling
+
         try:
-            if throttling is True:
-                raise ValueError
-            elif throttling is False:
-                self.throttling = False
-            else:
-                self.throttling = float(throttling)
-                if self.throttling <= 0:
-                    raise ValueError
-        except ValueError:
-            raise AmazonException(
-                'ValueError', 'Throttling should be False or greater than 0')
-        self.country = country
-        try:
-            self.host = 'webservices.amazon.' + constants.DOMAINS[country]
-            self.region = constants.REGIONS[country]
-            self.marketplace = 'www.amazon.' + constants.DOMAINS[country]
+            self._host = 'webservices.amazon.' + constants.DOMAINS[country]
+            self._region = constants.REGIONS[country]
+            self._marketplace = 'www.amazon.' + constants.DOMAINS[country]
         except KeyError:
-            raise AmazonException('KeyError', 'Invalid country code')
-        self.last_query_time = time.time()
-        self.api = DefaultApi(access_key=self.key, secret_key=self.secret, host=self.host,
-                              region=self.region)
+            raise InvalidArgumentException('Country code is not correct')
+
+        self._api = DefaultApi(key, secret, self._host, self._region)
 
     def _throttle(self):
-        if self.throttling:
-            wait_time = 1 / self.throttling - \
-                (time.time() - self.last_query_time)
+        if self._throttling:
+            wait_time = self._throttling - (time.time() - self._last_query_time)
             if wait_time > 0:
                 time.sleep(wait_time)
-        self.last_query_time = time.time()
+        self._last_query_time = time.time()
 
     def get_products(self, product_ids, condition='Any', merchant='All',
                      async_req=False):
@@ -102,9 +91,9 @@ class AmazonApi:
         results = []
         for asin_list in asin_full_list:
             try:
-                request = GetItemsRequest(partner_tag=self.tag,
+                request = GetItemsRequest(partner_tag=self._tag,
                                           partner_type=PartnerType.ASSOCIATES,
-                                          marketplace=self.marketplace,
+                                          marketplace=self._marketplace,
                                           merchant=merchant,
                                           condition=constants.CONDITION[condition],
                                           item_ids=asin_list,
@@ -119,10 +108,10 @@ class AmazonApi:
                     # Send the request and create results
                     self._throttle()
                     if async_req:
-                        thread = self.api.get_items(request, async_req=True)
+                        thread = self._api.get_items(request, async_req=True)
                         response = thread.get()
                     else:
-                        response = self.api.get_items(request)
+                        response = self._api.get_items(request)
                     break
                 except ApiException as e:
                     if x == 2:
@@ -245,7 +234,7 @@ class AmazonApi:
         while len(results) < item_count:
             try:
                 request = SearchItemsRequest(
-                    partner_tag=self.tag,
+                    partner_tag=self._tag,
                     partner_type=PartnerType.ASSOCIATES,
                     actor=actor,
                     artist=artist,
@@ -278,10 +267,10 @@ class AmazonApi:
                     # Send the request and create results
                     self._throttle()
                     if async_req:
-                        thread = self.api.search_items(request, async_req=True)
+                        thread = self._api.search_items(request, async_req=True)
                         response = thread.get()
                     else:
-                        response = self.api.search_items(request)
+                        response = self._api.search_items(request)
                     break
                 except ApiException as e:
                     if x == 2:
@@ -351,9 +340,9 @@ class AmazonApi:
         while len(results) < item_count:
             try:
                 request = GetVariationsRequest(
-                    partner_tag=self.tag,
+                    partner_tag=self._tag,
                     partner_type=PartnerType.ASSOCIATES,
-                    marketplace=self.marketplace,
+                    marketplace=self._marketplace,
                     asin=get_asin(asin),
                     condition=constants.CONDITION[condition],
                     merchant=merchant,
@@ -371,11 +360,11 @@ class AmazonApi:
                     # Send the request and create results
                     self._throttle()
                     if async_req:
-                        thread = self.api.get_variations(
+                        thread = self._api.get_variations(
                             request, async_req=True)
                         response = thread.get()
                     else:
-                        response = self.api.get_variations(request)
+                        response = self._api.get_variations(request)
                     break
                 except ApiException as e:
                     if x == 2:
@@ -422,9 +411,9 @@ class AmazonApi:
 
         try:
             request = GetBrowseNodesRequest(
-                partner_tag=self.tag,
+                partner_tag=self._tag,
                 partner_type=PartnerType.ASSOCIATES,
-                marketplace=self.marketplace,
+                marketplace=self._marketplace,
                 browse_node_ids=browse_nodes,
                 languages_of_preference=None,
                 resources=constants.BROWSE_RESOURCES)
@@ -434,10 +423,10 @@ class AmazonApi:
         try:
             self._throttle()
             if async_req:
-                thread = self.api.get_browse_nodes(request, async_req=True)
+                thread = self._api.get_browse_nodes(request, async_req=True)
                 response = thread.get()
             else:
-                response = self.api.get_browse_nodes(request)
+                response = self._api.get_browse_nodes(request)
         except ApiException as e:
             raise AmazonException('ApiException', e)
 
