@@ -13,17 +13,20 @@ REGIONS = {
     'CA': 'us-east-1',
     'FR': 'eu-west-1',
     'DE': 'eu-west-1',
-    'NL': 'eu-west-1',
     'IN': 'eu-west-1',
     'IT': 'eu-west-1',
     'JP': 'us-west-2',
     'MX': 'us-east-1',
+    'NL': 'eu-west-1',
+    'PL': 'eu-west-1',
+    'SG': 'us-west-2',
+    'SA': 'eu-west-1',
     'ES': 'eu-west-1',
+    'SE': 'eu-west-1',
     'TR': 'eu-west-1',
     'AE': 'eu-west-1',
     'UK': 'eu-west-1',
-    'US': 'us-east-1',
-    'SE': 'eu-west-1'
+    'US': 'us-east-1'
 }
 
 """Domains for each region on the Amazon API."""
@@ -33,17 +36,20 @@ DOMAINS = {
     'CA': 'ca',
     'FR': 'fr',
     'DE': 'de',
-    'NL': 'nl',
     'IN': 'in',
     'IT': 'it',
     'JP': 'co.jp',
     'MX': 'com.mx',
+    'NL': 'nl',
+    'PL': 'pl',
+    'SG': 'sg',
+    'SA': 'sa',
     'ES': 'es',
+    'SE': 'se',
     'TR': 'com.tr',
     'AE': 'ae',
     'UK': 'co.uk',
     'US': 'com',
-    'SE': 'se'
 }
 
 """Condition values."""
