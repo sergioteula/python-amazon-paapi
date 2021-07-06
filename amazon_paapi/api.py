@@ -13,10 +13,8 @@ from .sdk.models.get_browse_nodes_request import GetBrowseNodesRequest
 from .sdk.models.partner_type import PartnerType
 from .sdk.rest import ApiException
 
-from .constant import DOMAINS, REGIONS, CONDITION
-from .constant import PRODUCT_RESOURCES, SEARCH_RESOURCES, VARIATION_RESOURCES
-from .constant import BROWSE_RESOURCES
-from .exception import AmazonException
+from . import constants
+from .exceptions import AmazonException
 from .parse import parse_product, AmazonBrowseNode, parse_browsenode
 from .tools import get_asin, chunks
 
@@ -52,9 +50,9 @@ class AmazonApi:
             raise AmazonException('ValueError', 'Throttling should be False or greater than 0')
         self.country = country
         try:
-            self.host = 'webservices.amazon.' + DOMAINS[country]
-            self.region = REGIONS[country]
-            self.marketplace = 'www.amazon.' + DOMAINS[country]
+            self.host = 'webservices.amazon.' + constants.DOMAINS[country]
+            self.region = constants.REGIONS[country]
+            self.marketplace = 'www.amazon.' + constants.DOMAINS[country]
         except KeyError:
             raise AmazonException('KeyError', 'Invalid country code')
         self.last_query_time = time.time()
@@ -104,9 +102,9 @@ class AmazonApi:
                                           partner_type=PartnerType.ASSOCIATES,
                                           marketplace=self.marketplace,
                                           merchant=merchant,
-                                          condition=CONDITION[condition],
+                                          condition=constants.CONDITION[condition],
                                           item_ids=asin_list,
-                                          resources=PRODUCT_RESOURCES)
+                                          resources=constants.PRODUCT_RESOURCES)
             except KeyError:
                 raise AmazonException('KeyError', 'Invalid condition value')
             except Exception as e:
@@ -248,7 +246,7 @@ class AmazonApi:
                     availability=availability,
                     brand=brand,
                     browse_node_id=browse_node,
-                    condition=CONDITION[condition],
+                    condition=constants.CONDITION[condition],
                     delivery_flags=delivery,
                     item_count=items_per_page,
                     item_page=item_page,
@@ -259,7 +257,7 @@ class AmazonApi:
                     min_reviews_rating=min_rating,
                     min_saving_percent=min_discount,
                     offer_count=1,
-                    resources=SEARCH_RESOURCES,
+                    resources=constants.SEARCH_RESOURCES,
                     search_index=search_index,
                     sort_by=sort_by,
                     title=title)
@@ -346,12 +344,12 @@ class AmazonApi:
                     partner_type=PartnerType.ASSOCIATES,
                     marketplace=self.marketplace,
                     asin=get_asin(asin),
-                    condition=CONDITION[condition],
+                    condition=constants.CONDITION[condition],
                     merchant=merchant,
                     offer_count=1,
                     variation_count=items_per_page,
                     variation_page=item_page,
-                    resources=VARIATION_RESOURCES)
+                    resources=constants.VARIATION_RESOURCES)
             except KeyError:
                 raise AmazonException('KeyError', 'Invalid condition value')
             except Exception as e:
@@ -416,7 +414,7 @@ class AmazonApi:
                 marketplace=self.marketplace,
                 browse_node_ids=browse_nodes,
                 languages_of_preference=None,
-                resources=BROWSE_RESOURCES)
+                resources=constants.BROWSE_RESOURCES)
         except ValueError as e:
             raise AmazonException("ValueError", e)
 
