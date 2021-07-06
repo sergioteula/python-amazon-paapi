@@ -1,10 +1,10 @@
 """Module containing all the constants."""
 
-from amazon_paapi.sdk.models.get_items_resource import GetItemsResource
-from amazon_paapi.sdk.models.search_items_resource import SearchItemsResource
-from amazon_paapi.sdk.models.get_variations_resource import GetVariationsResource
-from amazon_paapi.sdk.models.get_browse_nodes_resource import GetBrowseNodesResource
-from amazon_paapi.sdk.models.condition import Condition
+from .sdk.models.get_items_resource import GetItemsResource
+from .sdk.models.search_items_resource import SearchItemsResource
+from .sdk.models.get_variations_resource import GetVariationsResource
+from .sdk.models.get_browse_nodes_resource import GetBrowseNodesResource
+from .sdk.models.condition import Condition
 
 """Available regions for the Amazon API."""
 REGIONS = {
