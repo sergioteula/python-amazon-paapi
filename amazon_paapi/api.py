@@ -51,13 +51,6 @@ class AmazonApi:
 
         self._api = DefaultApi(key, secret, self._host, self._region)
 
-    def _throttle(self):
-        if self._throttling:
-            wait_time = self._throttling - (time.time() - self._last_query_time)
-            if wait_time > 0:
-                time.sleep(wait_time)
-        self._last_query_time = time.time()
-
     def get_products(self, product_ids, condition='Any', merchant='All',
                      async_req=False):
         """Find product information for multiple products on Amazon.
@@ -446,3 +439,9 @@ class AmazonApi:
             raise AmazonException(e.status, e.reason)
         except Exception as e:
             raise AmazonException("General", e)
+
+    def _throttle(self):
+        wait_time = self._throttling - (time.time() - self._last_query_time)
+        if wait_time > 0:
+            time.sleep(wait_time)
+        self._last_query_time = time.time()
