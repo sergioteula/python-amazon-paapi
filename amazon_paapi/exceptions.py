@@ -1,11 +1,16 @@
-"""Custom exceptions class."""
+"""Custom exceptions module"""
 
 
 class AmazonException(Exception):
-    """Custom exceptions class for Amazon Product Advertising API."""
-    def __init__(self, status=None, reason=None):
-        self.status = status
-        self.reason = reason
+    """Common base class for all Amazon API exceptions."""
+    def __init__(self, message: str):
+        super().__init__()
+        self.message = message
 
-    def __str__(self):
-        return '%s: %s' % (self.status, self.reason)
+    def __str__(self) -> str:
+        return '%s' % self.message
+
+
+class InvalidArgumentException(AmazonException):
+    """Raised when arguments are not correct."""
+    pass
