@@ -1,6 +1,7 @@
 # Custom folders and files to ignore
 .vscode/
 .DS_Store
+secrets.py
 
 
 # Byte-compiled / optimized / DLL files
