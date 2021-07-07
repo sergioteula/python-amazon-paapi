@@ -8,7 +8,7 @@ from typing import Union
 
 def get_items_ids(items: Union[str, list[str]]) -> list[str]:
     if not isinstance(items, str) and not isinstance(items, list):
-        raise InvalidArgumentException('Invalid products argument, it should be a string or list of strings')
+        raise InvalidArgumentException('Invalid items argument, it should be a string or list of strings')
 
     if isinstance(items, str):
         items_ids = items.split(',')

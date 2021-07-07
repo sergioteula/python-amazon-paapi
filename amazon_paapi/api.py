@@ -90,38 +90,6 @@ class AmazonApi:
 
         return results
 
-
-    def get_product(self, product_id, condition='Any', merchant='All',
-                    async_req=False):
-        """Find product information for a specific product on Amazon.
-
-        Args:
-            product_id (str, list): One item ID like ASIN or product URL.
-            condition (str, optional): Specify the product condition.
-                Allowed values: Any, Collectible, New, Refurbished, Used.
-                Defaults to Any.
-            merchant (str, optional): Filters search results to return items
-                having at least one offer sold by target merchant. Allowed values:
-                All, Amazon. Defaults to All.
-            async_req (bool, optional): Specify if a thread should be created to
-                run the request. Defaults to False.
-
-        Returns:
-            instance: An instance containing all the available information
-                for the product or None if no results.
-        """
-        if isinstance(product_id, list):
-            product_id = product_id[0]
-        if isinstance(product_id, str):
-            product_id = product_id.split(',')[0]
-
-        product = self.get_products(product_id, condition=condition, merchant=merchant,
-                                    async_req=async_req)
-        if product:
-            return product[0]
-        else:
-            return None
-
     def search_products(self, item_count=10, item_page=1, items_per_page=10, keywords=None,
                         actor=None, artist=None, author=None, brand=None, title=None,
                         availability='Available', browse_node=None, condition='Any', delivery=None,
