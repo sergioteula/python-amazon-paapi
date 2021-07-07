@@ -16,7 +16,7 @@ from .sdk.rest import ApiException
 from . import models
 from .helpers.arguments import get_items_ids
 from .exceptions import AmazonException, InvalidArgumentException, MalformedRequestException
-from .helpers.parser import parse_product, AmazonBrowseNode, parse_browsenode
+from .helpers.parser import get_parsed_item, AmazonBrowseNode, parse_browsenode
 from .helpers.generators import get_list_chunks
 from .tools import get_asin
 
@@ -84,9 +84,7 @@ class AmazonApi:
             request = get_items_request(self, asin_chunk, **kwargs)
             self._throttle()
             items_response = get_items_response(self, request)
-
-            for item in items_response:
-                results.append(parse_product(item))
+            results.extend(items_response)
 
         return results
 
@@ -209,7 +207,7 @@ class AmazonApi:
                 if response.search_result is not None:
                     if response.search_result.items is not None:
                         for item in response.search_result.items:
-                            results.append(parse_product(item))
+                            results.append(get_parsed_item(item))
                             if len(results) >= item_count:
                                 break
                         if len(response.search_result.items) < items_per_page:
@@ -303,7 +301,7 @@ class AmazonApi:
                 if response.variations_result is not None:
                     if response.variations_result.items is not None:
                         for item in response.variations_result.items:
-                            results.append(parse_product(item))
+                            results.append(get_parsed_item(item))
                             if len(results) >= item_count:
                                 break
                         if len(response.variations_result.items) < items_per_page:
