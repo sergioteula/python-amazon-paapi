@@ -11,7 +11,7 @@ import inspect
 
 def get_items_request(self, asin_chunk, **kwargs):
     try:
-        return GetItemsRequest(resources=_get_request_resources(),
+        return GetItemsRequest(resources=_get_items_request_resources(),
                                partner_type=PartnerType.ASSOCIATES,
                                marketplace=self._marketplace,
                                partner_tag=self._tag,
@@ -21,7 +21,7 @@ def get_items_request(self, asin_chunk, **kwargs):
         raise MalformedRequestException('Parameters for get_items request are not correct')
 
 
-def _get_request_resources():
+def _get_items_request_resources():
     resources = inspect.getmembers(GetItemsResource, lambda a:not(inspect.isroutine(a)))
     resources = [x[-1] for x in resources if isinstance(x[-1], str) and x[0][0:2] != '__']
     return resources
