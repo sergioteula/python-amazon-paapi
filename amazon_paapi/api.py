@@ -47,9 +47,9 @@ class AmazonApi:
         self._last_query_time = time.time() - throttling
 
         try:
-            self._host = 'webservices.amazon.' + constants.DOMAINS[country]
-            self._region = constants.REGIONS[country]
-            self._marketplace = 'www.amazon.' + constants.DOMAINS[country]
+            self._host = 'webservices.amazon.' + constants._DOMAINS[country]
+            self._region = constants._REGIONS[country]
+            self._marketplace = 'www.amazon.' + constants._DOMAINS[country]
         except KeyError:
             raise InvalidArgumentException('Country code is not correct')
 
