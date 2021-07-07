@@ -7,14 +7,13 @@ an easier way.
 
 from amazon_paapi.helpers.requests import get_items_request, get_items_response
 from .sdk.api.default_api import DefaultApi
-from .sdk.models.get_items_request import GetItemsRequest
 from .sdk.models.search_items_request import SearchItemsRequest
 from .sdk.models.get_variations_request import GetVariationsRequest
 from .sdk.models.get_browse_nodes_request import GetBrowseNodesRequest
 from .sdk.models.partner_type import PartnerType
 from .sdk.rest import ApiException
 
-from . import constants
+from . import models
 from .helpers.arguments import get_items_ids
 from .exceptions import AmazonException, InvalidArgumentException, MalformedRequestException
 from .helpers.parser import parse_product, AmazonBrowseNode, parse_browsenode
@@ -38,7 +37,7 @@ class AmazonApi:
             reaching Amazon limits. Defaults to 1 second.
     """
 
-    def __init__(self, key: str, secret: str, tag: str, country: constants.Country, throttling: float = 1, **kwargs):
+    def __init__(self, key: str, secret: str, tag: str, country: models.Country, throttling: float = 1, **kwargs):
         self._key = key
         self._secret = secret
         self._tag = tag
@@ -47,9 +46,9 @@ class AmazonApi:
         self._last_query_time = time.time() - throttling
 
         try:
-            self._host = 'webservices.amazon.' + constants._DOMAINS[country]
-            self._region = constants._REGIONS[country]
-            self._marketplace = 'www.amazon.' + constants._DOMAINS[country]
+            self._host = 'webservices.amazon.' + models._DOMAINS[country]
+            self._region = models._REGIONS[country]
+            self._marketplace = 'www.amazon.' + models._DOMAINS[country]
         except KeyError:
             raise InvalidArgumentException('Country code is not correct')
 
@@ -197,7 +196,7 @@ class AmazonApi:
                     availability=availability,
                     brand=brand,
                     browse_node_id=browse_node,
-                    condition=constants.CONDITION[condition],
+                    condition=models.CONDITION[condition],
                     delivery_flags=delivery,
                     item_count=items_per_page,
                     item_page=item_page,
@@ -208,7 +207,7 @@ class AmazonApi:
                     min_reviews_rating=min_rating,
                     min_saving_percent=min_discount,
                     offer_count=1,
-                    resources=constants.SEARCH_RESOURCES,
+                    resources=models.SEARCH_RESOURCES,
                     search_index=search_index,
                     sort_by=sort_by,
                     title=title)
@@ -299,12 +298,12 @@ class AmazonApi:
                     partner_type=PartnerType.ASSOCIATES,
                     marketplace=self._marketplace,
                     asin=get_asin(asin),
-                    condition=constants.CONDITION[condition],
+                    condition=models.CONDITION[condition],
                     merchant=merchant,
                     offer_count=1,
                     variation_count=items_per_page,
                     variation_page=item_page,
-                    resources=constants.VARIATION_RESOURCES)
+                    resources=models.VARIATION_RESOURCES)
             except KeyError:
                 raise AmazonException('KeyError', 'Invalid condition value')
             except Exception as e:
@@ -371,7 +370,7 @@ class AmazonApi:
                 marketplace=self._marketplace,
                 browse_node_ids=browse_nodes,
                 languages_of_preference=None,
-                resources=constants.BROWSE_RESOURCES)
+                resources=models.BROWSE_RESOURCES)
         except ValueError as e:
             raise AmazonException("ValueError", e)
 
