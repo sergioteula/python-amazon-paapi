@@ -14,3 +14,8 @@ class AmazonException(Exception):
 class InvalidArgumentException(AmazonException):
     """Raised when arguments are not correct."""
     pass
+
+
+class AsinNotFoundException(AmazonException):
+    """Raised if the ASIN for an item is not found."""
+    pass
