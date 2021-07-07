@@ -24,7 +24,7 @@ class Country(object):
 
 
 """Available regions for the Amazon API."""
-_REGIONS = {
+REGIONS = {
     'AU': 'us-west-2',
     'BR': 'us-east-1',
     'CA': 'us-east-1',
@@ -47,7 +47,7 @@ _REGIONS = {
 }
 
 """Domains for each region on the Amazon API."""
-_DOMAINS = {
+DOMAINS = {
     'AU': 'com.au',
     'BR': 'com.br',
     'CA': 'ca',

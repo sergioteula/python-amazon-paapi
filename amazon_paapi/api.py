@@ -46,27 +46,35 @@ class AmazonApi:
         self._last_query_time = time.time() - throttling
 
         try:
-            self._host = 'webservices.amazon.' + models._DOMAINS[country]
-            self._region = models._REGIONS[country]
-            self._marketplace = 'www.amazon.' + models._DOMAINS[country]
+            self._host = 'webservices.amazon.' + models.DOMAINS[country]
+            self._region = models.REGIONS[country]
+            self._marketplace = 'www.amazon.' + models.DOMAINS[country]
         except KeyError:
             raise InvalidArgumentException('Country code is not correct')
 
         self._api = DefaultApi(key, secret, self._host, self._region)
 
     def get_items(self, items: Union[str, list[str]], **kwargs) -> list:
-        """Find product information for multiple products on Amazon.
+        """Get items information from Amazon.
+        Full official documentation [here](https://webservices.amazon.com/paapi5/documentation/get-items.html#ItemLookup-rp).
 
         Args:
-            items (str | list[str]): One or more item IDs like ASIN or product URL. Use a string
+            items (str | list[str]): One or more items using ASIN or product URL. Use a string
                 separated by comma or a list of strings.
-            condition (str, optional): Specify the product condition. Allowed values are
-                Any, Collectible, New, Refurbished and Used. Defaults to Any.
+            condition (str, optional): The condition parameter filters offers by condition type.
+                Available values in models.Condition. Defaults to Any.
+            currency_of_preference (str, optional): Currency of preference in which the prices
+                information should be returned in response. By default the prices are returned
+                in the default currency of the marketplace. Expected currency code format is
+                ISO 4217.
+            languages_of_preference (list[str], optional): Languages in order of preference in
+                which the item information should be returned in response. By default the item
+                information is returned in the default language of the marketplace.
             merchant (str, optional): Filters search results to return items having at least one
-                offer sold by the target merchant. Allowed values are All and Amazon. Defaults to All.
+                offer sold by target merchant. Available values in models.Merchant. Defaults to All.
 
         Returns:
-            list: A list containing 1 instance for each product or None if no results.
+            list: A list of items.
         """
 
         items_ids = get_items_ids(items)
