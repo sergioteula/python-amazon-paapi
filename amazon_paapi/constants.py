@@ -1,13 +1,11 @@
 """Module containing all the constants."""
 
-from .sdk.models.get_items_resource import GetItemsResource
 from .sdk.models.search_items_resource import SearchItemsResource
 from .sdk.models.get_variations_resource import GetVariationsResource
 from .sdk.models.get_browse_nodes_resource import GetBrowseNodesResource
-from .sdk.models.condition import Condition
 
 
-class COUNTRY(object):
+class Country(object):
     AU = 'AU'
     BR = 'BR'
     CA = 'CA'
@@ -74,73 +72,6 @@ _DOMAINS = {
     'UK': 'co.uk',
     'US': 'com',
 }
-
-"""Condition values."""
-CONDITION = {
-    'Any': Condition.ANY,
-    'Collectible': Condition.COLLECTIBLE,
-    'New': Condition.NEW,
-    'Refurbished': Condition.REFURBISHED,
-    'Used': Condition.USED
-}
-
-"""Product resources to get from Amazon API."""
-PRODUCT_RESOURCES = [
-    GetItemsResource.BROWSENODEINFO_BROWSENODES,
-    GetItemsResource.BROWSENODEINFO_BROWSENODES_ANCESTOR,
-    GetItemsResource.BROWSENODEINFO_BROWSENODES_SALESRANK,
-    GetItemsResource.BROWSENODEINFO_WEBSITESALESRANK,
-    GetItemsResource.IMAGES_PRIMARY_SMALL,
-    GetItemsResource.IMAGES_PRIMARY_MEDIUM,
-    GetItemsResource.IMAGES_PRIMARY_LARGE,
-    GetItemsResource.IMAGES_VARIANTS_SMALL,
-    GetItemsResource.IMAGES_VARIANTS_MEDIUM,
-    GetItemsResource.IMAGES_VARIANTS_LARGE,
-    GetItemsResource.ITEMINFO_BYLINEINFO,
-    GetItemsResource.ITEMINFO_CONTENTINFO,
-    GetItemsResource.ITEMINFO_CONTENTRATING,
-    GetItemsResource.ITEMINFO_CLASSIFICATIONS,
-    GetItemsResource.ITEMINFO_EXTERNALIDS,
-    GetItemsResource.ITEMINFO_FEATURES,
-    GetItemsResource.ITEMINFO_MANUFACTUREINFO,
-    GetItemsResource.ITEMINFO_PRODUCTINFO,
-    GetItemsResource.ITEMINFO_TECHNICALINFO,
-    GetItemsResource.ITEMINFO_TITLE,
-    GetItemsResource.ITEMINFO_TRADEININFO,
-    GetItemsResource.OFFERS_LISTINGS_AVAILABILITY_MAXORDERQUANTITY,
-    GetItemsResource.OFFERS_LISTINGS_AVAILABILITY_MESSAGE,
-    GetItemsResource.OFFERS_LISTINGS_AVAILABILITY_MINORDERQUANTITY,
-    GetItemsResource.OFFERS_LISTINGS_AVAILABILITY_TYPE,
-    GetItemsResource.OFFERS_LISTINGS_CONDITION,
-    GetItemsResource.OFFERS_LISTINGS_CONDITION_SUBCONDITION,
-    GetItemsResource.OFFERS_LISTINGS_DELIVERYINFO_ISAMAZONFULFILLED,
-    GetItemsResource.OFFERS_LISTINGS_DELIVERYINFO_ISFREESHIPPINGELIGIBLE,
-    GetItemsResource.OFFERS_LISTINGS_DELIVERYINFO_ISPRIMEELIGIBLE,
-    GetItemsResource.OFFERS_LISTINGS_DELIVERYINFO_SHIPPINGCHARGES,
-    GetItemsResource.OFFERS_LISTINGS_ISBUYBOXWINNER,
-    GetItemsResource.OFFERS_LISTINGS_LOYALTYPOINTS_POINTS,
-    GetItemsResource.OFFERS_LISTINGS_MERCHANTINFO,
-    GetItemsResource.OFFERS_LISTINGS_PRICE,
-    GetItemsResource.OFFERS_LISTINGS_PROGRAMELIGIBILITY_ISPRIMEEXCLUSIVE,
-    GetItemsResource.OFFERS_LISTINGS_PROGRAMELIGIBILITY_ISPRIMEPANTRY,
-    GetItemsResource.OFFERS_LISTINGS_PROMOTIONS,
-    GetItemsResource.OFFERS_LISTINGS_SAVINGBASIS,
-    GetItemsResource.OFFERS_SUMMARIES_HIGHESTPRICE,
-    GetItemsResource.OFFERS_SUMMARIES_LOWESTPRICE,
-    GetItemsResource.OFFERS_SUMMARIES_OFFERCOUNT,
-    GetItemsResource.PARENTASIN,
-    GetItemsResource.RENTALOFFERS_LISTINGS_AVAILABILITY_MAXORDERQUANTITY,
-    GetItemsResource.RENTALOFFERS_LISTINGS_AVAILABILITY_MESSAGE,
-    GetItemsResource.RENTALOFFERS_LISTINGS_AVAILABILITY_MINORDERQUANTITY,
-    GetItemsResource.RENTALOFFERS_LISTINGS_AVAILABILITY_TYPE,
-    GetItemsResource.RENTALOFFERS_LISTINGS_BASEPRICE,
-    GetItemsResource.RENTALOFFERS_LISTINGS_CONDITION,
-    GetItemsResource.RENTALOFFERS_LISTINGS_CONDITION_SUBCONDITION,
-    GetItemsResource.RENTALOFFERS_LISTINGS_DELIVERYINFO_ISAMAZONFULFILLED,
-    GetItemsResource.RENTALOFFERS_LISTINGS_DELIVERYINFO_ISFREESHIPPINGELIGIBLE,
-    GetItemsResource.RENTALOFFERS_LISTINGS_DELIVERYINFO_ISPRIMEELIGIBLE,
-    GetItemsResource.RENTALOFFERS_LISTINGS_DELIVERYINFO_SHIPPINGCHARGES,
-    GetItemsResource.RENTALOFFERS_LISTINGS_MERCHANTINFO]
 
 """Search resources to get from Amazon API."""
 SEARCH_RESOURCES = [

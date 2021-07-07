@@ -38,7 +38,7 @@ class AmazonApi:
             reaching Amazon limits. Defaults to 1 second.
     """
 
-    def __init__(self, key: str, secret: str, tag: str, country: str, throttling: float = 1, **kwargs):
+    def __init__(self, key: str, secret: str, tag: str, country: constants.Country, throttling: float = 1, **kwargs):
         self._key = key
         self._secret = secret
         self._tag = tag
