@@ -6,8 +6,31 @@ from .sdk.models.get_variations_resource import GetVariationsResource
 from .sdk.models.get_browse_nodes_resource import GetBrowseNodesResource
 from .sdk.models.condition import Condition
 
+
+class COUNTRY(object):
+    AU = 'AU'
+    BR = 'BR'
+    CA = 'CA'
+    FR = 'FR'
+    DE = 'DE'
+    IN = 'IN'
+    IT = 'IT'
+    JP = 'JP'
+    MX = 'MX'
+    NL = 'NL'
+    PL = 'PL'
+    SG = 'SG'
+    SA = 'SA'
+    ES = 'ES'
+    SE = 'SE'
+    TR = 'TR'
+    AE = 'AE'
+    UK = 'UK'
+    US = 'US'
+
+
 """Available regions for the Amazon API."""
-REGIONS = {
+_REGIONS = {
     'AU': 'us-west-2',
     'BR': 'us-east-1',
     'CA': 'us-east-1',
@@ -30,7 +53,7 @@ REGIONS = {
 }
 
 """Domains for each region on the Amazon API."""
-DOMAINS = {
+_DOMAINS = {
     'AU': 'com.au',
     'BR': 'com.br',
     'CA': 'ca',
