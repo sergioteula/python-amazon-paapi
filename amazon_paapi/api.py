@@ -5,6 +5,7 @@ This module allows to get product information from Amazon using the official API
 an easier way.
 """
 
+from amazon_paapi.helpers.requests import get_items_request, get_items_response
 from .sdk.api.default_api import DefaultApi
 from .sdk.models.get_items_request import GetItemsRequest
 from .sdk.models.search_items_request import SearchItemsRequest
@@ -14,9 +15,11 @@ from .sdk.models.partner_type import PartnerType
 from .sdk.rest import ApiException
 
 from . import constants
-from .exceptions import AmazonException, InvalidArgumentException
-from .parse import parse_product, AmazonBrowseNode, parse_browsenode
-from .tools import get_asin, chunks
+from .helpers.arguments import get_items_ids
+from .exceptions import AmazonException, InvalidArgumentException, MalformedRequestException
+from .helpers.parser import parse_product, AmazonBrowseNode, parse_browsenode
+from .helpers.generators import get_list_chunks
+from .tools import get_asin
 
 from typing import Union
 import time
@@ -52,11 +55,11 @@ class AmazonApi:
 
         self._api = DefaultApi(key, secret, self._host, self._region)
 
-    def get_products(self, product_ids: Union[str, list], condition='Any', merchant='All', **kwargs):
+    def get_items(self, items: Union[str, list[str]], **kwargs) -> list:
         """Find product information for multiple products on Amazon.
 
         Args:
-            product_ids (str|list): One or more item IDs like ASIN or product URL. Use a string
+            items (str | list[str]): One or more item IDs like ASIN or product URL. Use a string
                 separated by comma or a list of strings.
             condition (str, optional): Specify the product condition. Allowed values are
                 Any, Collectible, New, Refurbished and Used. Defaults to Any.
@@ -67,55 +70,19 @@ class AmazonApi:
             list: A list containing 1 instance for each product or None if no results.
         """
 
-        # Clean up input data and remove 10 items limit from Amazon API
-        if isinstance(product_ids, str):
-            product_ids = [x.strip() for x in product_ids.split(',')]
-        elif not isinstance(product_ids, list):
-            raise AmazonException(
-                'TypeError', 'Arg product_ids should be a list or string')
-        asin_full_list = list(set([get_asin(x) for x in product_ids]))
-        asin_full_list = list(chunks(asin_full_list, 10))
-
+        items_ids = get_items_ids(items)
         results = []
-        for asin_list in asin_full_list:
-            try:
-                request = GetItemsRequest(partner_tag=self._tag,
-                                          partner_type=PartnerType.ASSOCIATES,
-                                          marketplace=self._marketplace,
-                                          merchant=merchant,
-                                          condition=constants.CONDITION[condition],
-                                          item_ids=asin_list,
-                                          resources=constants.PRODUCT_RESOURCES)
-            except KeyError:
-                raise AmazonException('KeyError', 'Invalid condition value')
-            except Exception as e:
-                raise AmazonException('GetItemsError', e)
 
-            for x in range(3):
-                try:
-                    # Send the request and create results
-                    self._throttle()
-                    if async_req:
-                        thread = self._api.get_items(request, async_req=True)
-                        response = thread.get()
-                    else:
-                        response = self._api.get_items(request)
-                    break
-                except ApiException as e:
-                    if x == 2:
-                        raise AmazonException('ApiException', e)
-            try:
-                if response.items_result is not None:
-                    if len(response.items_result.items) > 0:
-                        for item in response.items_result.items:
-                            results.append(parse_product(item))
-            except Exception as e:
-                raise AmazonException('ResponseError', e)
+        for asin_chunk in get_list_chunks(items_ids, 10):
+            request = get_items_request(self, asin_chunk, **kwargs)
+            self._throttle()
+            items_response = get_items_response(self, request)
 
-        if results:
-            return results
-        else:
-            return None
+            for item in items_response:
+                results.append(parse_product(item))
+
+        return results
+
 
     def get_product(self, product_id, condition='Any', merchant='All',
                     async_req=False):
