@@ -213,3 +213,10 @@ class ApiItem(models.Item):
     images: ApiImages
     offers: ApiOffers
     browse_node_info: ApiBrowseNodeInfo
+    asin: str
+    detail_page_url: str
+    parent_asin: str
+    score: float
+    rental_offers: models.RentalOffers
+    customer_reviews: models.CustomerReviews
+    variation_attributes: list[models.VariationAttribute]
