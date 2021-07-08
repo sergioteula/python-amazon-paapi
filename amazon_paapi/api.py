@@ -59,7 +59,7 @@ class AmazonApi:
         merchant: models.Merchant = None,
         currency_of_preference: str = None,
         languages_of_preference: list[str] = None,
-        **kwargs) -> list[models.AmazonItem]:
+        **kwargs) -> list[models.ApiItem]:
         """Get items information from Amazon.
         Full official documentation [here](https://webservices.amazon.com/paapi5/documentation/get-items.html#ItemLookup-rp).
 
