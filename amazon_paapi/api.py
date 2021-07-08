@@ -5,7 +5,6 @@ This module allows to get product information from Amazon using the official API
 an easier way.
 """
 
-from amazon_paapi.helpers.requests import get_items_request, get_items_response
 from .sdk.api.default_api import DefaultApi
 from .sdk.models.search_items_request import SearchItemsRequest
 from .sdk.models.get_variations_request import GetVariationsRequest
@@ -15,8 +14,9 @@ from .sdk.rest import ApiException
 
 from . import models
 from .helpers.arguments import get_items_ids
-from .exceptions import AmazonException, InvalidArgumentException
+from .helpers.requests import get_items_request, get_items_response
 from .helpers.generators import get_list_chunks
+from .exceptions import AmazonException, InvalidArgumentException
 from .tools import get_asin
 
 from typing import Union
