@@ -1,6 +1,6 @@
 """Some useful tools."""
 
-from amazon_paapi.exceptions import AsinNotFoundException
+from ..errors import AsinNotFoundException
 import re
 
 

@@ -2,7 +2,7 @@
 
 
 from ..tools import get_asin
-from ..exceptions import InvalidArgumentException
+from ..errors import InvalidArgumentException
 from typing import Union
 
 
