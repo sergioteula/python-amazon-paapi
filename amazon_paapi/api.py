@@ -59,7 +59,7 @@ class AmazonApi:
         merchant: models.Merchant = None,
         currency_of_preference: str = None,
         languages_of_preference: list[str] = None,
-        **kwargs) -> list[models.Item]:
+        **kwargs) -> list[models.AmazonItem]:
         """Get items information from Amazon.
         Full official documentation [here](https://webservices.amazon.com/paapi5/documentation/get-items.html#ItemLookup-rp).
 
@@ -80,7 +80,7 @@ class AmazonApi:
             kwargs (any): Any other parameters supported by Amazon API for the GetItems operation.
 
         Returns:
-            list[Item]: A list of items with Amazon information.
+            list[AmazonItem]: A list of items with Amazon information.
         """
 
         kwargs.update({
