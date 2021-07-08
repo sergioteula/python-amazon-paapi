@@ -190,8 +190,22 @@ class ApiOffers(models.Offers):
     listings: list[ApiListings]
 
 """Browse node info model"""
+class ApiBrowseNode(models.BrowseNode):
+    ancestor: str
+    context_free_name: str
+    display_name: str
+    id: str
+    is_root: str
+    sales_rank: str
+
+class ApiWebsiteSalesRank(models.WebsiteSalesRank):
+    context_free_name: str
+    display_name: str
+    sales_rank: str
+
 class ApiBrowseNodeInfo(models.BrowseNodeInfo):
-    pass
+    browse_nodes: list[ApiBrowseNode]
+    website_sales_rank: ApiWebsiteSalesRank
 
 """Main model"""
 class ApiItem(models.Item):
