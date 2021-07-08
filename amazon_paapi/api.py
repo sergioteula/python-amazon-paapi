@@ -80,7 +80,7 @@ class AmazonApi:
             kwargs (any): Any other parameters supported by Amazon API for the GetItems operation.
 
         Returns:
-            list[AmazonItem]: A list of items with Amazon information.
+            list[ApiItem]: A list of items with Amazon information.
         """
 
         kwargs.update({
