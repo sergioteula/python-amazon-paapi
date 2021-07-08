@@ -15,8 +15,7 @@ from .sdk.rest import ApiException
 
 from . import models
 from .helpers.arguments import get_items_ids
-from .exceptions import AmazonException, InvalidArgumentException, MalformedRequestException
-from .helpers.parser import get_parsed_item, AmazonBrowseNode, parse_browsenode
+from .exceptions import AmazonException, InvalidArgumentException
 from .helpers.generators import get_list_chunks
 from .tools import get_asin
 
@@ -31,8 +30,7 @@ class AmazonApi:
         key (str): Your API key.
         secret (str): Your API secret.
         tag (str): Your affiliate tracking id, used to create the affiliate link.
-        country (str): Country code for your affiliate account. Compatible with
-            AU, BR, CA, FR, DE, IN, IT, JP, MX, NL, PL, SG, SA, ES, TR, AE, UK, US, SE.
+        country (str): Country code for your affiliate account. Available values in models.Country.
         throttling (float, optional): Wait time in seconds between API calls. Use it to avoid
             reaching Amazon limits. Defaults to 1 second.
     """
@@ -54,7 +52,14 @@ class AmazonApi:
 
         self._api = DefaultApi(key, secret, self._host, self._region)
 
-    def get_items(self, items: Union[str, list[str]], **kwargs) -> list:
+
+    def get_items(self,
+        items: Union[str, list[str]],
+        condition: models.Condition = None,
+        merchant: models.Merchant = None,
+        currency_of_preference: str = None,
+        languages_of_preference: list[str] = None,
+        **kwargs) -> list[models.Item]:
         """Get items information from Amazon.
         Full official documentation [here](https://webservices.amazon.com/paapi5/documentation/get-items.html#ItemLookup-rp).
 
@@ -63,6 +68,8 @@ class AmazonApi:
                 separated by comma or a list of strings.
             condition (str, optional): The condition parameter filters offers by condition type.
                 Available values in models.Condition. Defaults to Any.
+            merchant (str, optional): Filters search results to return items having at least one
+                offer sold by target merchant. Available values in models.Merchant. Defaults to All.
             currency_of_preference (str, optional): Currency of preference in which the prices
                 information should be returned in response. By default the prices are returned
                 in the default currency of the marketplace. Expected currency code format is
@@ -70,12 +77,18 @@ class AmazonApi:
             languages_of_preference (list[str], optional): Languages in order of preference in
                 which the item information should be returned in response. By default the item
                 information is returned in the default language of the marketplace.
-            merchant (str, optional): Filters search results to return items having at least one
-                offer sold by target merchant. Available values in models.Merchant. Defaults to All.
+            kwargs (any): Any other parameters supported by Amazon API for the GetItems operation.
 
         Returns:
-            list: A list of items.
+            list[Item]: A list of items with Amazon information.
         """
+
+        kwargs.update({
+            'condition': condition,
+            'merchant': merchant,
+            'currency_of_preference': currency_of_preference,
+            'languages_of_preference': languages_of_preference
+            })
 
         items_ids = get_items_ids(items)
         results = []
@@ -88,7 +101,7 @@ class AmazonApi:
 
         return results
 
-    def search_products(self, item_count=10, item_page=1, items_per_page=10, keywords=None,
+    def search_items(self, item_count=10, item_page=1, items_per_page=10, keywords=None,
                         actor=None, artist=None, author=None, brand=None, title=None,
                         availability='Available', browse_node=None, condition='Any', delivery=None,
                         max_price=None, min_price=None, min_rating=None, min_discount=None,
