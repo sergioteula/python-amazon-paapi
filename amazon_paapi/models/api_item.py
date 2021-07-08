@@ -28,6 +28,12 @@ class ApiSingleBooleanValuedAttribute(ApiLabelLocale, models.SingleBooleanValued
 class ApiSingleIntegerValuedAttribute(ApiLabelLocale, models.SingleIntegerValuedAttribute):
     display_value: float
 
+class ApiPrice:
+    amount: float
+    currency: str
+    price_per_unit: float
+    display_amount: str
+
 """Image models"""
 class ApiImageSize(models.ImageSize):
     url: str
@@ -142,17 +148,46 @@ class ApiOfferDeliveryInfo(models.OfferDeliveryInfo):
     is_free_shipping_eligible: bool
     is_prime_eligible: bool
 
+class ApiOfferLoyaltyPoints(models.OfferLoyaltyPoints):
+    points: int
+
+class ApiOfferMerchantInfo(models.OfferMerchantInfo):
+    default_shipping_country: str
+    feedback_count: int
+    feedback_rating: float
+    id: str
+    name: str
+
+class ApiOfferSavings(ApiPrice, models.OfferSavings):
+    percentage: float
+
+class ApiOfferPrice(ApiPrice, models.OfferPrice):
+    savings: models.OfferSavings
+
+class ApiOfferProgramEligibility(models.OfferProgramEligibility):
+    is_prime_exclusive: bool
+    is_prime_pantry: bool
+
+class ApiPromotion(ApiPrice, models.OfferPromotion):
+    type: str
+    discount_percent: float
+
 class ApiListings(models.OfferListing):
     availability: ApiOfferAvailability
     condition: ApiOfferCondition
     delivery_info: ApiOfferDeliveryInfo
     id: str
     is_buy_box_winner: bool
-
+    loyalty_points: ApiOfferLoyaltyPoints
+    merchant_info: ApiOfferMerchantInfo
+    price: ApiOfferPrice
+    program_eligibility: ApiOfferProgramEligibility
+    promotions: list[ApiPromotion]
+    saving_basis: ApiPrice
+    violates_map: bool
 
 class ApiOffers(models.Offers):
     listings: list[ApiListings]
-
 
 """Browse node info model"""
 class ApiBrowseNodeInfo(models.BrowseNodeInfo):
