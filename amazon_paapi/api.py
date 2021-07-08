@@ -93,7 +93,7 @@ class AmazonApi:
         items_ids = get_items_ids(items)
         results = []
 
-        for asin_chunk in get_list_chunks(items_ids, 10):
+        for asin_chunk in get_list_chunks(items_ids, chunk_size=10):
             request = get_items_request(self, asin_chunk, **kwargs)
             self._throttle()
             items_response = get_items_response(self, request)
@@ -101,11 +101,31 @@ class AmazonApi:
 
         return results
 
-    def search_items(self, item_count=10, item_page=1, items_per_page=10, keywords=None,
-                        actor=None, artist=None, author=None, brand=None, title=None,
-                        availability='Available', browse_node=None, condition='Any', delivery=None,
-                        max_price=None, min_price=None, min_rating=None, min_discount=None,
-                        merchant='All', search_index='All', sort_by=None, async_req=False):
+#TODO Ver paginación
+
+    def search_items(self,
+        actor: str = None,
+        artist: str = None,
+        author: str = None,
+        availability: str = None,
+        brand: str = None,
+        browse_node_id: str = None,
+        condition: str = None,
+        currency_of_preference: str = None,
+        delivery_flags: list[str] = None,
+        item_count: int = None,
+        item_page: int = None,
+        keywords: str = None,
+        languages_of_preference: list[str] = None,
+        max_price: int = None,
+        merchant: str = None,
+        min_price: int = None,
+        min_reviews_rating: int = None,
+        min_saving_percent: int = None,
+        search_index: str = None,
+        sort_by: str = None,
+        title: str = None,
+        **kwargs) -> list[models.ApiItem]:
         """Search products on Amazon using different parameters. At least one of the
         following parameters should be used: keywords, actor, artist, author, brand,
         title.
