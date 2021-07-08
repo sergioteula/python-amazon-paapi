@@ -6,7 +6,7 @@ from ..sdk.models.get_items_resource import GetItemsResource
 from ..sdk.rest import ApiException
 from ..sdk.models.partner_type import PartnerType
 from ..sdk.models.get_items_request import GetItemsRequest
-from ..exceptions import ApiRequestException, ItemsNotFoudException, MalformedRequestException
+from ..errors import ApiRequestException, ItemsNotFoudException, MalformedRequestException
 import inspect
 
 

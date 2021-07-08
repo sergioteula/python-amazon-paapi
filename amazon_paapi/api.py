@@ -16,7 +16,7 @@ from . import models
 from .helpers.arguments import get_items_ids
 from .helpers.requests import get_items_request, get_items_response
 from .helpers.generators import get_list_chunks
-from .exceptions import AmazonException, InvalidArgumentException
+from .errors import AmazonException, InvalidArgumentException
 from .tools import get_asin
 
 from typing import Union
