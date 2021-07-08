@@ -114,14 +114,38 @@ class ApiItemInfo(models.ItemInfo):
     trade_in_info: ApiTradeInInfo
 
 """Offers model"""
-class ApiOfferCondition(models.OfferCondition):
-    sub_condition: models.OfferSubCondition
-    condition_note: models.OfferConditionNote
+class ApiOfferAvailability(models.OfferAvailability):
+    max_order_quantity: int
+    message: str
+    min_order_quantity: int
+    type: str
+
+class ApiOfferConditionInfo:
+    display_value: str
+    label: str
+    locale: str
+    value: str
+
+class ApiOfferSubCondition(ApiOfferConditionInfo, models.OfferSubCondition):
+    pass
+
+class ApiOfferConditionNote(models.OfferConditionNote):
+    locale: str
+    value: str
+
+class ApiOfferCondition(ApiOfferConditionInfo, models.OfferCondition):
+    sub_condition: ApiOfferSubCondition
+    condition_note: ApiOfferConditionNote
+
+class ApiOfferDeliveryInfo(models.OfferDeliveryInfo):
+    is_amazon_fulfilled: bool
+    is_free_shipping_eligible: bool
+    is_prime_eligible: bool
 
 class ApiListings(models.OfferListing):
-    availability: models.Availability
+    availability: ApiOfferAvailability
     condition: ApiOfferCondition
-    delivery_info: models.OfferDeliveryInfo
+    delivery_info: ApiOfferDeliveryInfo
     id: str
     is_buy_box_winner: bool
 
