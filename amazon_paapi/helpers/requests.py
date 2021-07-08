@@ -28,7 +28,7 @@ def _get_items_request_resources() -> list[models.GetItemsResource]:
     return resources
 
 
-def get_items_response(self, request: models.GetItemsRequest) -> list[models.Item]:
+def get_items_response(self, request: models.GetItemsRequest) -> list[models.AmazonItem]:
     try:
         response = self._api.get_items(request)
     except ApiException as e:
