@@ -1,6 +1,3 @@
-"""Module containing all the models."""
-
-
 class Country(object):
     AU = 'AU'
     BR = 'BR'
