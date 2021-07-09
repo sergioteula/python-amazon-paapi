@@ -16,3 +16,24 @@ def get_items_ids(items: Union[str, list[str]]) -> list[str]:
 
     else:
         return [get_asin(x.strip()) for x in items]
+
+
+def check_search_args(**kwargs):
+    _check_search_mandatory_args(**kwargs)
+    _check_search_pagination_args(**kwargs)
+
+
+def _check_search_mandatory_args(**kwargs):
+    mandatory_args = [kwargs['keywords'], kwargs['actor'], kwargs['artist'],
+                      kwargs['author'],kwargs['brand'], kwargs['title']]
+    if all(arg is None for arg in mandatory_args):
+        error_message = ('At least one of the following args should be provided: '
+                         'keywords, actor, artist, author, brand or title.')
+        raise InvalidArgumentException(error_message)
+
+
+def _check_search_pagination_args(**kwargs):
+    pagination_args = [kwargs['item_count'], kwargs['item_page']]
+    if not all(1 <= arg <= 10 and isinstance(arg, int) for arg in pagination_args):
+        error_message = ('Args item_count and item_page should be integers between 1 and 10.')
+        raise InvalidArgumentException(error_message)

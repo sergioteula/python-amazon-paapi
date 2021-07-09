@@ -13,7 +13,7 @@ from .sdk.models.partner_type import PartnerType
 from .sdk.rest import ApiException
 
 from . import models
-from .helpers.arguments import get_items_ids
+from .helpers.arguments import check_search_args, get_items_ids
 from .helpers.requests import get_items_request, get_items_response
 from .helpers.generators import get_list_chunks
 from .errors import AmazonException, InvalidArgumentException
@@ -60,8 +60,8 @@ class AmazonApi:
         currency_of_preference: str = None,
         languages_of_preference: list[str] = None,
         **kwargs) -> list[models.ApiItem]:
+
         """Get items information from Amazon.
-        Full official documentation [here](https://webservices.amazon.com/paapi5/documentation/get-items.html#ItemLookup-rp).
 
         Args:
             items (str | list[str]): One or more items using ASIN or product URL. Use a string
@@ -101,21 +101,21 @@ class AmazonApi:
 
         return results
 
-#TODO Ver paginación
 
     def search_items(self,
+        item_count: int = None,
+        item_page: int = None,
         actor: str = None,
         artist: str = None,
         author: str = None,
-        availability: models.Availability = None,
         brand: str = None,
+        keywords: str = None,
+        title: str = None,
+        availability: models.Availability = None,
         browse_node_id: str = None,
         condition: models.Condition = None,
         currency_of_preference: str = None,
         delivery_flags: list[str] = None,
-        item_count: int = None,
-        item_page: int = None,
-        keywords: str = None,
         languages_of_preference: list[str] = None,
         max_price: int = None,
         merchant: models.Merchant = None,
@@ -124,7 +124,6 @@ class AmazonApi:
         min_saving_percent: int = None,
         search_index: str = None,
         sort_by: models.SortBy = None,
-        title: str = None,
         **kwargs) -> list[models.ApiItem]:
         """Search products on Amazon using different parameters. At least one of the
         following parameters should be used: keywords, actor, artist, author, brand,
@@ -178,19 +177,34 @@ class AmazonApi:
             list of instances: A list containing 1 instance for each product
                 or None if no results.
         """
-        if items_per_page > 10 or items_per_page < 1:
-            raise AmazonException(
-                'ValueError', 'Arg items_per_page should be between 1 and 10')
-        if item_count > 100 or item_count < 1:
-            raise AmazonException(
-                'ValueError', 'Arg item_count should be between 1 and 100')
-        if item_page < 1:
-            raise AmazonException(
-                'ValueError', 'Arg item_page should be 1 or higher')
-        if not keywords and not actor and not artist and not author and not brand and not title and not browse_node and not search_index:
-            raise AmazonException('ValueError', 'At least one of the following args must be '
-                                                'provided: keywords, actor, artist, author, brand, '
-                                                'title, browse_node, search_index')
+
+        kwargs.update({
+            'item_count': item_count,
+            'item_page': item_page,
+            'actor': actor,
+            'artist': artist,
+            'author': author,
+            'brand': brand,
+            'keywords': keywords,
+            'title': title,
+            'availability': availability,
+            'browse_node_id': browse_node_id,
+            'condition': condition,
+            'currency_of_preference': currency_of_preference,
+            'delivery_flags': delivery_flags,
+            'languages_of_preference': languages_of_preference,
+            'max_price': max_price,
+            'merchant': merchant,
+            'min_price': min_price,
+            'min_reviews_rating': min_reviews_rating,
+            'min_saving_percent': min_saving_percent,
+            'search_index': search_index,
+            'sort_by': sort_by,
+        })
+
+        check_search_args(**kwargs)
+
+
         results = []
         while len(results) < item_count:
             try:
