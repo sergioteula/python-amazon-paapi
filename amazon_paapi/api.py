@@ -68,10 +68,9 @@ class AmazonApi:
         Args:
             items (str | list[str]): One or more items using ASIN or product URL. Use a string
                 separated by comma or a list of strings.
-            condition (str, optional): The condition parameter filters offers by condition type.
-                Available values in models.Condition. Defaults to Any.
-            merchant (str, optional): Filters search results to return items having at least one
-                offer sold by target merchant. Available values in models.Merchant. Defaults to All.
+            condition (Condition, optional): Filters offers by condition type. Defaults to Any.
+            merchant (Merchant, optional): Filters search results to return items having at least one
+                offer sold by target merchant. Defaults to All.
             currency_of_preference (str, optional): Currency of preference in which the prices
                 information should be returned in response. By default the prices are returned
                 in the default currency of the marketplace. Expected currency code format is
@@ -119,65 +118,59 @@ class AmazonApi:
         currency_of_preference: str = None,
         delivery_flags: list[str] = None,
         languages_of_preference: list[str] = None,
-        max_price: int = None,
         merchant: models.Merchant = None,
+        max_price: int = None,
         min_price: int = None,
-        min_reviews_rating: int = None,
         min_saving_percent: int = None,
+        min_reviews_rating: int = None,
         search_index: str = None,
         sort_by: models.SortBy = None,
         **kwargs) -> list[models.ApiItem]:
-        """Search products on Amazon using different parameters. At least one of the
-        following parameters should be used: keywords, actor, artist, author, brand,
-        title.
+        """Searches for items on Amazon based on a search query. At least one of the following
+        parameters should be specified: keywords, actor, artist, author, brand or title.
 
         Args:
-            item_count (int, optional): The total number of products to get. Should be between
-                1 and 100. Defaults to 10.
-            item_page (int, optional): The page where the results start from. Should be between
-                1 and 10. Defaults to 1.
-            items_per_page (int, optional): Products on each page. Should be between
-                1 and 10. Defaults to 10.
-            keywords (str, optional): A word or phrase that describes an item.
+            item_count (int, optional): The number of items returned. Should be between 1 and 10.
+                Defaults to 10.
+            item_page (int, optional): The specific page of items to be returned from the available
+                results. Should be between 1 and 10. Defaults to 1.
             actor (str, optional): Actor name associated with the item.
             artist (str, optional): Artist name associated with the item.
             author (str, optional): Author name associated with the item.
             brand (str, optional): Brand name associated with the item.
+            keywords (str, optional): A word or phrase that describes an item.
             title (str, optional): Title associated with the item.
-            availability (str, optional): Filters available items on Amazon. Allowed values:
-            Available, IncludeOutOfStock. Defaults to Available.
-            browse_node (str, optional): A unique ID assigned by Amazon that
-                identifies a product category or subcategory.
-            condition (str, optional): The condition parameter filters offers by
-                condition type. Allowed values: Any, Collectible, New, Refurbished, Used.
-                Defaults to Any.
-            delivery (list, optional): The delivery flag filters items which
-                satisfy a certain delivery program promoted by the specific
-                Amazon Marketplace. Allowed values: AmazonGlobal, FreeShipping,
-                FulfilledByAmazon, Prime.
-            max_price (int, optional): Filters search results to items with at
-                least one offer price below the specified value.
-            min_price (int, optional): Filters search results to items with at
-                least one offer price above the specified value.
-            min_rating (int, optional): Filters search results to items with
-                customer review ratings above specified value.
-            min_discount (int, optional): Filters search results to items with
-                at least one offer having saving percentage above the specified
-                value.
-            merchant (str, optional): Filters search results to return items
-                having at least one offer sold by target merchant. Allowed values:
-                All, Amazon. Defaults to All.
-            search_index (str, optional): Indicates the product category to
-                search. Defaults to All.
-            sort_by (str, optional): The way in which items in the response
-                are sorted. Allowed values: AvgCustomerReviews, Featured,
-                NewestArrivals, Price:HighToLow, Price:LowToHigh, Relevance.
-            async_req (bool, optional): Specify if a thread should be created to
-                run the request. Defaults to False.
+            availability (Availability, optional): Filters available items on Amazon.
+                Defaults to Available.
+            browse_node_id (str, optional): A unique ID assigned by Amazon that identifies a product
+                category or subcategory.
+            condition (Condition, optional): Filters offers by condition type. Defaults to Any.
+            currency_of_preference (str, optional): Currency of preference in which the prices
+                information should be returned in response. By default the prices are returned
+                in the default currency of the marketplace. Expected currency code format is
+                ISO 4217.
+            delivery_flags (list[str]): Filters items which satisfy a certain delivery program.
+            languages_of_preference (list[str], optional): Languages in order of preference in
+                which the item information should be returned in response. By default the item
+                information is returned in the default language of the marketplace.
+            merchant (Merchant, optional): Filters search results to return items having at least one
+                offer sold by target merchant. Defaults to All.
+            max_price (int, optional): Filters search results to items with at least one offer price
+                below the specified value. Prices appear in lowest currency denomination.
+                For example, $31.41 should be passed as 3141 or 28.00€ should be 2800.
+            min_price (int, optional): Filters search results to items with at least one offer price
+                above the specified value. Prices appear in lowest currency denomination.
+                For example, $31.41 should be passed as 3141 or 28.00€ should be 2800.
+            min_saving_percent (int, optional): Filters search results to items with at least one
+                offer having saving percentage above the specified value. Value should be
+                positive integer less than 100.
+            min_reviews_rating (int, optional): Filters search results to items with customer review
+                ratings above specified value. Value should be positive integer less than 5.
+            search_index (str, optional): Indicates the product category to search. Defaults to All.
+            sort_by (SortBy, optional): The way in which items are sorted.
 
         Returns:
-            list of instances: A list containing 1 instance for each product
-                or None if no results.
+            list[ApiItem]: A list of items with Amazon information.
         """
 
         kwargs.update({
