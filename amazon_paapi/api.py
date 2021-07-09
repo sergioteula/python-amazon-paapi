@@ -6,14 +6,12 @@ an easier way.
 """
 
 from .sdk.api.default_api import DefaultApi
-from .sdk.models.search_items_request import SearchItemsRequest
-from .sdk.models.get_variations_request import GetVariationsRequest
 from .sdk.models.get_browse_nodes_request import GetBrowseNodesRequest
 from .sdk.models.partner_type import PartnerType
 from .sdk.rest import ApiException
 
 from . import models
-from .helpers.arguments import check_search_args, get_items_ids
+from .helpers.arguments import check_search_args, check_variations_args, get_items_ids
 from .helpers.requests import get_items_request, get_items_response, get_search_items_request, get_search_items_response
 from .helpers.generators import get_list_chunks
 from .errors import AmazonException, InvalidArgumentException
@@ -21,8 +19,6 @@ from .tools import get_asin
 
 from typing import Union
 import time
-
-from amazon_paapi.sdk.models import search_items_request
 
 
 class AmazonApi:
@@ -215,8 +211,14 @@ class AmazonApi:
         return get_search_items_response(self, request)
 
 
-    def get_variations(self, asin, item_count=10, item_page=1, items_per_page=10, condition='Any',
-                       merchant='All', async_req=False):
+    def get_variations(self,
+        asin: str,
+        variation_count: int = None,
+        variation_page: int = None,
+        condition: models.Condition = None,
+        currency_of_preference: str = None,
+        merchant: models.Merchant = None,
+        **kwargs) -> list[models.ApiItem]:
         """Returns a set of items that are the same product, but differ according to a
         consistent theme, for example size and color.
 
@@ -241,71 +243,86 @@ class AmazonApi:
             list of instances: A list containing 1 instance for each product
                 or None if no results.
         """
-        if items_per_page > 10 or items_per_page < 1:
-            raise AmazonException(
-                'ValueError', 'Arg items_per_page should be between 1 and 10')
-        if item_count > 100 or item_count < 1:
-            raise AmazonException(
-                'ValueError', 'Arg item_count should be between 1 and 100')
-        if item_page < 1:
-            raise AmazonException(
-                'ValueError', 'Arg item_page should be 1 or higher')
 
-        results = []
-        while len(results) < item_count:
-            try:
-                request = GetVariationsRequest(
-                    partner_tag=self._tag,
-                    partner_type=PartnerType.ASSOCIATES,
-                    marketplace=self._marketplace,
-                    asin=get_asin(asin),
-                    condition=models.CONDITION[condition],
-                    merchant=merchant,
-                    offer_count=1,
-                    variation_count=items_per_page,
-                    variation_page=item_page,
-                    resources=models.VARIATION_RESOURCES)
-            except KeyError:
-                raise AmazonException('KeyError', 'Invalid condition value')
-            except Exception as e:
-                raise AmazonException('GetVariationsError', e)
+        kwargs.update({
+            'asin': asin,
+            'variation_count': variation_count,
+            'variation_page': variation_page,
+            'condition': condition,
+            'currency_of_preference': currency_of_preference,
+            'merchant': merchant
+        })
 
-            for x in range(3):
-                try:
-                    # Send the request and create results
-                    self._throttle()
-                    if async_req:
-                        thread = self._api.get_variations(
-                            request, async_req=True)
-                        response = thread.get()
-                    else:
-                        response = self._api.get_variations(request)
-                    break
-                except ApiException as e:
-                    if x == 2:
-                        raise AmazonException('ApiException', e)
-            try:
-                if response.variations_result is not None:
-                    if response.variations_result.items is not None:
-                        for item in response.variations_result.items:
-                            results.append(get_parsed_item(item))
-                            if len(results) >= item_count:
-                                break
-                        if len(response.variations_result.items) < items_per_page:
-                            break
-                else:
-                    break
-                if response.errors is not None:
-                    raise AmazonException(
-                        response.errors[0].code, response.errors[0].message)
-            except Exception as e:
-                raise AmazonException('ResponseError', e)
-            item_page += 1
+        check_variations_args(**kwargs)
+        request = get_variations_request(self, **kwargs)
+        self._throttle()
+        return get_variations_response(self, request)
 
-        if results:
-            return results
-        else:
-            return None
+        # if items_per_page > 10 or items_per_page < 1:
+        #     raise AmazonException(
+        #         'ValueError', 'Arg items_per_page should be between 1 and 10')
+        # if item_count > 100 or item_count < 1:
+        #     raise AmazonException(
+        #         'ValueError', 'Arg item_count should be between 1 and 100')
+        # if item_page < 1:
+        #     raise AmazonException(
+        #         'ValueError', 'Arg item_page should be 1 or higher')
+
+        # results = []
+        # while len(results) < item_count:
+        #     try:
+        #         request = GetVariationsRequest(
+        #             partner_tag=self._tag,
+        #             partner_type=PartnerType.ASSOCIATES,
+        #             marketplace=self._marketplace,
+        #             asin=get_asin(asin),
+        #             condition=models.CONDITION[condition],
+        #             merchant=merchant,
+        #             offer_count=1,
+        #             variation_count=items_per_page,
+        #             variation_page=item_page,
+        #             resources=models.VARIATION_RESOURCES)
+        #     except KeyError:
+        #         raise AmazonException('KeyError', 'Invalid condition value')
+        #     except Exception as e:
+        #         raise AmazonException('GetVariationsError', e)
+
+        #     for x in range(3):
+        #         try:
+        #             # Send the request and create results
+        #             self._throttle()
+        #             if async_req:
+        #                 thread = self._api.get_variations(
+        #                     request, async_req=True)
+        #                 response = thread.get()
+        #             else:
+        #                 response = self._api.get_variations(request)
+        #             break
+        #         except ApiException as e:
+        #             if x == 2:
+        #                 raise AmazonException('ApiException', e)
+        #     try:
+        #         if response.variations_result is not None:
+        #             if response.variations_result.items is not None:
+        #                 for item in response.variations_result.items:
+        #                     results.append(get_parsed_item(item))
+        #                     if len(results) >= item_count:
+        #                         break
+        #                 if len(response.variations_result.items) < items_per_page:
+        #                     break
+        #         else:
+        #             break
+        #         if response.errors is not None:
+        #             raise AmazonException(
+        #                 response.errors[0].code, response.errors[0].message)
+        #     except Exception as e:
+        #         raise AmazonException('ResponseError', e)
+        #     item_page += 1
+
+        # if results:
+        #     return results
+        # else:
+        #     return None
 
     def get_browsenodes(self, browse_nodes, async_req=False):
         """Get browse nodes information from Amazon.

@@ -38,3 +38,11 @@ def _check_search_pagination_args(**kwargs):
     if not all(1 <= arg <= 10 and isinstance(arg, int) for arg in pagination_args):
         error_message = ('Args item_count and item_page should be integers between 1 and 10.')
         raise InvalidArgumentException(error_message)
+
+
+def check_variations_args(**kwargs):
+    pagination_args = [kwargs['variation_count'], kwargs['variation_page']]
+    pagination_args = [arg for arg in pagination_args if arg]
+    if not all(1 <= arg <= 10 and isinstance(arg, int) for arg in pagination_args):
+        error_message = ('Args variation_count and variation_page should be integers between 1 and 10.')
+        raise InvalidArgumentException(error_message)
