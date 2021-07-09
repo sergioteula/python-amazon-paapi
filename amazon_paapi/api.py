@@ -34,7 +34,7 @@ class AmazonApi:
         tag (``str``): Your affiliate tracking id, used to create the affiliate link.
         country (``models.Country``): Country code for your affiliate account.
         throttling (``float``, optional): Wait time in seconds between API calls. Use it to avoid
-            reaching Amazon limits. Defaults to 1 second.
+            reaching Amazon limits. Defaults to ``1`` second.
 
     Raises:
         ``InvalidArgumentException``
@@ -69,22 +69,20 @@ class AmazonApi:
         """Get items information from Amazon.
 
         Args:
-            items (str | list[str]): One or more items using ASIN or product URL. Use a string
-                separated by comma or a list of strings.
-            condition (Condition, optional): Filters offers by condition type. Defaults to Any.
-            merchant (Merchant, optional): Filters search results to return items having at least one
-                offer sold by target merchant. Defaults to All.
-            currency_of_preference (str, optional): Currency of preference in which the prices
-                information should be returned in response. By default the prices are returned
-                in the default currency of the marketplace. Expected currency code format is
-                ISO 4217.
-            languages_of_preference (list[str], optional): Languages in order of preference in
-                which the item information should be returned in response. By default the item
-                information is returned in the default language of the marketplace.
-            kwargs (any): Any other parameters supported by Amazon API for the GetItems operation.
+            items (``str`` | ``list[str]``): One or more items, using ASIN or product URL. Items
+                in string format should be separated by commas.
+            condition (``models.Condition``, optional): Filters offers by condition type.
+                Defaults to Any.
+            merchant (``models.Merchant``, optional): Filters search results to return items having
+                at least one offer sold by target merchant. Defaults to ``All``.
+            currency_of_preference (``str``, optional): Currency of preference in which the prices
+                information should be returned. Expected currency code format is ISO 4217.
+            languages_of_preference (``list[str]``, optional): Languages in order of preference in
+                which the item information should be returned.
+            kwargs (``dict``, optional): Any other arguments to be passed to the Amazon API.
 
         Returns:
-            list[ApiItem]: A list of items with Amazon information.
+            ``list[ApiItem]``: A list of items with Amazon information.
         """
 
         kwargs.update({
@@ -148,10 +146,8 @@ class AmazonApi:
             browse_node_id (str, optional): A unique ID assigned by Amazon that identifies a product
                 category or subcategory.
             condition (Condition, optional): Filters offers by condition type. Defaults to Any.
-            currency_of_preference (str, optional): Currency of preference in which the prices
-                information should be returned in response. By default the prices are returned
-                in the default currency of the marketplace. Expected currency code format is
-                ISO 4217.
+            currency_of_preference (``str``, optional): Currency of preference in which the prices
+                information should be returned. Expected currency code format is ISO 4217.
             delivery_flags (list[str]): Filters items which satisfy a certain delivery program.
             languages_of_preference (list[str], optional): Languages in order of preference in
                 which the item information should be returned in response. By default the item
