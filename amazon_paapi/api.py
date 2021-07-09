@@ -72,7 +72,7 @@ class AmazonApi:
             items (``str`` | ``list[str]``): One or more items, using ASIN or product URL. Items
                 in string format should be separated by commas.
             condition (``models.Condition``, optional): Filters offers by condition type.
-                Defaults to Any.
+                Defaults to ``Any``.
             merchant (``models.Merchant``, optional): Filters search results to return items having
                 at least one offer sold by target merchant. Defaults to ``All``.
             currency_of_preference (``str``, optional): Currency of preference in which the prices
@@ -83,6 +83,12 @@ class AmazonApi:
 
         Returns:
             ``list[ApiItem]``: A list of items with Amazon information.
+
+        Raises:
+            ``InvalidArgumentException``
+            ``MalformedRequestException``
+            ``ApiRequestException``
+            ``ItemsNotFoudException``
         """
 
         kwargs.update({
@@ -149,9 +155,8 @@ class AmazonApi:
             currency_of_preference (``str``, optional): Currency of preference in which the prices
                 information should be returned. Expected currency code format is ISO 4217.
             delivery_flags (list[str]): Filters items which satisfy a certain delivery program.
-            languages_of_preference (list[str], optional): Languages in order of preference in
-                which the item information should be returned in response. By default the item
-                information is returned in the default language of the marketplace.
+            languages_of_preference (``list[str]``, optional): Languages in order of preference in
+                which the item information should be returned.
             merchant (Merchant, optional): Filters search results to return items having at least one
                 offer sold by target merchant. Defaults to All.
             max_price (int, optional): Filters search results to items with at least one offer price
@@ -167,6 +172,7 @@ class AmazonApi:
                 ratings above specified value. Value should be positive integer less than 5.
             search_index (str, optional): Indicates the product category to search. Defaults to All.
             sort_by (SortBy, optional): The way in which items are sorted.
+            kwargs (``dict``, optional): Any other arguments to be passed to the Amazon API.
 
         Returns:
             list[ApiItem]: A list of items with Amazon information.
