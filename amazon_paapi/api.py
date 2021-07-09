@@ -134,48 +134,55 @@ class AmazonApi:
         sort_by: models.SortBy = None,
         **kwargs) -> list[models.ApiItem]:
         """Searches for items on Amazon based on a search query. At least one of the following
-        parameters should be specified: keywords, actor, artist, author, brand or title.
+        parameters should be specified: ``keywords``, ``actor``, ``artist``, ``author``,
+        ``brand`` or ``title``.
 
         Args:
-            item_count (int, optional): The number of items returned. Should be between 1 and 10.
-                Defaults to 10.
-            item_page (int, optional): The specific page of items to be returned from the available
-                results. Should be between 1 and 10. Defaults to 1.
-            actor (str, optional): Actor name associated with the item.
-            artist (str, optional): Artist name associated with the item.
-            author (str, optional): Author name associated with the item.
-            brand (str, optional): Brand name associated with the item.
-            keywords (str, optional): A word or phrase that describes an item.
-            title (str, optional): Title associated with the item.
-            availability (Availability, optional): Filters available items on Amazon.
-                Defaults to Available.
-            browse_node_id (str, optional): A unique ID assigned by Amazon that identifies a product
+            item_count (``int``, optional): Number of items returned. Should be between ``1`` and ``10``.
+                Defaults to ``10``.
+            item_page (``int``, optional): The specific page of items to be returned from the available
+                results. Should be between ``1`` and ``10``. Defaults to ``1``.
+            actor (``str``, optional): Actor name associated with the item.
+            artist (``str``, optional): Artist name associated with the item.
+            author (``str``, optional): Author name associated with the item.
+            brand (``str``, optional): Brand name associated with the item.
+            keywords (``str``, optional): A word or phrase that describes an item.
+            title (``str``, optional): Title associated with the item.
+            availability (``models.Availability``, optional): Filters available items on Amazon.
+                Defaults to ``Available``.
+            browse_node_id (``str``, optional): A unique ID assigned by Amazon that identifies a product
                 category or subcategory.
-            condition (Condition, optional): Filters offers by condition type. Defaults to Any.
+            condition (``models.Condition``, optional): Filters offers by condition type. Defaults to ``Any``.
             currency_of_preference (``str``, optional): Currency of preference in which the prices
                 information should be returned. Expected currency code format is ISO 4217.
-            delivery_flags (list[str]): Filters items which satisfy a certain delivery program.
+            delivery_flags (``list[str]``): Filters items which satisfy a certain delivery program.
             languages_of_preference (``list[str]``, optional): Languages in order of preference in
                 which the item information should be returned.
-            merchant (Merchant, optional): Filters search results to return items having at least one
-                offer sold by target merchant. Defaults to All.
-            max_price (int, optional): Filters search results to items with at least one offer price
+            merchant (``models.Merchant``, optional): Filters search results to return items having
+                at least one offer sold by target merchant. Defaults to ``All``.
+            max_price (``int``, optional): Filters search results to items with at least one offer price
                 below the specified value. Prices appear in lowest currency denomination.
-                For example, $31.41 should be passed as 3141 or 28.00€ should be 2800.
-            min_price (int, optional): Filters search results to items with at least one offer price
+                For example, $31.41 should be passed as ``3141`` or 28.00€ should be ``2800``.
+            min_price (``int``, optional): Filters search results to items with at least one offer price
                 above the specified value. Prices appear in lowest currency denomination.
-                For example, $31.41 should be passed as 3141 or 28.00€ should be 2800.
-            min_saving_percent (int, optional): Filters search results to items with at least one
+                For example, $31.41 should be passed as ``3141`` or 28.00€ should be ``2800``.
+            min_saving_percent (``int``, optional): Filters search results to items with at least one
                 offer having saving percentage above the specified value. Value should be
-                positive integer less than 100.
-            min_reviews_rating (int, optional): Filters search results to items with customer review
-                ratings above specified value. Value should be positive integer less than 5.
-            search_index (str, optional): Indicates the product category to search. Defaults to All.
-            sort_by (SortBy, optional): The way in which items are sorted.
+                ``positive integer less than 100``.
+            min_reviews_rating (``int``, optional): Filters search results to items with customer review
+                ratings above specified value. Value should be ``positive integer less than 5``.
+            search_index (``str``, optional): Indicates the product category to search. Defaults to ``All``.
+            sort_by (``models.SortBy``, optional): The way in which items are sorted.
             kwargs (``dict``, optional): Any other arguments to be passed to the Amazon API.
 
         Returns:
-            list[ApiItem]: A list of items with Amazon information.
+            ``list[ApiItem]``: A list of items with Amazon information.
+
+        Raises:
+            ``InvalidArgumentException``
+            ``MalformedRequestException``
+            ``ApiRequestException``
+            ``ItemsNotFoudException``
         """
 
         kwargs.update({
