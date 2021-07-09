@@ -34,6 +34,9 @@ def _check_search_mandatory_args(**kwargs):
 
 def _check_search_pagination_args(**kwargs):
     pagination_args = [kwargs['item_count'], kwargs['item_page']]
+    if all(arg is None for arg in pagination_args):
+        return
+
     if not all(1 <= arg <= 10 and isinstance(arg, int) for arg in pagination_args):
         error_message = ('Args item_count and item_page should be integers between 1 and 10.')
         raise InvalidArgumentException(error_message)

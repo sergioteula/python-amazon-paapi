@@ -14,13 +14,15 @@ from .sdk.rest import ApiException
 
 from . import models
 from .helpers.arguments import check_search_args, get_items_ids
-from .helpers.requests import get_items_request, get_items_response
+from .helpers.requests import get_items_request, get_items_response, get_search_items_request, get_search_items_response
 from .helpers.generators import get_list_chunks
 from .errors import AmazonException, InvalidArgumentException
 from .tools import get_asin
 
 from typing import Union
 import time
+
+from amazon_paapi.sdk.models import search_items_request
 
 
 class AmazonApi:
@@ -203,77 +205,10 @@ class AmazonApi:
         })
 
         check_search_args(**kwargs)
+        request = get_search_items_request(self, **kwargs)
+        self._throttle()
+        return get_search_items_response(self, request)
 
-
-        results = []
-        while len(results) < item_count:
-            try:
-                request = SearchItemsRequest(
-                    partner_tag=self._tag,
-                    partner_type=PartnerType.ASSOCIATES,
-                    actor=actor,
-                    artist=artist,
-                    author=author,
-                    availability=availability,
-                    brand=brand,
-                    browse_node_id=browse_node,
-                    condition=models.CONDITION[condition],
-                    delivery_flags=delivery,
-                    item_count=items_per_page,
-                    item_page=item_page,
-                    keywords=keywords,
-                    max_price=max_price,
-                    merchant=merchant,
-                    min_price=min_price,
-                    min_reviews_rating=min_rating,
-                    min_saving_percent=min_discount,
-                    offer_count=1,
-                    resources=models.SEARCH_RESOURCES,
-                    search_index=search_index,
-                    sort_by=sort_by,
-                    title=title)
-            except KeyError:
-                raise AmazonException('KeyError', 'Invalid condition value')
-            except Exception as e:
-                raise AmazonException('SearchItemsError', e)
-
-            for x in range(3):
-                try:
-                    # Send the request and create results
-                    self._throttle()
-                    if async_req:
-                        thread = self._api.search_items(request, async_req=True)
-                        response = thread.get()
-                    else:
-                        response = self._api.search_items(request)
-                    break
-                except ApiException as e:
-                    if x == 2:
-                        raise AmazonException('ApiException', e)
-            try:
-                if response.search_result is not None:
-                    if response.search_result.items is not None:
-                        for item in response.search_result.items:
-                            results.append(get_parsed_item(item))
-                            if len(results) >= item_count:
-                                break
-                        if len(response.search_result.items) < items_per_page:
-                            break
-                else:
-                    break
-                if response.errors is not None:
-                    raise AmazonException(
-                        response.errors[0].code, response.errors[0].message)
-            except Exception as e:
-                if e.status == "NoResults":
-                    break
-                raise AmazonException('ResponseError', e)
-            item_page += 1
-
-        if results:
-            return results
-        else:
-            return None
 
     def get_variations(self, asin, item_count=10, item_page=1, items_per_page=10, condition='Any',
                        merchant='All', async_req=False):
