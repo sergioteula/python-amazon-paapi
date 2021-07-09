@@ -29,12 +29,15 @@ class AmazonApi:
     """Provides methods to get information from Amazon using your API credentials.
 
     Args:
-        key (str): Your API key.
-        secret (str): Your API secret.
-        tag (str): Your affiliate tracking id, used to create the affiliate link.
-        country (str): Country code for your affiliate account. Available values in models.Country.
-        throttling (float, optional): Wait time in seconds between API calls. Use it to avoid
+        key (``str``): Your API key.
+        secret (``str``): Your API secret.
+        tag (``str``): Your affiliate tracking id, used to create the affiliate link.
+        country (``models.Country``): Country code for your affiliate account.
+        throttling (``float``, optional): Wait time in seconds between API calls. Use it to avoid
             reaching Amazon limits. Defaults to 1 second.
+
+    Raises:
+        ``InvalidArgumentException``
     """
 
     def __init__(self, key: str, secret: str, tag: str, country: models.Country, throttling: float = 1, **kwargs):
