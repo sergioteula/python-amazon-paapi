@@ -6,6 +6,7 @@ from ..sdk.models.get_browse_nodes_request import GetBrowseNodesRequest
 from ..models.api_item import Item
 from ..models.search_result import SearchResult
 from ..models.variations_result import VariationsResult
+from ..models.browse_nodes_result import BrowseNode
 from ..errors import ApiRequestException, ItemsNotFoudException, MalformedRequestException
 from ..sdk.models.partner_type import PartnerType
 from ..sdk.models.get_items_resource import GetItemsResource
@@ -99,7 +100,7 @@ def get_browse_nodes_request(amazon_api, **kwargs) -> GetBrowseNodesRequest:
         raise MalformedRequestException('Parameters for get_browse_nodes request are not correct: ' + str(e))
 
 
-def get_browse_nodes_response(amazon_api, request: GetBrowseNodesRequest) -> list[Item]:
+def get_browse_nodes_response(amazon_api, request: GetBrowseNodesRequest) -> list[BrowseNode]:
     try:
         response = amazon_api._api.get_browse_nodes(request)
     except ApiException as e:

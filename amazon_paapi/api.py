@@ -262,7 +262,7 @@ class AmazonApi:
     def get_browse_nodes(self,
         browse_node_ids: list[str],
         languages_of_preference: list[str] = None,
-        **kwargs):
+        **kwargs) -> list[models.BrowseNode]:
         """Get browse nodes information from Amazon.
 
         Args:
