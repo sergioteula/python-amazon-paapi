@@ -46,3 +46,9 @@ def check_variations_args(**kwargs):
     if not all(1 <= arg <= 10 and isinstance(arg, int) for arg in pagination_args):
         error_message = ('Args variation_count and variation_page should be integers between 1 and 10.')
         raise InvalidArgumentException(error_message)
+
+
+def check_browse_nodes_args(**kwargs):
+    if not isinstance(kwargs['browse_node_ids'], list):
+        error_message = 'Argument browse_node_ids should be a list of strings.'
+        raise InvalidArgumentException(error_message)
