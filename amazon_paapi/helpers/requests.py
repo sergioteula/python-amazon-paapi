@@ -1,6 +1,8 @@
 """Module with helper functions for creating requests."""
 
 
+from amazon_paapi.sdk.models.get_browse_nodes_resource import GetBrowseNodesResource
+from amazon_paapi.sdk.models.get_browse_nodes_request import GetBrowseNodesRequest
 from ..models.api_item import Item
 from ..errors import ApiRequestException, ItemsNotFoudException, MalformedRequestException
 from ..sdk.models.partner_type import PartnerType
@@ -82,6 +84,29 @@ def get_variations_response(amazon_api, request: GetVariationsRequest) -> list[I
         raise ItemsNotFoudException('No variation items have been found')
 
     return response.variations_result.items
+
+
+def get_browse_nodes_request(amazon_api, **kwargs) -> GetBrowseNodesRequest:
+    try:
+        return GetBrowseNodesRequest(resources=_get_request_resources(GetBrowseNodesResource),
+                                    partner_type=PartnerType.ASSOCIATES,
+                                    marketplace=amazon_api._marketplace,
+                                    partner_tag=amazon_api._tag,
+                                    **kwargs)
+    except TypeError as e:
+        raise MalformedRequestException('Parameters for get_browse_nodes request are not correct: ' + str(e))
+
+
+def get_browse_nodes_response(amazon_api, request: GetBrowseNodesRequest) -> list[Item]:
+    try:
+        response = amazon_api._api.get_browse_nodes(request)
+    except ApiException as e:
+        raise ApiRequestException('Error getting response for get_browse_nodes from Amazon API: ' + str(e))
+
+    if response.browse_nodes_result == None:
+        raise ItemsNotFoudException('No browse nodes have been found')
+
+    return response.browse_nodes_result.browse_nodes
 
 
 def _get_request_resources(resources) -> list[str]:

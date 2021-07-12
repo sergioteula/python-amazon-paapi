@@ -5,17 +5,15 @@ This module allows to get product information from Amazon using the official API
 an easier way.
 """
 
-from .sdk.api.default_api import DefaultApi
-from .sdk.models.get_browse_nodes_request import GetBrowseNodesRequest
-from .sdk.models.partner_type import PartnerType
-from .sdk.rest import ApiException
 
 from . import models
-from .helpers.arguments import check_search_args, check_variations_args, get_items_ids
-from .helpers.requests import get_items_request, get_items_response, get_search_items_request, get_search_items_response, get_variations_request, get_variations_response
+from .sdk.api.default_api import DefaultApi
+from .errors import InvalidArgumentException
+from .helpers.arguments import check_browse_nodes_args, check_search_args, check_variations_args, get_items_ids
+from .helpers.requests import (get_browse_nodes_request, get_browse_nodes_response, get_items_request,
+                               get_items_response, get_search_items_request, get_search_items_response,
+                               get_variations_request, get_variations_response)
 from .helpers.generators import get_list_chunks
-from .errors import AmazonException, InvalidArgumentException
-from .tools import get_asin
 
 from typing import Union
 import time
@@ -261,7 +259,10 @@ class AmazonApi:
         return get_variations_response(self, request)
 
 
-    def get_browsenodes(self, browse_nodes, async_req=False):
+    def get_browse_nodes(self,
+        browse_node_ids: list[str],
+        languages_of_preference: list[str] = None,
+        **kwargs):
         """Get browse nodes information from Amazon.
 
         Args:
@@ -273,48 +274,16 @@ class AmazonApi:
             dict: A dictionary containing the browse node information.
         """
 
-        if isinstance(browse_nodes, list) is False:
-            raise Exception('Browse nodes parameter should be a list')
-        elif not browse_nodes:
-            raise Exception('Browse nodes parameter can\'t be empty')
+        kwargs.update({
+            'browse_node_ids': browse_node_ids,
+            'languages_of_preference': languages_of_preference
+        })
 
-        try:
-            request = GetBrowseNodesRequest(
-                partner_tag=self._tag,
-                partner_type=PartnerType.ASSOCIATES,
-                marketplace=self._marketplace,
-                browse_node_ids=browse_nodes,
-                languages_of_preference=None,
-                resources=models.BROWSE_RESOURCES)
-        except ValueError as e:
-            raise AmazonException("ValueError", e)
+        check_browse_nodes_args(**kwargs)
+        request = get_browse_nodes_request(self, **kwargs)
+        self._throttle()
+        return get_browse_nodes_response(self, request)
 
-        try:
-            self._throttle()
-            if async_req:
-                thread = self._api.get_browse_nodes(request, async_req=True)
-                response = thread.get()
-            else:
-                response = self._api.get_browse_nodes(request)
-        except ApiException as e:
-            raise AmazonException('ApiException', e)
-
-        try:
-            if response.browse_nodes_result is not None:
-                res = [AmazonBrowseNode(
-                    item) for item in response.browse_nodes_result.browse_nodes]
-                return parse_browsenode(res)
-            if response.errors is not None:
-                raise AmazonException(
-                    response.errors[0].code, response.errors[0].message)
-        except TypeError as e:
-            raise AmazonException("TypeError", e)
-        except ValueError as e:
-            raise AmazonException(ValueError, e)
-        except AmazonException as e:
-            raise AmazonException(e.status, e.reason)
-        except Exception as e:
-            raise AmazonException("General", e)
 
     def _throttle(self):
         wait_time = self._throttling - (time.time() - self._last_query_time)
