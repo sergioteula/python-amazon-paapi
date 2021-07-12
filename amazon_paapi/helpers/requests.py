@@ -5,6 +5,7 @@ from ..sdk.models.get_browse_nodes_resource import GetBrowseNodesResource
 from ..sdk.models.get_browse_nodes_request import GetBrowseNodesRequest
 from ..models.api_item import Item
 from ..models.search_result import SearchResult
+from ..models.variations_result import VariationsResult
 from ..errors import ApiRequestException, ItemsNotFoudException, MalformedRequestException
 from ..sdk.models.partner_type import PartnerType
 from ..sdk.models.get_items_resource import GetItemsResource
@@ -75,7 +76,7 @@ def get_variations_request(amazon_api, **kwargs) -> GetVariationsRequest:
         raise MalformedRequestException('Parameters for get_variations request are not correct: ' + str(e))
 
 
-def get_variations_response(amazon_api, request: GetVariationsRequest) -> list[Item]:
+def get_variations_response(amazon_api, request: GetVariationsRequest) -> VariationsResult:
     try:
         response = amazon_api._api.get_variations(request)
     except ApiException as e:
