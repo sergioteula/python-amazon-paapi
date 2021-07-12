@@ -1,8 +1,8 @@
 """Module with helper functions for creating requests."""
 
 
-from amazon_paapi.sdk.models.get_browse_nodes_resource import GetBrowseNodesResource
-from amazon_paapi.sdk.models.get_browse_nodes_request import GetBrowseNodesRequest
+from ..sdk.models.get_browse_nodes_resource import GetBrowseNodesResource
+from ..sdk.models.get_browse_nodes_request import GetBrowseNodesRequest
 from ..models.api_item import Item
 from ..errors import ApiRequestException, ItemsNotFoudException, MalformedRequestException
 from ..sdk.models.partner_type import PartnerType
