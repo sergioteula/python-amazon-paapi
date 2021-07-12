@@ -126,7 +126,7 @@ class AmazonApi:
         min_reviews_rating: int = None,
         search_index: str = None,
         sort_by: models.SortBy = None,
-        **kwargs) -> list[models.Item]:
+        **kwargs) -> models.SearchResult:
         """Searches for items on Amazon based on a search query. At least one of the following
         parameters should be specified: ``keywords``, ``actor``, ``artist``, ``author``,
         ``brand`` or ``title``.

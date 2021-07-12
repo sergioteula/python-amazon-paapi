@@ -4,6 +4,7 @@
 from ..sdk.models.get_browse_nodes_resource import GetBrowseNodesResource
 from ..sdk.models.get_browse_nodes_request import GetBrowseNodesRequest
 from ..models.api_item import Item
+from ..models.search_result import SearchResult
 from ..errors import ApiRequestException, ItemsNotFoudException, MalformedRequestException
 from ..sdk.models.partner_type import PartnerType
 from ..sdk.models.get_items_resource import GetItemsResource
@@ -51,7 +52,7 @@ def get_search_items_request(amazon_api, **kwargs) -> SearchItemsRequest:
         raise MalformedRequestException('Parameters for search_items request are not correct: ' + str(e))
 
 
-def get_search_items_response(amazon_api, request: SearchItemsRequest) -> list[Item]:
+def get_search_items_response(amazon_api, request: SearchItemsRequest) -> SearchResult:
     try:
         response = amazon_api._api.search_items(request)
     except ApiException as e:
@@ -60,7 +61,7 @@ def get_search_items_response(amazon_api, request: SearchItemsRequest) -> list[I
     if response.search_result == None:
         raise ItemsNotFoudException('No items have been found')
 
-    return response.search_result.items
+    return response.search_result
 
 
 def get_variations_request(amazon_api, **kwargs) -> GetVariationsRequest:
