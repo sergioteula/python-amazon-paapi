@@ -217,7 +217,7 @@ class AmazonApi:
         currency_of_preference: str = None,
         languages_of_preference: list[str] = None,
         merchant: models.Merchant = None,
-        **kwargs) -> list[models.Item]:
+        **kwargs) -> models.VariationsResult:
         """Returns a set of items that are the same product, but differ according to a
         consistent theme, for example size and color.
 
