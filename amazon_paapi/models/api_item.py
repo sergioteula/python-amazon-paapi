@@ -1,4 +1,4 @@
-from .. import models
+from ..sdk import models
 
 """Shared models"""
 class ApiLabelLocale:
@@ -208,7 +208,7 @@ class ApiBrowseNodeInfo(models.BrowseNodeInfo):
     website_sales_rank: ApiWebsiteSalesRank
 
 """Main model"""
-class ApiItem(models.Item):
+class Item(models.Item):
     item_info: ApiItemInfo
     images: ApiImages
     offers: ApiOffers
