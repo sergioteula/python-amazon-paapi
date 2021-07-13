@@ -28,7 +28,7 @@ import re  # noqa: F401
 
 import six
 
-from amazon_paapi.sdk.models.refinement import Refinement  # noqa: F401,E501
+from .refinement import Refinement  # noqa: F401,E501
 
 
 class SearchRefinements(object):

@@ -28,7 +28,7 @@ import re  # noqa: F401
 
 import six
 
-from amazon_paapi.sdk.models.rental_offer_listing import RentalOfferListing  # noqa: F401,E501
+from .rental_offer_listing import RentalOfferListing  # noqa: F401,E501
 
 
 class RentalOffers(object):

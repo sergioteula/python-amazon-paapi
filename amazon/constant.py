@@ -1,10 +1,10 @@
 """Module containing all the constants."""
 
-from .sdk.models.get_items_resource import GetItemsResource
-from .sdk.models.search_items_resource import SearchItemsResource
-from .sdk.models.get_variations_resource import GetVariationsResource
-from .sdk.models.get_browse_nodes_resource import GetBrowseNodesResource
-from .sdk.models.condition import Condition
+from .paapi5_python_sdk.get_items_resource import GetItemsResource
+from .paapi5_python_sdk.search_items_resource import SearchItemsResource
+from .paapi5_python_sdk.get_variations_resource import GetVariationsResource
+from .paapi5_python_sdk.get_browse_nodes_resource import GetBrowseNodesResource
+from .paapi5_python_sdk.condition import Condition
 
 """Available regions for the Amazon API."""
 REGIONS = {
@@ -13,20 +13,17 @@ REGIONS = {
     'CA': 'us-east-1',
     'FR': 'eu-west-1',
     'DE': 'eu-west-1',
+    'NL': 'eu-west-1',
     'IN': 'eu-west-1',
     'IT': 'eu-west-1',
     'JP': 'us-west-2',
     'MX': 'us-east-1',
-    'NL': 'eu-west-1',
-    'PL': 'eu-west-1',
-    'SG': 'us-west-2',
-    'SA': 'eu-west-1',
     'ES': 'eu-west-1',
-    'SE': 'eu-west-1',
     'TR': 'eu-west-1',
     'AE': 'eu-west-1',
     'UK': 'eu-west-1',
-    'US': 'us-east-1'
+    'US': 'us-east-1',
+    'SE': 'eu-west-1'
 }
 
 """Domains for each region on the Amazon API."""
@@ -36,20 +33,17 @@ DOMAINS = {
     'CA': 'ca',
     'FR': 'fr',
     'DE': 'de',
+    'NL': 'nl',
     'IN': 'in',
     'IT': 'it',
     'JP': 'co.jp',
     'MX': 'com.mx',
-    'NL': 'nl',
-    'PL': 'pl',
-    'SG': 'sg',
-    'SA': 'sa',
     'ES': 'es',
-    'SE': 'se',
     'TR': 'com.tr',
     'AE': 'ae',
     'UK': 'co.uk',
     'US': 'com',
+    'SE': 'se'
 }
 
 """Condition values."""

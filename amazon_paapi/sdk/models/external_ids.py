@@ -28,7 +28,7 @@ import re  # noqa: F401
 
 import six
 
-from amazon_paapi.sdk.models.multi_valued_attribute import MultiValuedAttribute  # noqa: F401,E501
+from .multi_valued_attribute import MultiValuedAttribute  # noqa: F401,E501
 
 
 class ExternalIds(object):

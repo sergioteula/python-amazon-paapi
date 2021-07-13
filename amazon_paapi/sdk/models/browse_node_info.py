@@ -28,8 +28,8 @@ import re  # noqa: F401
 
 import six
 
-from amazon_paapi.sdk.models.browse_node import BrowseNode  # noqa: F401,E501
-from amazon_paapi.sdk.models.website_sales_rank import WebsiteSalesRank  # noqa: F401,E501
+from .browse_node import BrowseNode  # noqa: F401,E501
+from .website_sales_rank import WebsiteSalesRank  # noqa: F401,E501
 
 
 class BrowseNodeInfo(object):

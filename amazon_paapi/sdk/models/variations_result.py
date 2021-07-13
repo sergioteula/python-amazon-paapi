@@ -28,8 +28,8 @@ import re  # noqa: F401
 
 import six
 
-from amazon_paapi.sdk.models.item import Item  # noqa: F401,E501
-from amazon_paapi.sdk.models.variation_summary import VariationSummary  # noqa: F401,E501
+from .item import Item  # noqa: F401,E501
+from .variation_summary import VariationSummary  # noqa: F401,E501
 
 
 class VariationsResult(object):

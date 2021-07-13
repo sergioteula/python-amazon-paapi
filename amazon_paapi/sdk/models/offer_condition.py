@@ -28,8 +28,8 @@ import re  # noqa: F401
 
 import six
 
-from amazon_paapi.sdk.models.offer_condition_note import OfferConditionNote  # noqa: F401,E501
-from amazon_paapi.sdk.models.offer_sub_condition import OfferSubCondition  # noqa: F401,E501
+from .offer_condition_note import OfferConditionNote  # noqa: F401,E501
+from .offer_sub_condition import OfferSubCondition  # noqa: F401,E501
 
 
 class OfferCondition(object):

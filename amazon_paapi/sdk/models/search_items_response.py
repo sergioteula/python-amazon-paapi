@@ -28,8 +28,8 @@ import re  # noqa: F401
 
 import six
 
-from amazon_paapi.sdk.models.error_data import ErrorData  # noqa: F401,E501
-from amazon_paapi.sdk.models.search_result import SearchResult  # noqa: F401,E501
+from .error_data import ErrorData  # noqa: F401,E501
+from .search_result import SearchResult  # noqa: F401,E501
 
 
 class SearchItemsResponse(object):

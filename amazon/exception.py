@@ -1,8 +1,8 @@
-"""Custom exceptions class."""
+"""Custom exception class."""
 
 
 class AmazonException(Exception):
-    """Custom exceptions class for Amazon Product Advertising API."""
+    """Custom exception class for Amazon Product Advertising API."""
     def __init__(self, status=None, reason=None):
         self.status = status
         self.reason = reason

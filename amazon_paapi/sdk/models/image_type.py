@@ -28,7 +28,7 @@ import re  # noqa: F401
 
 import six
 
-from amazon_paapi.sdk.models.image_size import ImageSize  # noqa: F401,E501
+from .image_size import ImageSize  # noqa: F401,E501
 
 
 class ImageType(object):
