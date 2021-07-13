@@ -1,10 +1,10 @@
 """Module containing all the constants."""
 
-from paapi5_python_sdk.get_items_resource import GetItemsResource
-from paapi5_python_sdk.search_items_resource import SearchItemsResource
-from paapi5_python_sdk.get_variations_resource import GetVariationsResource
-from paapi5_python_sdk.get_browse_nodes_resource import GetBrowseNodesResource
-from paapi5_python_sdk.condition import Condition
+from .paapi5_python_sdk.get_items_resource import GetItemsResource
+from .paapi5_python_sdk.search_items_resource import SearchItemsResource
+from .paapi5_python_sdk.get_variations_resource import GetVariationsResource
+from .paapi5_python_sdk.get_browse_nodes_resource import GetBrowseNodesResource
+from .paapi5_python_sdk.condition import Condition
 
 """Available regions for the Amazon API."""
 REGIONS = {

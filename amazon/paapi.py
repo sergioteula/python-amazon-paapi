@@ -5,13 +5,13 @@ This module allows to get product information from Amazon using the official API
 an easier way.
 """
 
-from paapi5_python_sdk.api.default_api import DefaultApi
-from paapi5_python_sdk.get_items_request import GetItemsRequest
-from paapi5_python_sdk.search_items_request import SearchItemsRequest
-from paapi5_python_sdk.get_variations_request import GetVariationsRequest
-from paapi5_python_sdk.get_browse_nodes_request import GetBrowseNodesRequest
-from paapi5_python_sdk.partner_type import PartnerType
-from paapi5_python_sdk.rest import ApiException
+from .paapi5_python_sdk.api.default_api import DefaultApi
+from .paapi5_python_sdk.get_items_request import GetItemsRequest
+from .paapi5_python_sdk.search_items_request import SearchItemsRequest
+from .paapi5_python_sdk.get_variations_request import GetVariationsRequest
+from .paapi5_python_sdk.get_browse_nodes_request import GetBrowseNodesRequest
+from .paapi5_python_sdk.partner_type import PartnerType
+from .paapi5_python_sdk.rest import ApiException
 
 from amazon.constant import DOMAINS, REGIONS, CONDITION
 from amazon.constant import PRODUCT_RESOURCES, SEARCH_RESOURCES, VARIATION_RESOURCES
