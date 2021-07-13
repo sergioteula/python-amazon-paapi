@@ -1,8 +1,6 @@
 """Amazon Product Advertising API wrapper for Python
 
 A simple Python wrapper for the last version of the Amazon Product Advertising API.
-This module allows to get product information from Amazon using the official API in
-an easier way.
 """
 
 
@@ -26,7 +24,7 @@ class AmazonApi:
         tag (``str``): Your affiliate tracking id, used to create the affiliate link.
         country (``models.Country``): Country code for your affiliate account.
         throttling (``float``, optional): Wait time in seconds between API calls. Use it to avoid
-            reaching Amazon limits. Defaults to ``1`` second.
+            reaching Amazon limits. Defaults to 1 second.
 
     Raises:
         ``InvalidArgumentException``
@@ -64,9 +62,9 @@ class AmazonApi:
             items (``str`` | ``list[str]``): One or more items, using ASIN or product URL. Items
                 in string format should be separated by commas.
             condition (``models.Condition``, optional): Filters offers by condition type.
-                Defaults to ``Any``.
+                Defaults to Any.
             merchant (``models.Merchant``, optional): Filters search results to return items having
-                at least one offer sold by target merchant. Defaults to ``All``.
+                at least one offer sold by target merchant. Defaults to All.
             currency_of_preference (``str``, optional): Currency of preference in which the prices
                 information should be returned. Expected currency code format is ISO 4217.
             languages_of_preference (``list[str]``, optional): Languages in order of preference in
@@ -74,7 +72,7 @@ class AmazonApi:
             kwargs (``dict``, optional): Any other arguments to be passed to the Amazon API.
 
         Returns:
-            ``list[ApiItem]``: A list of items with Amazon information.
+            ``list[models.Item]``: A list of items with Amazon information.
 
         Raises:
             ``InvalidArgumentException``
@@ -130,10 +128,10 @@ class AmazonApi:
         ``brand`` or ``title``.
 
         Args:
-            item_count (``int``, optional): Number of items returned. Should be between ``1`` and ``10``.
-                Defaults to ``10``.
+            item_count (``int``, optional): Number of items returned. Should be between 1 and 10.
+                Defaults to 10.
             item_page (``int``, optional): The specific page of items to be returned from the available
-                results. Should be between ``1`` and ``10``. Defaults to ``1``.
+                results. Should be between 1 and 10. Defaults to 1.
             actor (``str``, optional): Actor name associated with the item.
             artist (``str``, optional): Artist name associated with the item.
             author (``str``, optional): Author name associated with the item.
@@ -141,34 +139,34 @@ class AmazonApi:
             keywords (``str``, optional): A word or phrase that describes an item.
             title (``str``, optional): Title associated with the item.
             availability (``models.Availability``, optional): Filters available items on Amazon.
-                Defaults to ``Available``.
+                Defaults to Available.
             browse_node_id (``str``, optional): A unique ID assigned by Amazon that identifies a product
                 category or subcategory.
-            condition (``models.Condition``, optional): Filters offers by condition type. Defaults to ``Any``.
+            condition (``models.Condition``, optional): Filters offers by condition type. Defaults to Any.
             currency_of_preference (``str``, optional): Currency of preference in which the prices
                 information should be returned. Expected currency code format is ISO 4217.
             delivery_flags (``list[str]``): Filters items which satisfy a certain delivery program.
             languages_of_preference (``list[str]``, optional): Languages in order of preference in
                 which the item information should be returned.
             merchant (``models.Merchant``, optional): Filters search results to return items having
-                at least one offer sold by target merchant. Defaults to ``All``.
+                at least one offer sold by target merchant. Defaults to All.
             max_price (``int``, optional): Filters search results to items with at least one offer price
                 below the specified value. Prices appear in lowest currency denomination.
-                For example, $31.41 should be passed as ``3141`` or 28.00€ should be ``2800``.
+                For example, $31.41 should be passed as 3141 or 28.00€ should be 2800.
             min_price (``int``, optional): Filters search results to items with at least one offer price
                 above the specified value. Prices appear in lowest currency denomination.
-                For example, $31.41 should be passed as ``3141`` or 28.00€ should be ``2800``.
+                For example, $31.41 should be passed as 3141 or 28.00€ should be 2800.
             min_saving_percent (``int``, optional): Filters search results to items with at least one
                 offer having saving percentage above the specified value. Value should be
-                ``positive integer less than 100``.
+                positive integer less than 100.
             min_reviews_rating (``int``, optional): Filters search results to items with customer review
-                ratings above specified value. Value should be ``positive integer less than 5``.
-            search_index (``str``, optional): Indicates the product category to search. Defaults to ``All``.
+                ratings above specified value. Value should be positive integer less than 5.
+            search_index (``str``, optional): Indicates the product category to search. Defaults to All.
             sort_by (``models.SortBy``, optional): The way in which items are sorted.
             kwargs (``dict``, optional): Any other arguments to be passed to the Amazon API.
 
         Returns:
-            ``list[ApiItem]``: A list of items with Amazon information.
+            ``models.SearchResult``: The search result containing the list of items.
 
         Raises:
             ``InvalidArgumentException``
@@ -217,29 +215,34 @@ class AmazonApi:
         merchant: models.Merchant = None,
         **kwargs) -> models.VariationsResult:
         """Returns a set of items that are the same product, but differ according to a
-        consistent theme, for example size and color.
+        consistent theme, for example size and color. A variation is a child ASIN.
 
         Args:
-            asin (str): One item ID like ASIN or product URL.
-            item_count (int, optional): The total number of products to get. Should be between
-                1 and 100. Defaults to 10.
-            item_page (int, optional): The page where the results start from. Should be between
-                1 and 10. Defaults to 1.
-            items_per_page (int, optional): Products on each page. Should be between
-                1 and 10. Defaults to 10.
-            condition (str, optional): The condition parameter filters offers by
-                condition type. Allowed values: Any, Collectible, New, Refurbished, Used.
-                Defaults to Any.
-            merchant (str, optional): Filters search results to return items
-                having at least one offer sold by target merchant. Allowed values:
-                All, Amazon. Defaults to All.
-            async_req (bool, optional): Specify if a thread should be created to
-                run the request. Defaults to False.
+            asin (``str``): One item, using ASIN or product URL.
+            variation_count (``int``, optional): Number of items returned. Should be between 1 and 10.
+                Defaults to 10.
+            variation_page (``int``, optional): The specific page of items to be returned from the available
+                results. Should be between 1 and 10. Defaults to 1.
+            condition (``models.Condition``, optional): Filters offers by condition type. Defaults to Any.
+            currency_of_preference (``str``, optional): Currency of preference in which the prices
+                information should be returned. Expected currency code format is ISO 4217.
+            languages_of_preference (``list[str]``, optional): Languages in order of preference in
+                which the item information should be returned.
+            merchant (``models.Merchant``, optional): Filters search results to return items having
+                at least one offer sold by target merchant. Defaults to All.
+            kwargs (``dict``, optional): Any other arguments to be passed to the Amazon API.
 
         Returns:
-            list of instances: A list containing 1 instance for each product
-                or None if no results.
+            ``models.VariationsResult``: The variations result containing the list of items.
+
+        Raises:
+            ``InvalidArgumentException``
+            ``MalformedRequestException``
+            ``ApiRequestException``
+            ``ItemsNotFoudException``
         """
+
+        asin = arguments.get_items_ids(asin)[0]
 
         kwargs.update({
             'asin': asin,
@@ -261,15 +264,23 @@ class AmazonApi:
         browse_node_ids: list[str],
         languages_of_preference: list[str] = None,
         **kwargs) -> list[models.BrowseNode]:
-        """Get browse nodes information from Amazon.
+        """Returns the specified browse node's information like name, children and ancestors.
 
         Args:
-            browse_nodes (list): List of strings containing the browse node ids.
-            async_req (bool, optional): Specify if a thread should be created to
-                run the request. Defaults to False.
+            browse_node_ids (``list[str]``): List of browse node ids. A browse node id is a unique
+                ID assigned by Amazon that identifies a product category/sub-category.
+            languages_of_preference (``list[str]``, optional): Languages in order of preference in
+                which the item information should be returned.
+            kwargs (``dict``, optional): Any other arguments to be passed to the Amazon API.
 
         Returns:
-            dict: A dictionary containing the browse node information.
+            ``list[models.BrowseNode]``: A list of browse nodes.
+
+        Raises:
+            ``InvalidArgumentException``
+            ``MalformedRequestException``
+            ``ApiRequestException``
+            ``ItemsNotFoudException``
         """
 
         kwargs.update({
