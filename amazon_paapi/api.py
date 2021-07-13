@@ -9,10 +9,8 @@ an easier way.
 from . import models
 from .sdk.api.default_api import DefaultApi
 from .errors import InvalidArgumentException
-from .helpers.arguments import check_browse_nodes_args, check_search_args, check_variations_args, get_items_ids
-from .helpers.requests import (get_browse_nodes_request, get_browse_nodes_response, get_items_request,
-                               get_items_response, get_search_items_request, get_search_items_response,
-                               get_variations_request, get_variations_response)
+from .helpers import arguments
+from .helpers import requests
 from .helpers.generators import get_list_chunks
 
 from typing import Union
@@ -92,13 +90,13 @@ class AmazonApi:
             'languages_of_preference': languages_of_preference
             })
 
-        items_ids = get_items_ids(items)
+        items_ids = arguments.get_items_ids(items)
         results = []
 
         for asin_chunk in get_list_chunks(items_ids, chunk_size=10):
-            request = get_items_request(self, asin_chunk, **kwargs)
+            request = requests.get_items_request(self, asin_chunk, **kwargs)
             self._throttle()
-            items_response = get_items_response(self, request)
+            items_response = requests.get_items_response(self, request)
             results.extend(items_response)
 
         return results
@@ -203,10 +201,10 @@ class AmazonApi:
             'sort_by': sort_by,
         })
 
-        check_search_args(**kwargs)
-        request = get_search_items_request(self, **kwargs)
+        arguments.check_search_args(**kwargs)
+        request = requests.get_search_items_request(self, **kwargs)
         self._throttle()
-        return get_search_items_response(self, request)
+        return requests.get_search_items_response(self, request)
 
 
     def get_variations(self,
@@ -253,10 +251,10 @@ class AmazonApi:
             'merchant': merchant
         })
 
-        check_variations_args(**kwargs)
-        request = get_variations_request(self, **kwargs)
+        arguments.check_variations_args(**kwargs)
+        request = requests.get_variations_request(self, **kwargs)
         self._throttle()
-        return get_variations_response(self, request)
+        return requests.get_variations_response(self, request)
 
 
     def get_browse_nodes(self,
@@ -279,10 +277,10 @@ class AmazonApi:
             'languages_of_preference': languages_of_preference
         })
 
-        check_browse_nodes_args(**kwargs)
-        request = get_browse_nodes_request(self, **kwargs)
+        arguments.check_browse_nodes_args(**kwargs)
+        request = requests.get_browse_nodes_request(self, **kwargs)
         self._throttle()
-        return get_browse_nodes_response(self, request)
+        return requests.get_browse_nodes_response(self, request)
 
 
     def _throttle(self):
