@@ -86,7 +86,7 @@ def get_variations_response(amazon_api, request: GetVariationsRequest) -> Variat
     if response.variations_result == None:
         raise ItemsNotFoudException('No variation items have been found')
 
-    return response.variations_result.items
+    return response.variations_result
 
 
 def get_browse_nodes_request(amazon_api, **kwargs) -> GetBrowseNodesRequest:
