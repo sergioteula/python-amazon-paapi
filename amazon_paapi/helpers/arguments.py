@@ -2,7 +2,7 @@
 
 
 from ..tools import get_asin
-from ..errors import InvalidArgumentException
+from ..errors import InvalidArgumentException, AsinNotFoundException
 from typing import Union
 
 
@@ -12,10 +12,15 @@ def get_items_ids(items: Union[str, list[str]]) -> list[str]:
 
     if isinstance(items, str):
         items_ids = items.split(',')
-        return [get_asin(x.strip()) for x in items_ids]
+        items_ids = [get_asin(x.strip()) for x in items_ids]
 
     else:
-        return [get_asin(x.strip()) for x in items]
+        items_ids = [get_asin(x.strip()) for x in items]
+
+    if items_ids:
+        return items_ids
+    else:
+        raise AsinNotFoundException('No ASIN codes have been found.')
 
 
 def check_search_args(**kwargs):
