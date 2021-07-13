@@ -28,9 +28,9 @@ import re  # noqa: F401
 
 import six
 
-from amazon_paapi.sdk.models.languages import Languages  # noqa: F401,E501
-from amazon_paapi.sdk.models.single_integer_valued_attribute import SingleIntegerValuedAttribute  # noqa: F401,E501
-from amazon_paapi.sdk.models.single_string_valued_attribute import SingleStringValuedAttribute  # noqa: F401,E501
+from .languages import Languages  # noqa: F401,E501
+from .single_integer_valued_attribute import SingleIntegerValuedAttribute  # noqa: F401,E501
+from .single_string_valued_attribute import SingleStringValuedAttribute  # noqa: F401,E501
 
 
 class ContentInfo(object):

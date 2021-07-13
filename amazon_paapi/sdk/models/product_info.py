@@ -28,10 +28,10 @@ import re  # noqa: F401
 
 import six
 
-from amazon_paapi.sdk.models.dimension_based_attribute import DimensionBasedAttribute  # noqa: F401,E501
-from amazon_paapi.sdk.models.single_boolean_valued_attribute import SingleBooleanValuedAttribute  # noqa: F401,E501
-from amazon_paapi.sdk.models.single_integer_valued_attribute import SingleIntegerValuedAttribute  # noqa: F401,E501
-from amazon_paapi.sdk.models.single_string_valued_attribute import SingleStringValuedAttribute  # noqa: F401,E501
+from .dimension_based_attribute import DimensionBasedAttribute  # noqa: F401,E501
+from .single_boolean_valued_attribute import SingleBooleanValuedAttribute  # noqa: F401,E501
+from .single_integer_valued_attribute import SingleIntegerValuedAttribute  # noqa: F401,E501
+from .single_string_valued_attribute import SingleStringValuedAttribute  # noqa: F401,E501
 
 
 class ProductInfo(object):

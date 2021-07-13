@@ -28,8 +28,8 @@ import re  # noqa: F401
 
 import six
 
-from amazon_paapi.sdk.models.get_browse_nodes_resource import GetBrowseNodesResource  # noqa: F401,E501
-from amazon_paapi.sdk.models.partner_type import PartnerType  # noqa: F401,E501
+from .get_browse_nodes_resource import GetBrowseNodesResource  # noqa: F401,E501
+from .partner_type import PartnerType  # noqa: F401,E501
 
 
 class GetBrowseNodesRequest(object):

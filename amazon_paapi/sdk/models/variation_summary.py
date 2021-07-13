@@ -28,8 +28,8 @@ import re  # noqa: F401
 
 import six
 
-from amazon_paapi.sdk.models.price import Price  # noqa: F401,E501
-from amazon_paapi.sdk.models.variation_dimension import VariationDimension  # noqa: F401,E501
+from .price import Price  # noqa: F401,E501
+from .variation_dimension import VariationDimension  # noqa: F401,E501
 
 
 class VariationSummary(object):

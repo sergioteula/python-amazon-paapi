@@ -28,13 +28,13 @@ import re  # noqa: F401
 
 import six
 
-from amazon_paapi.sdk.models.condition import Condition  # noqa: F401,E501
-from amazon_paapi.sdk.models.get_items_resource import GetItemsResource  # noqa: F401,E501
-from amazon_paapi.sdk.models.item_id_type import ItemIdType  # noqa: F401,E501
-from amazon_paapi.sdk.models.merchant import Merchant  # noqa: F401,E501
-from amazon_paapi.sdk.models.offer_count import OfferCount  # noqa: F401,E501
-from amazon_paapi.sdk.models.partner_type import PartnerType  # noqa: F401,E501
-from amazon_paapi.sdk.models.properties import Properties  # noqa: F401,E501
+from .condition import Condition  # noqa: F401,E501
+from .get_items_resource import GetItemsResource  # noqa: F401,E501
+from .item_id_type import ItemIdType  # noqa: F401,E501
+from .merchant import Merchant  # noqa: F401,E501
+from .offer_count import OfferCount  # noqa: F401,E501
+from .partner_type import PartnerType  # noqa: F401,E501
+from .properties import Properties  # noqa: F401,E501
 
 
 class GetItemsRequest(object):

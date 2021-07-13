@@ -28,8 +28,8 @@ import re  # noqa: F401
 
 import six
 
-from amazon_paapi.sdk.models.offer_price import OfferPrice  # noqa: F401,E501
-from amazon_paapi.sdk.models.unit_based_attribute import UnitBasedAttribute  # noqa: F401,E501
+from .offer_price import OfferPrice  # noqa: F401,E501
+from .unit_based_attribute import UnitBasedAttribute  # noqa: F401,E501
 
 
 class DurationPrice(object):

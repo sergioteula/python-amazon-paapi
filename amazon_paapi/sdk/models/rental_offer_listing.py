@@ -28,11 +28,11 @@ import re  # noqa: F401
 
 import six
 
-from amazon_paapi.sdk.models.duration_price import DurationPrice  # noqa: F401,E501
-from amazon_paapi.sdk.models.offer_availability import OfferAvailability  # noqa: F401,E501
-from amazon_paapi.sdk.models.offer_condition import OfferCondition  # noqa: F401,E501
-from amazon_paapi.sdk.models.offer_delivery_info import OfferDeliveryInfo  # noqa: F401,E501
-from amazon_paapi.sdk.models.offer_merchant_info import OfferMerchantInfo  # noqa: F401,E501
+from .duration_price import DurationPrice  # noqa: F401,E501
+from .offer_availability import OfferAvailability  # noqa: F401,E501
+from .offer_condition import OfferCondition  # noqa: F401,E501
+from .offer_delivery_info import OfferDeliveryInfo  # noqa: F401,E501
+from .offer_merchant_info import OfferMerchantInfo  # noqa: F401,E501
 
 
 class RentalOfferListing(object):

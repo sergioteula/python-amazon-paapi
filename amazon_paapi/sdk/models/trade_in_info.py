@@ -28,7 +28,7 @@ import re  # noqa: F401
 
 import six
 
-from amazon_paapi.sdk.models.trade_in_price import TradeInPrice  # noqa: F401,E501
+from .trade_in_price import TradeInPrice  # noqa: F401,E501
 
 
 class TradeInInfo(object):
