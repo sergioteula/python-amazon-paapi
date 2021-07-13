@@ -1,0 +1,117 @@
+# coding: utf-8
+
+# flake8: noqa
+
+from __future__ import absolute_import
+
+"""
+  Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License").
+  You may not use this file except in compliance with the License.
+  A copy of the License is located at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  or in the "license" file accompanying this file. This file is distributed
+  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  express or implied. See the License for the specific language governing
+  permissions and limitations under the License.
+"""
+
+"""
+    ProductAdvertisingAPI
+
+    https://webservices.amazon.com/paapi5/documentation/index.html  # noqa: E501
+"""
+
+
+# import models into model package
+from .availability import Availability
+from .browse_node import BrowseNode
+from .browse_node_ancestor import BrowseNodeAncestor
+from .browse_node_child import BrowseNodeChild
+from .browse_node_info import BrowseNodeInfo
+from .browse_nodes_result import BrowseNodesResult
+from .by_line_info import ByLineInfo
+from .classifications import Classifications
+from .condition import Condition
+from .content_info import ContentInfo
+from .content_rating import ContentRating
+from .contributor import Contributor
+from .customer_reviews import CustomerReviews
+from .delivery_flag import DeliveryFlag
+from .dimension_based_attribute import DimensionBasedAttribute
+from .duration_price import DurationPrice
+from .error_data import ErrorData
+from .external_ids import ExternalIds
+from .get_browse_nodes_request import GetBrowseNodesRequest
+from .get_browse_nodes_resource import GetBrowseNodesResource
+from .get_browse_nodes_response import GetBrowseNodesResponse
+from .get_items_request import GetItemsRequest
+from .get_items_resource import GetItemsResource
+from .get_items_response import GetItemsResponse
+from .get_variations_request import GetVariationsRequest
+from .get_variations_resource import GetVariationsResource
+from .get_variations_response import GetVariationsResponse
+from .image_size import ImageSize
+from .image_type import ImageType
+from .images import Images
+from .item import Item
+from .item_id_type import ItemIdType
+from .item_info import ItemInfo
+from .items_result import ItemsResult
+from .language_type import LanguageType
+from .languages import Languages
+from .manufacture_info import ManufactureInfo
+from .max_price import MaxPrice
+from .merchant import Merchant
+from .min_price import MinPrice
+from .min_reviews_rating import MinReviewsRating
+from .min_saving_percent import MinSavingPercent
+from .multi_valued_attribute import MultiValuedAttribute
+from .offer_availability import OfferAvailability
+from .offer_condition import OfferCondition
+from .offer_condition_note import OfferConditionNote
+from .offer_count import OfferCount
+from .offer_delivery_info import OfferDeliveryInfo
+from .offer_listing import OfferListing
+from .offer_loyalty_points import OfferLoyaltyPoints
+from .offer_merchant_info import OfferMerchantInfo
+from .offer_price import OfferPrice
+from .offer_program_eligibility import OfferProgramEligibility
+from .offer_promotion import OfferPromotion
+from .offer_savings import OfferSavings
+from .offer_shipping_charge import OfferShippingCharge
+from .offer_sub_condition import OfferSubCondition
+from .offer_summary import OfferSummary
+from .offers import Offers
+from .partner_type import PartnerType
+from .price import Price
+from .product_advertising_api_client_exception import ProductAdvertisingAPIClientException
+from .product_advertising_api_service_exception import ProductAdvertisingAPIServiceException
+from .product_info import ProductInfo
+from .properties import Properties
+from .rating import Rating
+from .refinement import Refinement
+from .refinement_bin import RefinementBin
+from .rental_offer_listing import RentalOfferListing
+from .rental_offers import RentalOffers
+from .search_items_request import SearchItemsRequest
+from .search_items_resource import SearchItemsResource
+from .search_items_response import SearchItemsResponse
+from .search_refinements import SearchRefinements
+from .search_result import SearchResult
+from .single_boolean_valued_attribute import SingleBooleanValuedAttribute
+from .single_integer_valued_attribute import SingleIntegerValuedAttribute
+from .single_string_valued_attribute import SingleStringValuedAttribute
+from .sort_by import SortBy
+from .technical_info import TechnicalInfo
+from .trade_in_info import TradeInInfo
+from .trade_in_price import TradeInPrice
+from .unit_based_attribute import UnitBasedAttribute
+from .variation_attribute import VariationAttribute
+from .variation_dimension import VariationDimension
+from .variation_summary import VariationSummary
+from .variations_result import VariationsResult
+from .website_sales_rank import WebsiteSalesRank

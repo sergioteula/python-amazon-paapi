@@ -5,13 +5,13 @@ This module allows to get product information from Amazon using the official API
 an easier way.
 """
 
-from paapi5_python_sdk.api.default_api import DefaultApi
-from paapi5_python_sdk.get_items_request import GetItemsRequest
-from paapi5_python_sdk.search_items_request import SearchItemsRequest
-from paapi5_python_sdk.get_variations_request import GetVariationsRequest
-from paapi5_python_sdk.get_browse_nodes_request import GetBrowseNodesRequest
-from paapi5_python_sdk.partner_type import PartnerType
-from paapi5_python_sdk.rest import ApiException
+from .paapi5_python_sdk.api.default_api import DefaultApi
+from .paapi5_python_sdk.get_items_request import GetItemsRequest
+from .paapi5_python_sdk.search_items_request import SearchItemsRequest
+from .paapi5_python_sdk.get_variations_request import GetVariationsRequest
+from .paapi5_python_sdk.get_browse_nodes_request import GetBrowseNodesRequest
+from .paapi5_python_sdk.partner_type import PartnerType
+from .paapi5_python_sdk.rest import ApiException
 
 from amazon.constant import DOMAINS, REGIONS, CONDITION
 from amazon.constant import PRODUCT_RESOURCES, SEARCH_RESOURCES, VARIATION_RESOURCES
@@ -20,7 +20,11 @@ from amazon.exception import AmazonException
 from amazon.parse import parse_product, AmazonBrowseNode, parse_browsenode
 from amazon.tools import get_asin, chunks
 
+import logging
 import time
+
+
+logger = logging.getLogger(__name__)
 
 
 class AmazonAPI:
@@ -36,6 +40,7 @@ class AmazonAPI:
         This value determines wait time between API calls.
     """
     def __init__(self, key, secret, tag, country, throttling=0.8):
+        logger.warning('This version of the module is deprecated and it will be removed in future updates. Please upgrade to version 4.0.0 or higher.')
         self.key = key
         self.secret = secret
         self.tag = tag
@@ -89,6 +94,7 @@ class AmazonAPI:
                 or None if no results.
         """
 
+        logger.warning('This version of the module is deprecated and it will be removed in future updates. Please upgrade to version 4.0.0 or higher.')
         # Clean up input data and remove 10 items limit from Amazon API
         if isinstance(product_ids, str):
             product_ids = [x.strip() for x in product_ids.split(',')]
@@ -226,6 +232,8 @@ class AmazonAPI:
             list of instances: A list containing 1 instance for each product
                 or None if no results.
         """
+
+        logger.warning('This version of the module is deprecated and it will be removed in future updates. Please upgrade to version 4.0.0 or higher.')
         if items_per_page > 10 or items_per_page < 1:
             raise AmazonException('ValueError', 'Arg items_per_page should be between 1 and 10')
         if item_count > 100 or item_count < 1:
@@ -331,6 +339,8 @@ class AmazonAPI:
             list of instances: A list containing 1 instance for each product
                 or None if no results.
         """
+
+        logger.warning('This version of the module is deprecated and it will be removed in future updates. Please upgrade to version 4.0.0 or higher.')
         if items_per_page > 10 or items_per_page < 1:
             raise AmazonException('ValueError', 'Arg items_per_page should be between 1 and 10')
         if item_count > 100 or item_count < 1:
@@ -404,6 +414,7 @@ class AmazonAPI:
             dict: A dictionary containing the browse node information.
         """
 
+        logger.warning('This version of the module is deprecated and it will be removed in future updates. Please upgrade to version 4.0.0 or higher.')
         if isinstance(browse_nodes, list) is False:
             raise Exception('Browse nodes parameter should be a list')
         elif not browse_nodes:
