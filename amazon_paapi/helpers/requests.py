@@ -3,7 +3,7 @@
 
 from ..sdk.models.get_browse_nodes_resource import GetBrowseNodesResource
 from ..sdk.models.get_browse_nodes_request import GetBrowseNodesRequest
-from ..models.api_item import Item
+from ..models.item_result import Item
 from ..models.search_result import SearchResult
 from ..models.variations_result import VariationsResult
 from ..models.browse_nodes_result import BrowseNode

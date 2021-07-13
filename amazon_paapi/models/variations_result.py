@@ -1,4 +1,4 @@
-from .api_item import Item
+from .item_result import Item
 from ..sdk.models import VariationsResult, VariationSummary
 
 class ApiPrice:
