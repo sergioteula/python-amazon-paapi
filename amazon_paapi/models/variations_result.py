@@ -1,3 +1,4 @@
+from typing import List
 from .item_result import Item
 from ..sdk.models import VariationsResult, VariationSummary
 
@@ -10,7 +11,7 @@ class ApiPrice:
 class ApiVariationDimension:
     display_name: str
     name: str
-    values: list[str]
+    values: List[str]
 
 
 class ApiVariationPrice:
@@ -21,9 +22,9 @@ class ApiVariationSummary(VariationSummary):
     page_count: int
     price: ApiVariationPrice
     variation_count: int
-    variation_dimensions: list[ApiVariationDimension]
+    variation_dimensions: List[ApiVariationDimension]
 
 
 class VariationsResult(VariationsResult):
-    items: list[Item]
+    items: List[Item]
     variation_summary: ApiVariationSummary

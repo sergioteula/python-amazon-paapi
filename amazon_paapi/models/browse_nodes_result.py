@@ -1,3 +1,4 @@
+from typing import List
 from ..sdk import models
 
 
@@ -16,5 +17,5 @@ class BrowseNode(models.BrowseNode):
     id: str
     is_root: bool
     context_free_name: str
-    children: list[BrowseNodeChild]
+    children: List[BrowseNodeChild]
     ancestor: BrowseNodeAncestor
