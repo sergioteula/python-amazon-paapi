@@ -209,14 +209,14 @@ class ApiBrowseNodeInfo(models.BrowseNodeInfo):
 
 """Main model"""
 class Item(models.Item):
-    item_info: ApiItemInfo
-    images: ApiImages
-    offers: ApiOffers
-    browse_node_info: ApiBrowseNodeInfo
     asin: str
-    detail_page_url: str
-    parent_asin: str
-    score: float
-    rental_offers: models.RentalOffers
+    browse_node_info: ApiBrowseNodeInfo
     customer_reviews: models.CustomerReviews
+    detail_page_url: str
+    images: ApiImages
+    item_info: ApiItemInfo
+    offers: ApiOffers
+    parent_asin: str
+    rental_offers: models.RentalOffers
+    score: float
     variation_attributes: list[models.VariationAttribute]

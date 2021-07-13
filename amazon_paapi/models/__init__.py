@@ -1,5 +1,5 @@
 from .regions import Country
-from .api_item import Item
+from .item_result import Item
 from .search_result import SearchResult
 from .browse_nodes_result import BrowseNode
 from .variations_result import VariationsResult
