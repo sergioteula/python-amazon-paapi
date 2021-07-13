@@ -8,6 +8,8 @@ A simple Python wrapper for the [last version of the Amazon Product Advertising 
 [![Support](https://img.shields.io/badge/Support-Good-brightgreen)](https://github.com/sergioteula/python-amazon-paapi/issues)
 [![Amazon API](https://img.shields.io/badge/Amazon%20API-5.0-%23FD9B15)](https://webservices.amazon.com/paapi5/documentation/)
 
+> If you are still using the old version, go [here](https://github.com/sergioteula/python-amazon-paapi/blob/master/amazon/README).
+
 ## Features
 
 - Object oriented interface for simple usage.
