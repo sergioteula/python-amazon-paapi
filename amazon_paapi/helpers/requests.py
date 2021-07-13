@@ -1,8 +1,6 @@
 """Module with helper functions for creating requests."""
 
 
-from ..sdk.models.get_browse_nodes_resource import GetBrowseNodesResource
-from ..sdk.models.get_browse_nodes_request import GetBrowseNodesRequest
 from ..models.item_result import Item
 from ..models.search_result import SearchResult
 from ..models.variations_result import VariationsResult
@@ -15,6 +13,8 @@ from ..sdk.models.search_items_resource import SearchItemsResource
 from ..sdk.models.search_items_request import SearchItemsRequest
 from ..sdk.models.get_variations_resource import GetVariationsResource
 from ..sdk.models.get_variations_request import GetVariationsRequest
+from ..sdk.models.get_browse_nodes_resource import GetBrowseNodesResource
+from ..sdk.models.get_browse_nodes_request import GetBrowseNodesRequest
 from ..sdk.rest import ApiException
 import inspect
 
