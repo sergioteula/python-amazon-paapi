@@ -1,6 +1,7 @@
 """Module with helper functions for creating requests."""
 
 
+from typing import List
 from ..models.item_result import Item
 from ..models.search_result import SearchResult
 from ..models.variations_result import VariationsResult
@@ -19,7 +20,7 @@ from ..sdk.rest import ApiException
 import inspect
 
 
-def get_items_request(amazon_api, asin_chunk: list[str], **kwargs) -> GetItemsRequest:
+def get_items_request(amazon_api, asin_chunk: List[str], **kwargs) -> GetItemsRequest:
     try:
         return GetItemsRequest(resources=_get_request_resources(GetItemsResource),
                                partner_type=PartnerType.ASSOCIATES,
@@ -31,7 +32,7 @@ def get_items_request(amazon_api, asin_chunk: list[str], **kwargs) -> GetItemsRe
         raise MalformedRequestException('Parameters for get_items request are not correct: ' + str(e))
 
 
-def get_items_response(amazon_api, request: GetItemsRequest) -> list[Item]:
+def get_items_response(amazon_api, request: GetItemsRequest) -> List[Item]:
     try:
         response = amazon_api._api.get_items(request)
     except ApiException as e:
@@ -100,7 +101,7 @@ def get_browse_nodes_request(amazon_api, **kwargs) -> GetBrowseNodesRequest:
         raise MalformedRequestException('Parameters for get_browse_nodes request are not correct: ' + str(e))
 
 
-def get_browse_nodes_response(amazon_api, request: GetBrowseNodesRequest) -> list[BrowseNode]:
+def get_browse_nodes_response(amazon_api, request: GetBrowseNodesRequest) -> List[BrowseNode]:
     try:
         response = amazon_api._api.get_browse_nodes(request)
     except ApiException as e:
@@ -112,7 +113,7 @@ def get_browse_nodes_response(amazon_api, request: GetBrowseNodesRequest) -> lis
     return response.browse_nodes_result.browse_nodes
 
 
-def _get_request_resources(resources) -> list[str]:
+def _get_request_resources(resources) -> List[str]:
     resources = inspect.getmembers(resources, lambda a:not(inspect.isroutine(a)))
     resources = [x[-1] for x in resources if isinstance(x[-1], str) and x[0][0:2] != '__']
     return resources

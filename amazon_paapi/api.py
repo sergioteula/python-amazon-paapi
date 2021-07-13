@@ -11,7 +11,7 @@ from .helpers import arguments
 from .helpers import requests
 from .helpers.generators import get_list_chunks
 
-from typing import Union
+from typing import List, Union
 import time
 
 
@@ -49,12 +49,12 @@ class AmazonApi:
 
 
     def get_items(self,
-        items: Union[str, list[str]],
+        items: Union[str, List[str]],
         condition: models.Condition = None,
         merchant: models.Merchant = None,
         currency_of_preference: str = None,
-        languages_of_preference: list[str] = None,
-        **kwargs) -> list[models.Item]:
+        languages_of_preference: List[str] = None,
+        **kwargs) -> List[models.Item]:
 
         """Get items information from Amazon.
 
@@ -113,8 +113,8 @@ class AmazonApi:
         browse_node_id: str = None,
         condition: models.Condition = None,
         currency_of_preference: str = None,
-        delivery_flags: list[str] = None,
-        languages_of_preference: list[str] = None,
+        delivery_flags: List[str] = None,
+        languages_of_preference: List[str] = None,
         merchant: models.Merchant = None,
         max_price: int = None,
         min_price: int = None,
@@ -211,7 +211,7 @@ class AmazonApi:
         variation_page: int = None,
         condition: models.Condition = None,
         currency_of_preference: str = None,
-        languages_of_preference: list[str] = None,
+        languages_of_preference: List[str] = None,
         merchant: models.Merchant = None,
         **kwargs) -> models.VariationsResult:
         """Returns a set of items that are the same product, but differ according to a
@@ -261,9 +261,9 @@ class AmazonApi:
 
 
     def get_browse_nodes(self,
-        browse_node_ids: list[str],
-        languages_of_preference: list[str] = None,
-        **kwargs) -> list[models.BrowseNode]:
+        browse_node_ids: List[str],
+        languages_of_preference: List[str] = None,
+        **kwargs) -> List[models.BrowseNode]:
         """Returns the specified browse node's information like name, children and ancestors.
 
         Args:

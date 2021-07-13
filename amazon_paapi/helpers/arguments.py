@@ -3,12 +3,12 @@
 
 from ..tools import get_asin
 from ..errors import InvalidArgumentException, AsinNotFoundException
-from typing import Union
+from typing import List, Union
 
 
-def get_items_ids(items: Union[str, list[str]]) -> list[str]:
-    if not isinstance(items, str) and not isinstance(items, list):
-        raise InvalidArgumentException('Invalid items argument, it should be a string or list of strings')
+def get_items_ids(items: Union[str, List[str]]) -> List[str]:
+    if not isinstance(items, str) and not isinstance(items, List):
+        raise InvalidArgumentException('Invalid items argument, it should be a string or List of strings')
 
     if isinstance(items, str):
         items_ids = items.split(',')
@@ -54,6 +54,6 @@ def check_variations_args(**kwargs):
 
 
 def check_browse_nodes_args(**kwargs):
-    if not isinstance(kwargs['browse_node_ids'], list):
-        error_message = 'Argument browse_node_ids should be a list of strings.'
+    if not isinstance(kwargs['browse_node_ids'], List):
+        error_message = 'Argument browse_node_ids should be a List of strings.'
         raise InvalidArgumentException(error_message)

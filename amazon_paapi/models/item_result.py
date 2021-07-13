@@ -1,3 +1,4 @@
+from typing import List
 from ..sdk import models
 
 """Shared models"""
@@ -6,14 +7,14 @@ class ApiLabelLocale:
     locale: str
 
 class ApiMultiValuedAttributeStr(ApiLabelLocale, models.MultiValuedAttribute):
-    display_values: list[str]
+    display_values: List[str]
 
 class ApiDisplayValuesType:
     display_value: str
     type: str
 
 class ApiMultiValuedAttributeType(ApiLabelLocale, models.MultiValuedAttribute):
-    display_values: list[ApiDisplayValuesType]
+    display_values: List[ApiDisplayValuesType]
 
 class ApiUnitBasedAttribute(ApiLabelLocale, models.UnitBasedAttribute):
     display_value: float
@@ -47,7 +48,7 @@ class ApiImageType(models.ImageType):
 
 class ApiImages(models.Images):
     primary: ApiImageType
-    variants: list[ApiImageType]
+    variants: List[ApiImageType]
 
 """Item info models"""
 class ApiByLineInfo(models.ByLineInfo):
@@ -182,12 +183,12 @@ class ApiListings(models.OfferListing):
     merchant_info: ApiOfferMerchantInfo
     price: ApiOfferPrice
     program_eligibility: ApiOfferProgramEligibility
-    promotions: list[ApiPromotion]
+    promotions: List[ApiPromotion]
     saving_basis: ApiPrice
     violates_map: bool
 
 class ApiOffers(models.Offers):
-    listings: list[ApiListings]
+    listings: List[ApiListings]
 
 """Browse node info model"""
 class ApiBrowseNode(models.BrowseNode):
@@ -204,7 +205,7 @@ class ApiWebsiteSalesRank(models.WebsiteSalesRank):
     sales_rank: str
 
 class ApiBrowseNodeInfo(models.BrowseNodeInfo):
-    browse_nodes: list[ApiBrowseNode]
+    browse_nodes: List[ApiBrowseNode]
     website_sales_rank: ApiWebsiteSalesRank
 
 """Main model"""
@@ -219,4 +220,4 @@ class Item(models.Item):
     parent_asin: str
     rental_offers: models.RentalOffers
     score: float
-    variation_attributes: list[models.VariationAttribute]
+    variation_attributes: List[models.VariationAttribute]
