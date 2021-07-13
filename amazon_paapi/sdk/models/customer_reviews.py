@@ -28,7 +28,7 @@ import re  # noqa: F401
 
 import six
 
-from amazon_paapi.sdk.models.rating import Rating  # noqa: F401,E501
+from .rating import Rating  # noqa: F401,E501
 
 
 class CustomerReviews(object):

@@ -28,8 +28,8 @@ import re  # noqa: F401
 
 import six
 
-from amazon_paapi.sdk.models.contributor import Contributor  # noqa: F401,E501
-from amazon_paapi.sdk.models.single_string_valued_attribute import SingleStringValuedAttribute  # noqa: F401,E501
+from .contributor import Contributor  # noqa: F401,E501
+from .single_string_valued_attribute import SingleStringValuedAttribute  # noqa: F401,E501
 
 
 class ByLineInfo(object):

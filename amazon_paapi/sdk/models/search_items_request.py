@@ -28,19 +28,19 @@ import re  # noqa: F401
 
 import six
 
-from amazon_paapi.sdk.models.availability import Availability  # noqa: F401,E501
-from amazon_paapi.sdk.models.condition import Condition  # noqa: F401,E501
-from amazon_paapi.sdk.models.delivery_flag import DeliveryFlag  # noqa: F401,E501
-from amazon_paapi.sdk.models.max_price import MaxPrice  # noqa: F401,E501
-from amazon_paapi.sdk.models.merchant import Merchant  # noqa: F401,E501
-from amazon_paapi.sdk.models.min_price import MinPrice  # noqa: F401,E501
-from amazon_paapi.sdk.models.min_reviews_rating import MinReviewsRating  # noqa: F401,E501
-from amazon_paapi.sdk.models.min_saving_percent import MinSavingPercent  # noqa: F401,E501
-from amazon_paapi.sdk.models.offer_count import OfferCount  # noqa: F401,E501
-from amazon_paapi.sdk.models.partner_type import PartnerType  # noqa: F401,E501
-from amazon_paapi.sdk.models.properties import Properties  # noqa: F401,E501
-from amazon_paapi.sdk.models.search_items_resource import SearchItemsResource  # noqa: F401,E501
-from amazon_paapi.sdk.models.sort_by import SortBy  # noqa: F401,E501
+from .availability import Availability  # noqa: F401,E501
+from .condition import Condition  # noqa: F401,E501
+from .delivery_flag import DeliveryFlag  # noqa: F401,E501
+from .max_price import MaxPrice  # noqa: F401,E501
+from .merchant import Merchant  # noqa: F401,E501
+from .min_price import MinPrice  # noqa: F401,E501
+from .min_reviews_rating import MinReviewsRating  # noqa: F401,E501
+from .min_saving_percent import MinSavingPercent  # noqa: F401,E501
+from .offer_count import OfferCount  # noqa: F401,E501
+from .partner_type import PartnerType  # noqa: F401,E501
+from .properties import Properties  # noqa: F401,E501
+from .search_items_resource import SearchItemsResource  # noqa: F401,E501
+from .sort_by import SortBy  # noqa: F401,E501
 
 
 class SearchItemsRequest(object):

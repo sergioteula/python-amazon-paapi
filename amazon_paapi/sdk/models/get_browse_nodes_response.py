@@ -28,8 +28,8 @@ import re  # noqa: F401
 
 import six
 
-from amazon_paapi.sdk.models.browse_nodes_result import BrowseNodesResult  # noqa: F401,E501
-from amazon_paapi.sdk.models.error_data import ErrorData  # noqa: F401,E501
+from .browse_nodes_result import BrowseNodesResult  # noqa: F401,E501
+from .error_data import ErrorData  # noqa: F401,E501
 
 
 class GetBrowseNodesResponse(object):

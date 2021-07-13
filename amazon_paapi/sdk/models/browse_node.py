@@ -28,8 +28,8 @@ import re  # noqa: F401
 
 import six
 
-from amazon_paapi.sdk.models.browse_node_ancestor import BrowseNodeAncestor  # noqa: F401,E501
-from amazon_paapi.sdk.models.browse_node_child import BrowseNodeChild  # noqa: F401,E501
+from .browse_node_ancestor import BrowseNodeAncestor  # noqa: F401,E501
+from .browse_node_child import BrowseNodeChild  # noqa: F401,E501
 
 
 class BrowseNode(object):
