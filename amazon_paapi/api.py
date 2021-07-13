@@ -1,444 +1,301 @@
 """Amazon Product Advertising API wrapper for Python
 
 A simple Python wrapper for the last version of the Amazon Product Advertising API.
-This module allows to get product information from Amazon using the official API in
-an easier way.
 """
 
+
+from . import models
 from .sdk.api.default_api import DefaultApi
-from .sdk.models.get_items_request import GetItemsRequest
-from .sdk.models.search_items_request import SearchItemsRequest
-from .sdk.models.get_variations_request import GetVariationsRequest
-from .sdk.models.get_browse_nodes_request import GetBrowseNodesRequest
-from .sdk.models.partner_type import PartnerType
-from .sdk.rest import ApiException
+from .errors import InvalidArgumentException
+from .helpers import arguments
+from .helpers import requests
+from .helpers.generators import get_list_chunks
 
-from . import constants
-from .exceptions import AmazonException
-from .parse import parse_product, AmazonBrowseNode, parse_browsenode
-from .tools import get_asin, chunks
-
+from typing import List, Union
 import time
 
 
 class AmazonApi:
-    """Creates an instance containing your API credentials.
+    """Provides methods to get information from Amazon using your API credentials.
 
     Args:
-        key (str): Your API key.
-        secret (str): Your API secret.
-        tag (str): The tag you want to use for the URL.
-        country (str): Country code. Use one of the following:
-            AU, BR, CA, FR, DE, IN, IT, JP, MX, NL, PL, SG, SA, ES, TR, AE, UK, US, SE.
-        throttling (float, optional): It should be greater than 0 or False to disable throttling.
-        This value determines wait time between API calls.
+        key (``str``): Your API key.
+        secret (``str``): Your API secret.
+        tag (``str``): Your affiliate tracking id, used to create the affiliate link.
+        country (``models.Country``): Country code for your affiliate account.
+        throttling (``float``, optional): Wait time in seconds between API calls. Use it to avoid
+            reaching Amazon limits. Defaults to 1 second.
+
+    Raises:
+        ``InvalidArgumentException``
     """
-    def __init__(self, key, secret, tag, country, throttling=0.8):
-        self.key = key
-        self.secret = secret
-        self.tag = tag
+
+    def __init__(self, key: str, secret: str, tag: str, country: models.Country, throttling: float = 1, **kwargs):
+        self._key = key
+        self._secret = secret
+        self._tag = tag
+        self._country = country
+        self._throttling = float(throttling)
+        self._last_query_time = time.time() - throttling
+
         try:
-            if throttling is True:
-                raise ValueError
-            elif throttling is False:
-                self.throttling = False
-            else:
-                self.throttling = float(throttling)
-                if self.throttling <= 0:
-                    raise ValueError
-        except ValueError:
-            raise AmazonException('ValueError', 'Throttling should be False or greater than 0')
-        self.country = country
-        try:
-            self.host = 'webservices.amazon.' + constants.DOMAINS[country]
-            self.region = constants.REGIONS[country]
-            self.marketplace = 'www.amazon.' + constants.DOMAINS[country]
+            self._host = 'webservices.amazon.' + models.regions.DOMAINS[country]
+            self._region = models.regions.REGIONS[country]
+            self._marketplace = 'www.amazon.' + models.regions.DOMAINS[country]
         except KeyError:
-            raise AmazonException('KeyError', 'Invalid country code')
-        self.last_query_time = time.time()
-        self.api = DefaultApi(access_key=self.key, secret_key=self.secret, host=self.host,
-                              region=self.region)
+            raise InvalidArgumentException('Country code is not correct')
+
+        self._api = DefaultApi(key, secret, self._host, self._region)
+
+
+    def get_items(self,
+        items: Union[str, List[str]],
+        condition: models.Condition = None,
+        merchant: models.Merchant = None,
+        currency_of_preference: str = None,
+        languages_of_preference: List[str] = None,
+        **kwargs) -> List[models.Item]:
+
+        """Get items information from Amazon.
+
+        Args:
+            items (``str`` | ``list[str]``): One or more items, using ASIN or product URL. Items
+                in string format should be separated by commas.
+            condition (``models.Condition``, optional): Filters offers by condition type.
+                Defaults to Any.
+            merchant (``models.Merchant``, optional): Filters search results to return items having
+                at least one offer sold by target merchant. Defaults to All.
+            currency_of_preference (``str``, optional): Currency of preference in which the prices
+                information should be returned. Expected currency code format is ISO 4217.
+            languages_of_preference (``list[str]``, optional): Languages in order of preference in
+                which the item information should be returned.
+            kwargs (``dict``, optional): Any other arguments to be passed to the Amazon API.
+
+        Returns:
+            ``list[models.Item]``: A list of items with Amazon information.
+
+        Raises:
+            ``InvalidArgumentException``
+            ``MalformedRequestException``
+            ``ApiRequestException``
+            ``ItemsNotFoudException``
+        """
+
+        kwargs.update({
+            'condition': condition,
+            'merchant': merchant,
+            'currency_of_preference': currency_of_preference,
+            'languages_of_preference': languages_of_preference
+            })
+
+        items_ids = arguments.get_items_ids(items)
+        results = []
+
+        for asin_chunk in get_list_chunks(items_ids, chunk_size=10):
+            request = requests.get_items_request(self, asin_chunk, **kwargs)
+            self._throttle()
+            items_response = requests.get_items_response(self, request)
+            results.extend(items_response)
+
+        return results
+
+
+    def search_items(self,
+        item_count: int = None,
+        item_page: int = None,
+        actor: str = None,
+        artist: str = None,
+        author: str = None,
+        brand: str = None,
+        keywords: str = None,
+        title: str = None,
+        availability: models.Availability = None,
+        browse_node_id: str = None,
+        condition: models.Condition = None,
+        currency_of_preference: str = None,
+        delivery_flags: List[str] = None,
+        languages_of_preference: List[str] = None,
+        merchant: models.Merchant = None,
+        max_price: int = None,
+        min_price: int = None,
+        min_saving_percent: int = None,
+        min_reviews_rating: int = None,
+        search_index: str = None,
+        sort_by: models.SortBy = None,
+        **kwargs) -> models.SearchResult:
+        """Searches for items on Amazon based on a search query. At least one of the following
+        parameters should be specified: ``keywords``, ``actor``, ``artist``, ``author``,
+        ``brand`` or ``title``.
+
+        Args:
+            item_count (``int``, optional): Number of items returned. Should be between 1 and 10.
+                Defaults to 10.
+            item_page (``int``, optional): The specific page of items to be returned from the available
+                results. Should be between 1 and 10. Defaults to 1.
+            actor (``str``, optional): Actor name associated with the item.
+            artist (``str``, optional): Artist name associated with the item.
+            author (``str``, optional): Author name associated with the item.
+            brand (``str``, optional): Brand name associated with the item.
+            keywords (``str``, optional): A word or phrase that describes an item.
+            title (``str``, optional): Title associated with the item.
+            availability (``models.Availability``, optional): Filters available items on Amazon.
+                Defaults to Available.
+            browse_node_id (``str``, optional): A unique ID assigned by Amazon that identifies a product
+                category or subcategory.
+            condition (``models.Condition``, optional): Filters offers by condition type. Defaults to Any.
+            currency_of_preference (``str``, optional): Currency of preference in which the prices
+                information should be returned. Expected currency code format is ISO 4217.
+            delivery_flags (``list[str]``): Filters items which satisfy a certain delivery program.
+            languages_of_preference (``list[str]``, optional): Languages in order of preference in
+                which the item information should be returned.
+            merchant (``models.Merchant``, optional): Filters search results to return items having
+                at least one offer sold by target merchant. Defaults to All.
+            max_price (``int``, optional): Filters search results to items with at least one offer price
+                below the specified value. Prices appear in lowest currency denomination.
+                For example, $31.41 should be passed as 3141 or 28.00€ should be 2800.
+            min_price (``int``, optional): Filters search results to items with at least one offer price
+                above the specified value. Prices appear in lowest currency denomination.
+                For example, $31.41 should be passed as 3141 or 28.00€ should be 2800.
+            min_saving_percent (``int``, optional): Filters search results to items with at least one
+                offer having saving percentage above the specified value. Value should be
+                positive integer less than 100.
+            min_reviews_rating (``int``, optional): Filters search results to items with customer review
+                ratings above specified value. Value should be positive integer less than 5.
+            search_index (``str``, optional): Indicates the product category to search. Defaults to All.
+            sort_by (``models.SortBy``, optional): The way in which items are sorted.
+            kwargs (``dict``, optional): Any other arguments to be passed to the Amazon API.
+
+        Returns:
+            ``models.SearchResult``: The search result containing the list of items.
+
+        Raises:
+            ``InvalidArgumentException``
+            ``MalformedRequestException``
+            ``ApiRequestException``
+            ``ItemsNotFoudException``
+        """
+
+        kwargs.update({
+            'item_count': item_count,
+            'item_page': item_page,
+            'actor': actor,
+            'artist': artist,
+            'author': author,
+            'brand': brand,
+            'keywords': keywords,
+            'title': title,
+            'availability': availability,
+            'browse_node_id': browse_node_id,
+            'condition': condition,
+            'currency_of_preference': currency_of_preference,
+            'delivery_flags': delivery_flags,
+            'languages_of_preference': languages_of_preference,
+            'max_price': max_price,
+            'merchant': merchant,
+            'min_price': min_price,
+            'min_reviews_rating': min_reviews_rating,
+            'min_saving_percent': min_saving_percent,
+            'search_index': search_index,
+            'sort_by': sort_by,
+        })
+
+        arguments.check_search_args(**kwargs)
+        request = requests.get_search_items_request(self, **kwargs)
+        self._throttle()
+        return requests.get_search_items_response(self, request)
+
+
+    def get_variations(self,
+        asin: str,
+        variation_count: int = None,
+        variation_page: int = None,
+        condition: models.Condition = None,
+        currency_of_preference: str = None,
+        languages_of_preference: List[str] = None,
+        merchant: models.Merchant = None,
+        **kwargs) -> models.VariationsResult:
+        """Returns a set of items that are the same product, but differ according to a
+        consistent theme, for example size and color. A variation is a child ASIN.
+
+        Args:
+            asin (``str``): One item, using ASIN or product URL.
+            variation_count (``int``, optional): Number of items returned. Should be between 1 and 10.
+                Defaults to 10.
+            variation_page (``int``, optional): The specific page of items to be returned from the available
+                results. Should be between 1 and 10. Defaults to 1.
+            condition (``models.Condition``, optional): Filters offers by condition type. Defaults to Any.
+            currency_of_preference (``str``, optional): Currency of preference in which the prices
+                information should be returned. Expected currency code format is ISO 4217.
+            languages_of_preference (``list[str]``, optional): Languages in order of preference in
+                which the item information should be returned.
+            merchant (``models.Merchant``, optional): Filters search results to return items having
+                at least one offer sold by target merchant. Defaults to All.
+            kwargs (``dict``, optional): Any other arguments to be passed to the Amazon API.
+
+        Returns:
+            ``models.VariationsResult``: The variations result containing the list of items.
+
+        Raises:
+            ``InvalidArgumentException``
+            ``MalformedRequestException``
+            ``ApiRequestException``
+            ``ItemsNotFoudException``
+        """
+
+        asin = arguments.get_items_ids(asin)[0]
+
+        kwargs.update({
+            'asin': asin,
+            'variation_count': variation_count,
+            'variation_page': variation_page,
+            'condition': condition,
+            'currency_of_preference': currency_of_preference,
+            'languages_of_preference': languages_of_preference,
+            'merchant': merchant
+        })
+
+        arguments.check_variations_args(**kwargs)
+        request = requests.get_variations_request(self, **kwargs)
+        self._throttle()
+        return requests.get_variations_response(self, request)
+
+
+    def get_browse_nodes(self,
+        browse_node_ids: List[str],
+        languages_of_preference: List[str] = None,
+        **kwargs) -> List[models.BrowseNode]:
+        """Returns the specified browse node's information like name, children and ancestors.
+
+        Args:
+            browse_node_ids (``list[str]``): List of browse node ids. A browse node id is a unique
+                ID assigned by Amazon that identifies a product category/sub-category.
+            languages_of_preference (``list[str]``, optional): Languages in order of preference in
+                which the item information should be returned.
+            kwargs (``dict``, optional): Any other arguments to be passed to the Amazon API.
+
+        Returns:
+            ``list[models.BrowseNode]``: A list of browse nodes.
+
+        Raises:
+            ``InvalidArgumentException``
+            ``MalformedRequestException``
+            ``ApiRequestException``
+            ``ItemsNotFoudException``
+        """
+
+        kwargs.update({
+            'browse_node_ids': browse_node_ids,
+            'languages_of_preference': languages_of_preference
+        })
+
+        arguments.check_browse_nodes_args(**kwargs)
+        request = requests.get_browse_nodes_request(self, **kwargs)
+        self._throttle()
+        return requests.get_browse_nodes_response(self, request)
+
 
     def _throttle(self):
-        if self.throttling:
-            wait_time = 1 / self.throttling - (time.time() - self.last_query_time)
-            if wait_time > 0:
-                time.sleep(wait_time)
-        self.last_query_time = time.time()
-
-    def get_products(self, product_ids, condition='Any', merchant='All',
-                     async_req=False):
-        """Find product information for multiple products on Amazon.
-
-        Args:
-            product_ids (str|list): One or more item IDs like ASIN or product URL.
-                Use a string separated by comma or as a list.
-            condition (str, optional): Specify the product condition.
-                Allowed values: Any, Collectible, New, Refurbished, Used.
-                Defaults to Any.
-            merchant (str, optional): Filters search results to return items
-                having at least one offer sold by target merchant. Allowed values:
-                All, Amazon. Defaults to All.
-            async_req (bool, optional): Specify if a thread should be created to
-                run the request. Defaults to False.
-
-        Returns:
-            list of instances: A list containing 1 instance for each product
-                or None if no results.
-        """
-
-        # Clean up input data and remove 10 items limit from Amazon API
-        if isinstance(product_ids, str):
-            product_ids = [x.strip() for x in product_ids.split(',')]
-        elif not isinstance(product_ids, list):
-            raise AmazonException('TypeError', 'Arg product_ids should be a list or string')
-        asin_full_list = list(set([get_asin(x) for x in product_ids]))
-        asin_full_list = list(chunks(asin_full_list, 10))
-
-        results = []
-        for asin_list in asin_full_list:
-            try:
-                request = GetItemsRequest(partner_tag=self.tag,
-                                          partner_type=PartnerType.ASSOCIATES,
-                                          marketplace=self.marketplace,
-                                          merchant=merchant,
-                                          condition=constants.CONDITION[condition],
-                                          item_ids=asin_list,
-                                          resources=constants.PRODUCT_RESOURCES)
-            except KeyError:
-                raise AmazonException('KeyError', 'Invalid condition value')
-            except Exception as e:
-                raise AmazonException('GetItemsError', e)
-
-            for x in range(3):
-                try:
-                    # Send the request and create results
-                    self._throttle()
-                    if async_req:
-                        thread = self.api.get_items(request, async_req=True)
-                        response = thread.get()
-                    else:
-                        response = self.api.get_items(request)
-                    break
-                except ApiException as e:
-                    if x == 2:
-                        raise AmazonException('ApiException', e)
-            try:
-                if response.items_result is not None:
-                    if len(response.items_result.items) > 0:
-                        for item in response.items_result.items:
-                            results.append(parse_product(item))
-            except Exception as e:
-                raise AmazonException('ResponseError', e)
-
-        if results:
-            return results
-        else:
-            return None
-
-    def get_product(self, product_id, condition='Any', merchant='All',
-                    async_req=False):
-        """Find product information for a specific product on Amazon.
-
-        Args:
-            product_id (str, list): One item ID like ASIN or product URL.
-            condition (str, optional): Specify the product condition.
-                Allowed values: Any, Collectible, New, Refurbished, Used.
-                Defaults to Any.
-            merchant (str, optional): Filters search results to return items
-                having at least one offer sold by target merchant. Allowed values:
-                All, Amazon. Defaults to All.
-            async_req (bool, optional): Specify if a thread should be created to
-                run the request. Defaults to False.
-
-        Returns:
-            instance: An instance containing all the available information
-                for the product or None if no results.
-        """
-        if isinstance(product_id, list):
-            product_id = product_id[0]
-        if isinstance(product_id, str):
-            product_id = product_id.split(',')[0]
-
-        product = self.get_products(product_id, condition=condition, merchant=merchant,
-                                    async_req=async_req)
-        if product:
-            return product[0]
-        else:
-            return None
-
-    def search_products(self, item_count=10, item_page=1, items_per_page=10, keywords=None,
-                        actor=None, artist=None, author=None, brand=None, title=None,
-                        availability='Available', browse_node=None, condition='Any', delivery=None,
-                        max_price=None, min_price=None, min_rating=None, min_discount=None,
-                        merchant='All', search_index='All', sort_by=None, async_req=False):
-        """Search products on Amazon using different parameters. At least one of the
-        following parameters should be used: keywords, actor, artist, author, brand,
-        title.
-
-        Args:
-            item_count (int, optional): The total number of products to get. Should be between
-                1 and 100. Defaults to 10.
-            item_page (int, optional): The page where the results start from. Should be between
-                1 and 10. Defaults to 1.
-            items_per_page (int, optional): Products on each page. Should be between
-                1 and 10. Defaults to 10.
-            keywords (str, optional): A word or phrase that describes an item.
-            actor (str, optional): Actor name associated with the item.
-            artist (str, optional): Artist name associated with the item.
-            author (str, optional): Author name associated with the item.
-            brand (str, optional): Brand name associated with the item.
-            title (str, optional): Title associated with the item.
-            availability (str, optional): Filters available items on Amazon. Allowed values:
-            Available, IncludeOutOfStock. Defaults to Available.
-            browse_node (str, optional): A unique ID assigned by Amazon that
-                identifies a product category or subcategory.
-            condition (str, optional): The condition parameter filters offers by
-                condition type. Allowed values: Any, Collectible, New, Refurbished, Used.
-                Defaults to Any.
-            delivery (list, optional): The delivery flag filters items which
-                satisfy a certain delivery program promoted by the specific
-                Amazon Marketplace. Allowed values: AmazonGlobal, FreeShipping,
-                FulfilledByAmazon, Prime.
-            max_price (int, optional): Filters search results to items with at
-                least one offer price below the specified value.
-            min_price (int, optional): Filters search results to items with at
-                least one offer price above the specified value.
-            min_rating (int, optional): Filters search results to items with
-                customer review ratings above specified value.
-            min_discount (int, optional): Filters search results to items with
-                at least one offer having saving percentage above the specified
-                value.
-            merchant (str, optional): Filters search results to return items
-                having at least one offer sold by target merchant. Allowed values:
-                All, Amazon. Defaults to All.
-            search_index (str, optional): Indicates the product category to
-                search. Defaults to All.
-            sort_by (str, optional): The way in which items in the response
-                are sorted. Allowed values: AvgCustomerReviews, Featured,
-                NewestArrivals, Price:HighToLow, Price:LowToHigh, Relevance.
-            async_req (bool, optional): Specify if a thread should be created to
-                run the request. Defaults to False.
-
-        Returns:
-            list of instances: A list containing 1 instance for each product
-                or None if no results.
-        """
-        if items_per_page > 10 or items_per_page < 1:
-            raise AmazonException('ValueError', 'Arg items_per_page should be between 1 and 10')
-        if item_count > 100 or item_count < 1:
-            raise AmazonException('ValueError', 'Arg item_count should be between 1 and 100')
-        if item_page < 1:
-            raise AmazonException('ValueError', 'Arg item_page should be 1 or higher')
-        if not keywords and not actor and not artist and not author and not brand and not title and not browse_node and not search_index:
-            raise AmazonException('ValueError', 'At least one of the following args must be '
-                                                'provided: keywords, actor, artist, author, brand, '
-                                                'title, browse_node, search_index')
-        results = []
-        while len(results) < item_count:
-            try:
-                request = SearchItemsRequest(
-                    partner_tag=self.tag,
-                    partner_type=PartnerType.ASSOCIATES,
-                    actor=actor,
-                    artist=artist,
-                    author=author,
-                    availability=availability,
-                    brand=brand,
-                    browse_node_id=browse_node,
-                    condition=constants.CONDITION[condition],
-                    delivery_flags=delivery,
-                    item_count=items_per_page,
-                    item_page=item_page,
-                    keywords=keywords,
-                    max_price=max_price,
-                    merchant=merchant,
-                    min_price=min_price,
-                    min_reviews_rating=min_rating,
-                    min_saving_percent=min_discount,
-                    offer_count=1,
-                    resources=constants.SEARCH_RESOURCES,
-                    search_index=search_index,
-                    sort_by=sort_by,
-                    title=title)
-            except KeyError:
-                raise AmazonException('KeyError', 'Invalid condition value')
-            except Exception as e:
-                raise AmazonException('SearchItemsError', e)
-
-            for x in range(3):
-                try:
-                    # Send the request and create results
-                    self._throttle()
-                    if async_req:
-                        thread = self.api.search_items(request, async_req=True)
-                        response = thread.get()
-                    else:
-                        response = self.api.search_items(request)
-                    break
-                except ApiException as e:
-                    if x == 2:
-                        raise AmazonException('ApiException', e)
-            try:
-                if response.search_result is not None:
-                    if response.search_result.items is not None:
-                        for item in response.search_result.items:
-                            results.append(parse_product(item))
-                            if len(results) >= item_count:
-                                break
-                        if len(response.search_result.items) < items_per_page:
-                            break
-                else:
-                    break
-                if response.errors is not None:
-                    raise AmazonException(response.errors[0].code, response.errors[0].message)
-            except Exception as e:
-                if e.status == "NoResults":
-                    break
-                raise AmazonException('ResponseError', e)
-            item_page += 1
-
-        if results:
-            return results
-        else:
-            return None
-
-    def get_variations(self, asin, item_count=10, item_page=1, items_per_page=10, condition='Any',
-                       merchant='All', async_req=False):
-        """Returns a set of items that are the same product, but differ according to a
-        consistent theme, for example size and color.
-
-        Args:
-            asin (str): One item ID like ASIN or product URL.
-            item_count (int, optional): The total number of products to get. Should be between
-                1 and 100. Defaults to 10.
-            item_page (int, optional): The page where the results start from. Should be between
-                1 and 10. Defaults to 1.
-            items_per_page (int, optional): Products on each page. Should be between
-                1 and 10. Defaults to 10.
-            condition (str, optional): The condition parameter filters offers by
-                condition type. Allowed values: Any, Collectible, New, Refurbished, Used.
-                Defaults to Any.
-            merchant (str, optional): Filters search results to return items
-                having at least one offer sold by target merchant. Allowed values:
-                All, Amazon. Defaults to All.
-            async_req (bool, optional): Specify if a thread should be created to
-                run the request. Defaults to False.
-
-        Returns:
-            list of instances: A list containing 1 instance for each product
-                or None if no results.
-        """
-        if items_per_page > 10 or items_per_page < 1:
-            raise AmazonException('ValueError', 'Arg items_per_page should be between 1 and 10')
-        if item_count > 100 or item_count < 1:
-            raise AmazonException('ValueError', 'Arg item_count should be between 1 and 100')
-        if item_page < 1:
-            raise AmazonException('ValueError', 'Arg item_page should be 1 or higher')
-
-        results = []
-        while len(results) < item_count:
-            try:
-                request = GetVariationsRequest(
-                    partner_tag=self.tag,
-                    partner_type=PartnerType.ASSOCIATES,
-                    marketplace=self.marketplace,
-                    asin=get_asin(asin),
-                    condition=constants.CONDITION[condition],
-                    merchant=merchant,
-                    offer_count=1,
-                    variation_count=items_per_page,
-                    variation_page=item_page,
-                    resources=constants.VARIATION_RESOURCES)
-            except KeyError:
-                raise AmazonException('KeyError', 'Invalid condition value')
-            except Exception as e:
-                raise AmazonException('GetVariationsError', e)
-
-            for x in range(3):
-                try:
-                    # Send the request and create results
-                    self._throttle()
-                    if async_req:
-                        thread = self.api.get_variations(request, async_req=True)
-                        response = thread.get()
-                    else:
-                        response = self.api.get_variations(request)
-                    break
-                except ApiException as e:
-                    if x == 2:
-                        raise AmazonException('ApiException', e)
-            try:
-                if response.variations_result is not None:
-                    if response.variations_result.items is not None:
-                        for item in response.variations_result.items:
-                            results.append(parse_product(item))
-                            if len(results) >= item_count:
-                                break
-                        if len(response.variations_result.items) < items_per_page:
-                            break
-                else:
-                    break
-                if response.errors is not None:
-                    raise AmazonException(response.errors[0].code, response.errors[0].message)
-            except Exception as e:
-                raise AmazonException('ResponseError', e)
-            item_page += 1
-
-        if results:
-            return results
-        else:
-            return None
-
-    def get_browsenodes(self, browse_nodes, async_req=False):
-        """Get browse nodes information from Amazon.
-
-        Args:
-            browse_nodes (list): List of strings containing the browse node ids.
-            async_req (bool, optional): Specify if a thread should be created to
-                run the request. Defaults to False.
-
-        Returns:
-            dict: A dictionary containing the browse node information.
-        """
-
-        if isinstance(browse_nodes, list) is False:
-            raise Exception('Browse nodes parameter should be a list')
-        elif not browse_nodes:
-            raise Exception('Browse nodes parameter can\'t be empty')
-
-        try:
-            request = GetBrowseNodesRequest(
-                partner_tag=self.tag,
-                partner_type=PartnerType.ASSOCIATES,
-                marketplace=self.marketplace,
-                browse_node_ids=browse_nodes,
-                languages_of_preference=None,
-                resources=constants.BROWSE_RESOURCES)
-        except ValueError as e:
-            raise AmazonException("ValueError", e)
-
-        try:
-            self._throttle()
-            if async_req:
-                thread = self.api.get_browse_nodes(request, async_req=True)
-                response = thread.get()
-            else:
-                response = self.api.get_browse_nodes(request)
-        except ApiException as e:
-            raise AmazonException('ApiException', e)
-
-        try:
-            if response.browse_nodes_result is not None:
-                res = [AmazonBrowseNode(item) for item in response.browse_nodes_result.browse_nodes]
-                return parse_browsenode(res)
-            if response.errors is not None:
-                raise AmazonException(response.errors[0].code, response.errors[0].message)
-        except TypeError as e:
-            raise AmazonException("TypeError", e)
-        except ValueError as e:
-            raise AmazonException(ValueError, e)
-        except AmazonException as e:
-            raise AmazonException(e.status, e.reason)
-        except Exception as e:
-            raise AmazonException("General", e)
+        wait_time = self._throttling - (time.time() - self._last_query_time)
+        if wait_time > 0:
+            time.sleep(wait_time)
+        self._last_query_time = time.time()

@@ -28,17 +28,17 @@ import re  # noqa: F401
 
 import six
 
-from amazon_paapi.sdk.models.by_line_info import ByLineInfo  # noqa: F401,E501
-from amazon_paapi.sdk.models.classifications import Classifications  # noqa: F401,E501
-from amazon_paapi.sdk.models.content_info import ContentInfo  # noqa: F401,E501
-from amazon_paapi.sdk.models.content_rating import ContentRating  # noqa: F401,E501
-from amazon_paapi.sdk.models.external_ids import ExternalIds  # noqa: F401,E501
-from amazon_paapi.sdk.models.manufacture_info import ManufactureInfo  # noqa: F401,E501
-from amazon_paapi.sdk.models.multi_valued_attribute import MultiValuedAttribute  # noqa: F401,E501
-from amazon_paapi.sdk.models.product_info import ProductInfo  # noqa: F401,E501
-from amazon_paapi.sdk.models.single_string_valued_attribute import SingleStringValuedAttribute  # noqa: F401,E501
-from amazon_paapi.sdk.models.technical_info import TechnicalInfo  # noqa: F401,E501
-from amazon_paapi.sdk.models.trade_in_info import TradeInInfo  # noqa: F401,E501
+from .by_line_info import ByLineInfo  # noqa: F401,E501
+from .classifications import Classifications  # noqa: F401,E501
+from .content_info import ContentInfo  # noqa: F401,E501
+from .content_rating import ContentRating  # noqa: F401,E501
+from .external_ids import ExternalIds  # noqa: F401,E501
+from .manufacture_info import ManufactureInfo  # noqa: F401,E501
+from .multi_valued_attribute import MultiValuedAttribute  # noqa: F401,E501
+from .product_info import ProductInfo  # noqa: F401,E501
+from .single_string_valued_attribute import SingleStringValuedAttribute  # noqa: F401,E501
+from .technical_info import TechnicalInfo  # noqa: F401,E501
+from .trade_in_info import TradeInInfo  # noqa: F401,E501
 
 
 class ItemInfo(object):
