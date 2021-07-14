@@ -1,4 +1,6 @@
-# Amazon Product Advertising API 5.0 wrapper for Python
+# Amazon Product Advertising API 5.0 wrapper for Python v3.3.4
+
+> :warning: **This version is deprecated and it will be removed in the future. Please use [version 4.0.0 or higher](https://github.com/sergioteula/python-amazon-paapi).**
 
 A simple Python wrapper for the [last version of the Amazon Product Advertising API](https://webservices.amazon.com/paapi5/documentation/quick-start/using-sdk.html). This module allows to get product information from Amazon using the official API in an easier way.
 
@@ -7,8 +9,6 @@ A simple Python wrapper for the [last version of the Amazon Product Advertising 
 [![License](https://img.shields.io/badge/License-MIT-%23e83633)](https://github.com/sergioteula/python-amazon-paapi/blob/master/LICENSE)
 [![Support](https://img.shields.io/badge/Support-Good-brightgreen)](https://github.com/sergioteula/python-amazon-paapi/issues)
 [![Amazon API](https://img.shields.io/badge/Amazon%20API-5.0-%23FD9B15)](https://webservices.amazon.com/paapi5/documentation/)
-
-> :warning: **This version is deprecated and it will be removed in the future. Please use [this](https://github.com/sergioteula/python-amazon-paapi).**
 
 ## Features
 
@@ -26,9 +26,9 @@ A simple Python wrapper for the [last version of the Amazon Product Advertising 
 
 ## Installation
 
-You can install or upgrade the module with:
+You can install this module version with:
 
-    pip install python-amazon-paapi --upgrade
+    pip install python-amazon-paapi==3.3.4
 
 If you get `ModuleNotFoundError`, try installing this:
 
