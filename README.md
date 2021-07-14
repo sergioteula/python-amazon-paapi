@@ -8,7 +8,7 @@ A simple Python wrapper for the [last version of the Amazon Product Advertising 
 [![Support](https://img.shields.io/badge/Support-Good-brightgreen)](https://github.com/sergioteula/python-amazon-paapi/issues)
 [![Amazon API](https://img.shields.io/badge/Amazon%20API-5.0-%23FD9B15)](https://webservices.amazon.com/paapi5/documentation/)
 
-> If you are still using the old version, go [here](https://github.com/sergioteula/python-amazon-paapi/blob/master/amazon/README) for documentation.
+> If you are still using the old version, go [here](https://github.com/sergioteula/python-amazon-paapi/blob/master/amazon/README.md) for documentation.
 
 ## Features
 
@@ -19,7 +19,7 @@ A simple Python wrapper for the [last version of the Amazon Product Advertising 
 - Get multiple results at once without the 10 items limitation from Amazon.
 - Configurable throttling to avoid requests exceptions.
 - Type hints to help you coding.
-- Support for [all available countries](https://github.com/sergioteula/python-amazon-paapi/blob/master/amazon/paapi.py#L31).
+- Support for [all available countries](https://github.com/sergioteula/python-amazon-paapi/blob/956f639b2ab3eab3f61644ae2ca8ae6500881312/amazon_paapi/models/regions.py#L1).
 - Ask for new features through the [issues](https://github.com/sergioteula/python-amazon-paapi/issues) section.
 - Join our [Telegram group](https://t.me/PythonAmazonPAAPI) for support or development.
 
