@@ -3,12 +3,12 @@
 
 class AmazonException(Exception):
     """Common base class for all Amazon API exceptions."""
-    def __init__(self, message: str):
+    def __init__(self, reason: str):
         super().__init__()
-        self.message = message
+        self.reason = reason
 
     def __str__(self) -> str:
-        return '%s' % self.message
+        return '%s' % self.reason
 
 
 class InvalidArgumentException(AmazonException):
@@ -30,4 +30,16 @@ class MalformedRequestException(AmazonException):
 
 class ItemsNotFoudException(AmazonException):
     """Raised if no items are found"""
+    pass
+
+class TooManyRequestsException(AmazonException):
+    """Raised if too many requests are made"""
+    pass
+
+class InvalidPartnerTagException(AmazonException):
+    """Raised if the partner tag is not present or invalid"""
+    pass
+
+class AssociateValidationException(AmazonException):
+    """Raised when credentials are not valid for the selected country."""
     pass
