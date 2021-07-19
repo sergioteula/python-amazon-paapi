@@ -39,3 +39,7 @@ class TooManyRequestsException(AmazonException):
 class InvalidPartnerTagException(AmazonException):
     """Raised if the partner tag is not present or invalid"""
     pass
+
+class AssociateValidationException(AmazonException):
+    """Raised when credentials are not valid for the selected country."""
+    pass
