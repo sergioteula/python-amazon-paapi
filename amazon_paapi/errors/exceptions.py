@@ -31,3 +31,7 @@ class MalformedRequestException(AmazonException):
 class ItemsNotFoudException(AmazonException):
     """Raised if no items are found"""
     pass
+
+class TooManyRequestsException(AmazonException):
+    """Raised if too many requests are made"""
+    pass
