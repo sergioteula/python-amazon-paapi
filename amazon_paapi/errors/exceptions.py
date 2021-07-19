@@ -3,12 +3,12 @@
 
 class AmazonException(Exception):
     """Common base class for all Amazon API exceptions."""
-    def __init__(self, message: str):
+    def __init__(self, reason: str):
         super().__init__()
-        self.message = message
+        self.reason = reason
 
     def __str__(self) -> str:
-        return '%s' % self.message
+        return '%s' % self.reason
 
 
 class InvalidArgumentException(AmazonException):
