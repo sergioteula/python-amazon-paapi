@@ -1,6 +1,7 @@
 """Module with helper functions for creating requests."""
 
 
+from amazon_paapi.errors.exceptions import InvalidArgumentException
 from typing import List
 from ..models.item_result import Item
 from ..models.search_result import SearchResult
@@ -123,4 +124,7 @@ def _manage_response_exceptions(error) -> None:
         if error.status == 429:
             raise TooManyRequestsException('Requests limit reached, try increasing throttling or wait before trying again')
 
-    raise ApiRequestException('Request failed: ' + str(error))
+        elif 'InvalidParameterValue' in error.body:
+            raise InvalidArgumentException('The value provided in the request for atleast one parameter is invalid.')
+
+    raise ApiRequestException('Request failed: ' + str(error.reason))
