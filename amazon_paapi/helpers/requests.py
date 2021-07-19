@@ -127,4 +127,7 @@ def _manage_response_exceptions(error) -> None:
         elif 'InvalidParameterValue' in error.body:
             raise InvalidArgumentException('The value provided in the request for atleast one parameter is invalid.')
 
+        elif 'InvalidPartnerTag' in error.body:
+            raise InvalidArgumentException('The partner tag is invalid or not present.')
+
     raise ApiRequestException('Request failed: ' + str(error.reason))
