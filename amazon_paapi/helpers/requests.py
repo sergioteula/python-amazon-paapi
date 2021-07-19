@@ -1,13 +1,12 @@
 """Module with helper functions for creating requests."""
 
 
-from amazon_paapi.errors.exceptions import InvalidArgumentException
 from typing import List
 from ..models.item_result import Item
 from ..models.search_result import SearchResult
 from ..models.variations_result import VariationsResult
 from ..models.browse_nodes_result import BrowseNode
-from ..errors import ApiRequestException, ItemsNotFoudException, MalformedRequestException, TooManyRequestsException
+from ..errors import ApiRequestException, ItemsNotFoudException, MalformedRequestException, TooManyRequestsException, AssociateValidationException, InvalidArgumentException
 from ..sdk.models.partner_type import PartnerType
 from ..sdk.models.get_items_resource import GetItemsResource
 from ..sdk.models.get_items_request import GetItemsRequest
@@ -129,5 +128,8 @@ def _manage_response_exceptions(error) -> None:
 
         elif 'InvalidPartnerTag' in error.body:
             raise InvalidArgumentException('The partner tag is invalid or not present.')
+
+        elif 'InvalidAssociate' in error.body:
+            raise AssociateValidationException('Used credentials are not valid for the selected country.')
 
     raise ApiRequestException('Request failed: ' + str(error.reason))
