@@ -35,3 +35,7 @@ class ItemsNotFoudException(AmazonException):
 class TooManyRequestsException(AmazonException):
     """Raised if too many requests are made"""
     pass
+
+class InvalidPartnerTagException(AmazonException):
+    """Raised if the partner tag is not present or invalid"""
+    pass
