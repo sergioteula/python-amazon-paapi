@@ -15,4 +15,4 @@ def get_asin(text: str) -> str:
     if asin:
         return asin.group(2)
     else:
-        raise AsinNotFoundException('Asin not found found')
+        raise AsinNotFoundException('Asin not found: ' + text)
