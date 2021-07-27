@@ -33,7 +33,7 @@ class ItemsNotFoudException(AmazonException):
     pass
 
 class TooManyRequestsException(AmazonException):
-    """Raised if too many requests are made"""
+    """Raised when requests limit is reached"""
     pass
 
 class InvalidPartnerTagException(AmazonException):
@@ -41,5 +41,5 @@ class InvalidPartnerTagException(AmazonException):
     pass
 
 class AssociateValidationException(AmazonException):
-    """Raised when credentials are not valid for the selected country."""
+    """Raised when credentials are not valid for the selected country"""
     pass
