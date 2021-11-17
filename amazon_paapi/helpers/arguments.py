@@ -19,8 +19,8 @@ def get_items_ids(items: Union[str, List[str]]) -> List[str]:
 
     if items_ids:
         return items_ids
-    else:
-        raise AsinNotFoundException('No ASIN codes have been found.')
+
+    raise AsinNotFoundException('No ASIN codes have been found.')
 
 
 def check_search_args(**kwargs):

@@ -3,6 +3,9 @@
 A simple Python wrapper for the last version of the Amazon Product Advertising API.
 """
 
+from typing import List, Union
+import time
+
 
 from . import models
 from .sdk.api.default_api import DefaultApi
@@ -10,9 +13,7 @@ from .errors import InvalidArgumentException
 from .helpers import arguments
 from .helpers import requests
 from .helpers.generators import get_list_chunks
-
-from typing import List, Union
-import time
+from .helpers.items import sort_items
 
 
 class AmazonApi:
@@ -42,19 +43,22 @@ class AmazonApi:
             self._host = 'webservices.amazon.' + models.regions.DOMAINS[country]
             self._region = models.regions.REGIONS[country]
             self._marketplace = 'www.amazon.' + models.regions.DOMAINS[country]
-        except KeyError:
-            raise InvalidArgumentException('Country code is not correct')
+        except KeyError as error:
+            raise InvalidArgumentException('Country code is not correct') from error
 
         self._api = DefaultApi(key, secret, self._host, self._region)
 
 
-    def get_items(self,
+    def get_items(
+        self,
         items: Union[str, List[str]],
         condition: models.Condition = None,
         merchant: models.Merchant = None,
         currency_of_preference: str = None,
         languages_of_preference: List[str] = None,
-        **kwargs) -> List[models.Item]:
+        include_unavailable: bool = False,
+        **kwargs
+    ) -> List[models.Item]:
 
         """Get items information from Amazon.
 
@@ -69,6 +73,8 @@ class AmazonApi:
                 information should be returned. Expected currency code format is ISO 4217.
             languages_of_preference (``list[str]``, optional): Languages in order of preference in
                 which the item information should be returned.
+            include_unavailable (``bool``, optional): The returned list includes not available
+                items. Not available items have the ASIN and item_info equals None. Defaults to False.
             kwargs (``dict``, optional): Any other arguments to be passed to the Amazon API.
 
         Returns:
@@ -86,21 +92,22 @@ class AmazonApi:
             'merchant': merchant,
             'currency_of_preference': currency_of_preference,
             'languages_of_preference': languages_of_preference
-            })
+        })
 
         items_ids = arguments.get_items_ids(items)
         results = []
 
-        for asin_chunk in get_list_chunks(items_ids, chunk_size=10):
+        for asin_chunk in get_list_chunks(list(set(items_ids)), chunk_size=10):
             request = requests.get_items_request(self, asin_chunk, **kwargs)
             self._throttle()
             items_response = requests.get_items_response(self, request)
             results.extend(items_response)
 
-        return results
+        return sort_items(results, items_ids, include_unavailable)
 
 
-    def search_items(self,
+    def search_items(
+        self,
         item_count: int = None,
         item_page: int = None,
         actor: str = None,
@@ -122,7 +129,8 @@ class AmazonApi:
         min_reviews_rating: int = None,
         search_index: str = None,
         sort_by: models.SortBy = None,
-        **kwargs) -> models.SearchResult:
+        **kwargs
+    ) -> models.SearchResult:
         """Searches for items on Amazon based on a search query. At least one of the following
         parameters should be specified: ``keywords``, ``actor``, ``artist``, ``author``,
         ``brand`` or ``title``.
@@ -205,7 +213,8 @@ class AmazonApi:
         return requests.get_search_items_response(self, request)
 
 
-    def get_variations(self,
+    def get_variations(
+        self,
         asin: str,
         variation_count: int = None,
         variation_page: int = None,
@@ -213,7 +222,8 @@ class AmazonApi:
         currency_of_preference: str = None,
         languages_of_preference: List[str] = None,
         merchant: models.Merchant = None,
-        **kwargs) -> models.VariationsResult:
+        **kwargs
+    ) -> models.VariationsResult:
         """Returns a set of items that are the same product, but differ according to a
         consistent theme, for example size and color. A variation is a child ASIN.
 
@@ -260,10 +270,12 @@ class AmazonApi:
         return requests.get_variations_response(self, request)
 
 
-    def get_browse_nodes(self,
+    def get_browse_nodes(
+        self,
         browse_node_ids: List[str],
         languages_of_preference: List[str] = None,
-        **kwargs) -> List[models.BrowseNode]:
+        **kwargs
+    ) -> List[models.BrowseNode]:
         """Returns the specified browse node's information like name, children and ancestors.
 
         Args:
