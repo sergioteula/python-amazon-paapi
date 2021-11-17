@@ -18,7 +18,7 @@ def get_items_ids(items: Union[str, List[str]]) -> List[str]:
         items_ids = [get_asin(x.strip()) for x in items]
 
     if items_ids:
-        return list(set(items_ids))
+        return items_ids
 
     raise AsinNotFoundException('No ASIN codes have been found.')
 
