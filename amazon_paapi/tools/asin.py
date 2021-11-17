@@ -1,7 +1,7 @@
 """Some useful tools."""
 
-from ..errors import AsinNotFoundException
 import re
+from ..errors import AsinNotFoundException
 
 
 def get_asin(text: str) -> str:
@@ -14,5 +14,5 @@ def get_asin(text: str) -> str:
     asin = re.search(r'(dp|gp/product|gp/aw/d|dp/product)/([a-zA-Z0-9]{10})', text)
     if asin:
         return asin.group(2)
-    else:
-        raise AsinNotFoundException('Asin not found: ' + text)
+
+    raise AsinNotFoundException('Asin not found: ' + text)
