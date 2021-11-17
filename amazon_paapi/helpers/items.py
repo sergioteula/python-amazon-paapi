@@ -4,8 +4,14 @@ from typing import List
 from .. import models
 
 
-def get_items_including_unavailable(items: List[models.Item], items_ids: List[str]) -> List[models.Item]:
-    for index, asin in enumerate(items_ids):
-        if items[index].asin != asin:
-            items.insert(index, models.Item(asin=asin))
-    return items
+def sort_items(items: List[models.Item], items_ids: List[str], include_unavailable: bool) -> List[models.Item]:
+    sorted_items = []
+
+    for asin in items_ids:
+        matches = list(filter(lambda item, asin=asin: item.asin == asin, items))
+        if matches:
+            sorted_items.append(matches[0])
+        elif include_unavailable:
+            sorted_items.append(models.Item(asin=asin))
+
+    return sorted_items

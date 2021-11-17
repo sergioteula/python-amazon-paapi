@@ -13,7 +13,7 @@ from .errors import InvalidArgumentException
 from .helpers import arguments
 from .helpers import requests
 from .helpers.generators import get_list_chunks
-from .helpers.items import get_items_including_unavailable
+from .helpers.items import sort_items
 
 
 class AmazonApi:
@@ -97,16 +97,13 @@ class AmazonApi:
         items_ids = arguments.get_items_ids(items)
         results = []
 
-        for asin_chunk in get_list_chunks(items_ids, chunk_size=10):
+        for asin_chunk in get_list_chunks(list(set(items_ids)), chunk_size=10):
             request = requests.get_items_request(self, asin_chunk, **kwargs)
             self._throttle()
             items_response = requests.get_items_response(self, request)
             results.extend(items_response)
 
-        if include_unavailable:
-            results = get_items_including_unavailable(results, items_ids)
-
-        return results
+        return sort_items(results, items_ids, include_unavailable)
 
 
     def search_items(
