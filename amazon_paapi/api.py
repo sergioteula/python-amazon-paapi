@@ -6,12 +6,14 @@ A simple Python wrapper for the last version of the Amazon Product Advertising A
 from typing import List, Union
 import time
 
+
 from . import models
 from .sdk.api.default_api import DefaultApi
 from .errors import InvalidArgumentException
 from .helpers import arguments
 from .helpers import requests
 from .helpers.generators import get_list_chunks
+from .helpers.items import get_items_including_unavailable
 
 
 class AmazonApi:
@@ -54,6 +56,7 @@ class AmazonApi:
         merchant: models.Merchant = None,
         currency_of_preference: str = None,
         languages_of_preference: List[str] = None,
+        include_unavailable: bool = False,
         **kwargs
     ) -> List[models.Item]:
 
@@ -70,6 +73,8 @@ class AmazonApi:
                 information should be returned. Expected currency code format is ISO 4217.
             languages_of_preference (``list[str]``, optional): Languages in order of preference in
                 which the item information should be returned.
+            include_unavailable (``bool``, optional): The returned list includes not available
+                items. Not available items have the ASIN and item_info equals None. Defaults to False.
             kwargs (``dict``, optional): Any other arguments to be passed to the Amazon API.
 
         Returns:
@@ -97,6 +102,9 @@ class AmazonApi:
             self._throttle()
             items_response = requests.get_items_response(self, request)
             results.extend(items_response)
+
+        if include_unavailable:
+            results = get_items_including_unavailable(results, items_ids)
 
         return results
 
