@@ -9,8 +9,8 @@ Welcome to Python Amazon PAAPI's documentation!
 Reference
 =========
 
-Below you can find a reference of all the classes and methods in python-telegram-bot.
-Apart from the `telegram.ext` package the objects should reflect the types defined in the `official Telegram Bot API documentation <https://core.telegram.org/bots/api>`_.
+Below you can access the documentation for the main class, as well as errors and tools. To check some
+usage examples please go to the `readme <https://github.com/sergioteula/python-amazon-paapi>`_ on GitHub.
 
 .. toctree::
 
