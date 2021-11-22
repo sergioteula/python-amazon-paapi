@@ -72,12 +72,12 @@ html_static_path = ['_static']
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = 'pa-paapi-logo.png'
+html_logo = '_static/pa-paapi-logo.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-html_favicon = 'pa-paapi-icon.ico'
+html_favicon = '_static/pa-paapi-icon.ico'
 
 
 # -- script stuff --------------------------------------------------------
