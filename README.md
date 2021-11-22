@@ -22,6 +22,7 @@ A simple Python wrapper for the [last version of the Amazon Product Advertising 
 - Support for [all available countries](https://github.com/sergioteula/python-amazon-paapi/blob/956f639b2ab3eab3f61644ae2ca8ae6500881312/amazon_paapi/models/regions.py#L1).
 - Ask for new features through the [issues](https://github.com/sergioteula/python-amazon-paapi/issues) section.
 - Join our [Telegram group](https://t.me/PythonAmazonPAAPI) for support or development.
+- Check the [documentation](https://python-amazon-paapi.readthedocs.io/en/latest/index.html) for reference.
 
 ## Installation
 
