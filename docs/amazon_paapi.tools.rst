@@ -1,4 +1,4 @@
-Useful Tools
+Tools Module
 ===========================
 
 .. automodule:: amazon_paapi.tools.asin
