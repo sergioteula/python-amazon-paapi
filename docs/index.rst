@@ -6,14 +6,32 @@
 Welcome to Python Amazon PAAPI's documentation!
 ===============================================
 
-Reference
-=========
+A simple Python wrapper for the last version of the Amazon Product Advertising API. This module allows
+interacting with Amazon using the official API in an easier way.
 
-Below you can access the documentation for the main class, as well as errors and tools. To check some
-usage examples please go to the `readme <https://github.com/sergioteula/python-amazon-paapi>`_ on GitHub.
+Reference
+---------
 
 .. toctree::
 
    amazon_paapi
    amazon_paapi.errors
    amazon_paapi.tools
+
+Usage guide
+---------------
+
+.. toctree::
+    :maxdepth: 1
+
+    ./pages/usage-guide.md
+
+Migration guide
+---------------
+
+If you are still using version 3.x or lower, it is highly recommended upgrading to the latest version.
+
+.. toctree::
+    :maxdepth: 1
+
+    ./pages/migration-guide.md
