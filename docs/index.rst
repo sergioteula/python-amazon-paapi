@@ -12,8 +12,6 @@ interacting with Amazon using the official API in an easier way.
 Reference
 ---------
 
-Below you can access the documentation for the main class, as well as errors and tools.
-
 .. toctree::
 
    amazon_paapi
