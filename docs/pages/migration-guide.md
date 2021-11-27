@@ -4,7 +4,7 @@ This guide explains how to proceed with the migration from version 3.x to versio
 If you are still using the old version, it is highly recommended to update, since you wont get any future
 updates nor new features.
 
-## Version 4 changelog summary
+## Changelog summary
 
 - Added type hinting to help you code.
 - Added compatibility with all arguments from the official API.
@@ -80,10 +80,10 @@ amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY, throttling=0)  # No wait time betw
 ### Serializer for Django
 
 The serializer for Django is not available for this new version. If you want to help with the migration, send a
-merge request and will be added on future updates.
+pull request and will be added on future updates.
 
 ### I need more help
 
 You can always ask for help in our [Telegram group](https://t.me/PythonAmazonPAAPI) or raise an issue on
 [Github](https://github.com/sergioteula/python-amazon-paapi/issues) for help. If you find that this
-guide could be improved somehow, feel free to send a merge request with your changes.
+guide could be improved somehow, feel free to send a pull request with your changes.
