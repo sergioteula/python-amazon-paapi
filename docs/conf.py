@@ -32,7 +32,8 @@ release = '4.2.0'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
+    'myst_parser'
 ]
 
 # Don't show type hints in the signature - that just makes it hardly readable
