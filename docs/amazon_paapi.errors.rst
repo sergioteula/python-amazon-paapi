@@ -1,4 +1,4 @@
-Module Exceptions
+Exceptions Module
 ============================
 
 .. automodule:: amazon_paapi.errors.exceptions
