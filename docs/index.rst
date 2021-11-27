@@ -18,4 +18,12 @@ usage examples please go to the `readme <https://github.com/sergioteula/python-a
    amazon_paapi.errors
    amazon_paapi.tools
 
-:doc:`/pages/migration-guide`
+Migration guide
+---------------
+
+If you are still using version 3.x or lower, it is highly recommended upgrading to the latest version.
+
+.. toctree::
+    :maxdepth: 2
+
+    ./pages/migration-guide.md
