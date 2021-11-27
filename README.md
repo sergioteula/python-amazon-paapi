@@ -9,7 +9,7 @@ A simple Python wrapper for the [last version of the Amazon Product Advertising 
 [![Amazon API](https://img.shields.io/badge/Amazon%20API-5.0-%23FD9B15)](https://webservices.amazon.com/paapi5/documentation/)
 
 > If you are still using the old version, go [here](https://github.com/sergioteula/python-amazon-paapi/blob/master/amazon/README.md) for documentation or check our
-[migration guide](https://github.com/sergioteula/python-amazon-paapi/docs/pages/migration-guide.md).
+[migration guide](https://github.com/sergioteula/python-amazon-paapi/blob/master/docs/pages/migration-guide.md).
 
 ## Features
 
