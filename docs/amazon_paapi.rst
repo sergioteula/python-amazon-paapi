@@ -1,4 +1,4 @@
-amazon\_paapi package
+AmazonApi module
 =====================
 
 .. automodule:: amazon_paapi.api
