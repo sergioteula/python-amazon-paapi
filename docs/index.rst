@@ -17,3 +17,5 @@ usage examples please go to the `readme <https://github.com/sergioteula/python-a
    amazon_paapi
    amazon_paapi.errors
    amazon_paapi.tools
+
+:doc:`/pages/migration-guide`
