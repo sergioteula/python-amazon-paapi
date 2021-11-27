@@ -18,6 +18,14 @@ Reference
    amazon_paapi.errors
    amazon_paapi.tools
 
+Usage guide
+---------------
+
+.. toctree::
+    :maxdepth: 2
+
+    ./pages/usage-guide.md
+
 Migration guide
 ---------------
 
