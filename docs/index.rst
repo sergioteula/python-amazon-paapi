@@ -22,7 +22,7 @@ Usage guide
 ---------------
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
     ./pages/usage-guide.md
 
@@ -32,6 +32,6 @@ Migration guide
 If you are still using version 3.x or lower, it is highly recommended upgrading to the latest version.
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
     ./pages/migration-guide.md
