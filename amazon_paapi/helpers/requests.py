@@ -34,7 +34,7 @@ def get_items_request(amazon_api, asin_chunk: List[str], **kwargs) -> GetItemsRe
 
 def get_items_response(amazon_api, request: GetItemsRequest) -> List[Item]:
     try:
-        response = amazon_api._api.get_items(request)
+        response = amazon_api._api.get_items(request, _request_timeout=5)
     except ApiException as e:
         _manage_response_exceptions(e)
 
@@ -57,7 +57,7 @@ def get_search_items_request(amazon_api, **kwargs) -> SearchItemsRequest:
 
 def get_search_items_response(amazon_api, request: SearchItemsRequest) -> SearchResult:
     try:
-        response = amazon_api._api.search_items(request)
+        response = amazon_api._api.search_items(request, _request_timeout=5)
     except ApiException as e:
         _manage_response_exceptions(e)
 
@@ -80,7 +80,7 @@ def get_variations_request(amazon_api, **kwargs) -> GetVariationsRequest:
 
 def get_variations_response(amazon_api, request: GetVariationsRequest) -> VariationsResult:
     try:
-        response = amazon_api._api.get_variations(request)
+        response = amazon_api._api.get_variations(request, _request_timeout=5)
     except ApiException as e:
         _manage_response_exceptions(e)
 
@@ -103,7 +103,7 @@ def get_browse_nodes_request(amazon_api, **kwargs) -> GetBrowseNodesRequest:
 
 def get_browse_nodes_response(amazon_api, request: GetBrowseNodesRequest) -> List[BrowseNode]:
     try:
-        response = amazon_api._api.get_browse_nodes(request)
+        response = amazon_api._api.get_browse_nodes(request, _request_timeout=5)
     except ApiException as e:
         _manage_response_exceptions(e)
 
