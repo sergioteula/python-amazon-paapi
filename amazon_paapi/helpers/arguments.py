@@ -1,9 +1,10 @@
 """Module with helper functions for managing arguments."""
 
 
-from ..tools import get_asin
-from ..errors import InvalidArgumentException, AsinNotFoundException
 from typing import List, Union
+
+from ..errors import AsinNotFoundException, InvalidArgumentException
+from ..tools import get_asin
 
 
 def get_items_ids(items: Union[str, List[str]]) -> List[str]:
@@ -30,10 +31,11 @@ def check_search_args(**kwargs):
 
 def _check_search_mandatory_args(**kwargs):
     mandatory_args = [kwargs['keywords'], kwargs['actor'], kwargs['artist'],
-                      kwargs['author'],kwargs['brand'], kwargs['title']]
+                      kwargs['author'], kwargs['brand'], kwargs['title'],
+                      kwargs['browse_node_id']]
     if all(arg is None for arg in mandatory_args):
         error_message = ('At least one of the following args should be provided: '
-                         'keywords, actor, artist, author, brand or title.')
+                         'keywords, actor, artist, author, brand, title or browse_node_id.')
         raise InvalidArgumentException(error_message)
 
 
