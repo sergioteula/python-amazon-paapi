@@ -2,6 +2,7 @@
 .vscode/
 .DS_Store
 secrets.py
+test.py
 
 
 # Byte-compiled / optimized / DLL files

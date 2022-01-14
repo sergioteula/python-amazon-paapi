@@ -3,17 +3,15 @@
 A simple Python wrapper for the last version of the Amazon Product Advertising API.
 """
 
-from typing import List, Union
 import time
-
+from typing import List, Union
 
 from . import models
-from .sdk.api.default_api import DefaultApi
 from .errors import InvalidArgumentException
-from .helpers import arguments
-from .helpers import requests
+from .helpers import arguments, requests
 from .helpers.generators import get_list_chunks
 from .helpers.items import sort_items
+from .sdk.api.default_api import DefaultApi
 
 
 class AmazonApi:
