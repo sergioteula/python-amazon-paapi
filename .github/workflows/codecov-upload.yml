@@ -18,10 +18,10 @@ jobs:
       with:
         python-version: 3.9
 
-    - name: Generate coverage reports
+    - name: Generate coverage report
       run: |
         pip install coverage
-        coverage run -m unittest
+        coverage xml --omit=amazon/*,*/sdk/*
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
