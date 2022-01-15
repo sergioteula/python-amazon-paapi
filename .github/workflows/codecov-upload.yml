@@ -20,7 +20,7 @@ jobs:
 
     - name: Generate coverage report
       run: |
-        pip install coverage six
+        pip install coverage six urllib3 python_dateutil certifi setuptools
         coverage run -m unittest
 
     - name: Upload coverage to Codecov
