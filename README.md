@@ -7,6 +7,7 @@ A simple Python wrapper for the [last version of the Amazon Product Advertising 
 [![License](https://img.shields.io/badge/License-MIT-%23e83633)](https://github.com/sergioteula/python-amazon-paapi/blob/master/LICENSE)
 [![Support](https://img.shields.io/badge/Support-Good-brightgreen)](https://github.com/sergioteula/python-amazon-paapi/issues)
 [![Amazon API](https://img.shields.io/badge/Amazon%20API-5.0-%23FD9B15)](https://webservices.amazon.com/paapi5/documentation/)
+![Codecov](https://img.shields.io/codecov/c/github/sergioteula/python-amazon-paapi?label=Coverage)
 
 > If you are still using the old version, go [here](https://github.com/sergioteula/python-amazon-paapi/blob/master/amazon/README.md) for documentation or check our
 [migration guide](https://github.com/sergioteula/python-amazon-paapi/blob/master/docs/pages/migration-guide.md).
