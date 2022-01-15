@@ -18,9 +18,13 @@ jobs:
       with:
         python-version: 3.9
 
+    - name: Install dependencies
+      run: |
+        pip install coverage six urllib3 python_dateutil certifi setuptools
+
     - name: Generate coverage report
       run: |
-        pip install coverage
+        coverage run -m unittest
         coverage xml --omit=amazon/*,*/sdk/*
 
     - name: Upload coverage to Codecov
@@ -29,7 +33,3 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: true
         files: ./coverage.xml
-        flags: unittests
-        name: codecov-umbrella
-        path_to_write_report: ./coverage/codecov_report.txt
-        verbose: true
