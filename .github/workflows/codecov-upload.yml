@@ -1,0 +1,35 @@
+name: Coverage Update
+
+on:
+  release:
+    types: [created]
+
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+
+    - name: Setup Python
+      uses: actions/setup-python@master
+      with:
+        python-version: 3.9
+
+    - name: Generate coverage report
+      run: |
+        pip install coverage
+        coverage xml --omit=amazon/*,*/sdk/*
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        fail_ci_if_error: true
+        files: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        path_to_write_report: ./coverage/codecov_report.txt
+        verbose: true
