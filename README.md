@@ -5,9 +5,10 @@ A simple Python wrapper for the [last version of the Amazon Product Advertising 
 [![PyPI](https://img.shields.io/pypi/v/python-amazon-paapi?color=%231182C2&label=PyPI)](https://pypi.org/project/python-amazon-paapi/)
 [![Python](https://img.shields.io/badge/Python->3.6-%23FFD140)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-%23e83633)](https://github.com/sergioteula/python-amazon-paapi/blob/master/LICENSE)
-[![Support](https://img.shields.io/badge/Support-Good-brightgreen)](https://github.com/sergioteula/python-amazon-paapi/issues)
 [![Amazon API](https://img.shields.io/badge/Amazon%20API-5.0-%23FD9B15)](https://webservices.amazon.com/paapi5/documentation/)
-![Codecov](https://img.shields.io/codecov/c/github/sergioteula/python-amazon-paapi?label=Coverage)
+[![Codecov](https://img.shields.io/codecov/c/github/sergioteula/python-amazon-paapi?label=Coverage)](https://app.codecov.io/gh/sergioteula/python-amazon-paapi/)
+[![Support](https://img.shields.io/badge/Support-Good-brightgreen)](https://github.com/sergioteula/python-amazon-paapi/issues)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/python-amazon-paapi?label=Installs)](https://pypi.org/project/python-amazon-paapi/)
 
 > If you are still using the old version, go [here](https://github.com/sergioteula/python-amazon-paapi/blob/master/amazon/README.md) for documentation or check our
 [migration guide](https://github.com/sergioteula/python-amazon-paapi/blob/master/docs/pages/migration-guide.md).
