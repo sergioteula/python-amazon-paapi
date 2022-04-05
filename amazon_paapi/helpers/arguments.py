@@ -32,10 +32,10 @@ def check_search_args(**kwargs):
 def _check_search_mandatory_args(**kwargs):
     mandatory_args = [kwargs['keywords'], kwargs['actor'], kwargs['artist'],
                       kwargs['author'], kwargs['brand'], kwargs['title'],
-                      kwargs['browse_node_id']]
+                      kwargs['browse_node_id'], kwargs['search_index']]
     if all(arg is None for arg in mandatory_args):
         error_message = ('At least one of the following args should be provided: '
-                         'keywords, actor, artist, author, brand, title or browse_node_id.')
+                         'keywords, actor, artist, author, brand, title, browse_node_id or search_index.')
         raise InvalidArgumentException(error_message)
 
 

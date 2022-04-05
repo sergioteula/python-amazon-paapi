@@ -131,7 +131,7 @@ class AmazonApi:
     ) -> models.SearchResult:
         """Searches for items on Amazon based on a search query. At least one of the following
         parameters should be specified: ``keywords``, ``actor``, ``artist``, ``author``,
-        ``brand`` or ``title``.
+        ``brand``, ``title``, ``browse_node_id`` or ``search_index``.
 
         Args:
             item_count (``int``, optional): Number of items returned. Should be between 1 and 10.
