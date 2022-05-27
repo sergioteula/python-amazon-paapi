@@ -25,7 +25,6 @@ from __future__ import absolute_import
     https://webservices.amazon.com/paapi5/documentation/index.html  # noqa: E501
 """
 
-
 # import models into model package
 from .availability import Availability
 from .browse_node import BrowseNode
@@ -88,6 +87,7 @@ from .offer_summary import OfferSummary
 from .offers import Offers
 from .partner_type import PartnerType
 from .price import Price
+from .price_type import PriceType
 from .product_advertising_api_client_exception import ProductAdvertisingAPIClientException
 from .product_advertising_api_service_exception import ProductAdvertisingAPIServiceException
 from .product_info import ProductInfo
