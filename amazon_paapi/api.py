@@ -82,7 +82,7 @@ class AmazonApi:
             ``InvalidArgumentException``
             ``MalformedRequestException``
             ``ApiRequestException``
-            ``ItemsNotFoudException``
+            ``ItemsNotFoundException``
         """
 
         kwargs.update({
@@ -178,7 +178,7 @@ class AmazonApi:
             ``InvalidArgumentException``
             ``MalformedRequestException``
             ``ApiRequestException``
-            ``ItemsNotFoudException``
+            ``ItemsNotFoundException``
         """
 
         kwargs.update({
@@ -247,7 +247,7 @@ class AmazonApi:
             ``InvalidArgumentException``
             ``MalformedRequestException``
             ``ApiRequestException``
-            ``ItemsNotFoudException``
+            ``ItemsNotFoundException``
         """
 
         asin = arguments.get_items_ids(asin)[0]
@@ -290,7 +290,7 @@ class AmazonApi:
             ``InvalidArgumentException``
             ``MalformedRequestException``
             ``ApiRequestException``
-            ``ItemsNotFoudException``
+            ``ItemsNotFoundException``
         """
 
         kwargs.update({
