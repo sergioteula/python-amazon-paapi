@@ -45,7 +45,7 @@ class ApiPrice:
     currency: str
     price_per_unit: float
     display_amount: str
-    price_type: str
+    price_type: models.PriceType
     price_type_label: str
 
 
