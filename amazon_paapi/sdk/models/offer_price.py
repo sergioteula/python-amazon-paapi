@@ -29,6 +29,7 @@ import re  # noqa: F401
 import six
 
 from .offer_savings import OfferSavings  # noqa: F401,E501
+from .price_type import PriceType  # noqa: F401,E501
 
 
 class OfferPrice(object):
@@ -49,6 +50,8 @@ class OfferPrice(object):
         'currency': 'str',
         'display_amount': 'str',
         'price_per_unit': 'float',
+        'price_type': 'PriceType',
+        'price_type_label': 'str',
         'savings': 'OfferSavings'
     }
 
@@ -57,16 +60,20 @@ class OfferPrice(object):
         'currency': 'Currency',
         'display_amount': 'DisplayAmount',
         'price_per_unit': 'PricePerUnit',
+        'price_type': 'PriceType',
+        'price_type_label': 'PriceTypeLabel',
         'savings': 'Savings'
     }
 
-    def __init__(self, amount=None, currency=None, display_amount=None, price_per_unit=None, savings=None):  # noqa: E501
+    def __init__(self, amount=None, currency=None, display_amount=None, price_per_unit=None, price_type=None, price_type_label=None, savings=None):  # noqa: E501
         """OfferPrice - a model defined in Swagger"""  # noqa: E501
 
         self._amount = None
         self._currency = None
         self._display_amount = None
         self._price_per_unit = None
+        self._price_type = None
+        self._price_type_label = None
         self._savings = None
         self.discriminator = None
 
@@ -78,6 +85,10 @@ class OfferPrice(object):
             self.display_amount = display_amount
         if price_per_unit is not None:
             self.price_per_unit = price_per_unit
+        if price_type is not None:
+            self.price_type = price_type
+        if price_type_label is not None:
+            self.price_type_label = price_type_label
         if savings is not None:
             self.savings = savings
 
@@ -164,6 +175,48 @@ class OfferPrice(object):
         """
 
         self._price_per_unit = price_per_unit
+
+    @property
+    def price_type(self):
+        """Gets the price_type of this OfferPrice.  # noqa: E501
+
+
+        :return: The price_type of this OfferPrice.  # noqa: E501
+        :rtype: PriceType
+        """
+        return self._price_type
+
+    @price_type.setter
+    def price_type(self, price_type):
+        """Sets the price_type of this OfferPrice.
+
+
+        :param price_type: The price_type of this OfferPrice.  # noqa: E501
+        :type: PriceType
+        """
+
+        self._price_type = price_type
+
+    @property
+    def price_type_label(self):
+        """Gets the price_type_label of this OfferPrice.  # noqa: E501
+
+
+        :return: The price_type_label of this OfferPrice.  # noqa: E501
+        :rtype: str
+        """
+        return self._price_type_label
+
+    @price_type_label.setter
+    def price_type_label(self, price_type_label):
+        """Sets the price_type_label of this OfferPrice.
+
+
+        :param price_type_label: The price_type_label of this OfferPrice.  # noqa: E501
+        :type: str
+        """
+
+        self._price_type_label = price_type_label
 
     @property
     def savings(self):
