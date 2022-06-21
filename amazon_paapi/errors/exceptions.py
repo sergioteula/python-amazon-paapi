@@ -28,7 +28,7 @@ class MalformedRequestException(AmazonException):
     """Raised if the request for Amazon API is not correctly formed"""
     pass
 
-class ItemsNotFoudException(AmazonException):
+class ItemsNotFoundException(AmazonException):
     """Raised if no items are found"""
     pass
 

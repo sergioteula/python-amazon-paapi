@@ -1,23 +1,31 @@
 """Module with helper functions for creating requests."""
 
 
+import inspect
 from typing import List
+
+from ..errors import (
+    ApiRequestException,
+    AssociateValidationException,
+    InvalidArgumentException,
+    ItemsNotFoundException,
+    MalformedRequestException,
+    TooManyRequestsException,
+)
+from ..models.browse_nodes_result import BrowseNode
 from ..models.item_result import Item
 from ..models.search_result import SearchResult
 from ..models.variations_result import VariationsResult
-from ..models.browse_nodes_result import BrowseNode
-from ..errors import ApiRequestException, ItemsNotFoudException, MalformedRequestException, TooManyRequestsException, AssociateValidationException, InvalidArgumentException
-from ..sdk.models.partner_type import PartnerType
-from ..sdk.models.get_items_resource import GetItemsResource
-from ..sdk.models.get_items_request import GetItemsRequest
-from ..sdk.models.search_items_resource import SearchItemsResource
-from ..sdk.models.search_items_request import SearchItemsRequest
-from ..sdk.models.get_variations_resource import GetVariationsResource
-from ..sdk.models.get_variations_request import GetVariationsRequest
-from ..sdk.models.get_browse_nodes_resource import GetBrowseNodesResource
 from ..sdk.models.get_browse_nodes_request import GetBrowseNodesRequest
+from ..sdk.models.get_browse_nodes_resource import GetBrowseNodesResource
+from ..sdk.models.get_items_request import GetItemsRequest
+from ..sdk.models.get_items_resource import GetItemsResource
+from ..sdk.models.get_variations_request import GetVariationsRequest
+from ..sdk.models.get_variations_resource import GetVariationsResource
+from ..sdk.models.partner_type import PartnerType
+from ..sdk.models.search_items_request import SearchItemsRequest
+from ..sdk.models.search_items_resource import SearchItemsResource
 from ..sdk.rest import ApiException
-import inspect
 
 
 def get_items_request(amazon_api, asin_chunk: List[str], **kwargs) -> GetItemsRequest:
@@ -39,7 +47,7 @@ def get_items_response(amazon_api, request: GetItemsRequest) -> List[Item]:
         _manage_response_exceptions(e)
 
     if response.items_result == None:
-        raise ItemsNotFoudException('No items have been found')
+        raise ItemsNotFoundException('No items have been found')
 
     return response.items_result.items
 
@@ -62,7 +70,7 @@ def get_search_items_response(amazon_api, request: SearchItemsRequest) -> Search
         _manage_response_exceptions(e)
 
     if response.search_result == None:
-        raise ItemsNotFoudException('No items have been found')
+        raise ItemsNotFoundException('No items have been found')
 
     return response.search_result
 
@@ -85,7 +93,7 @@ def get_variations_response(amazon_api, request: GetVariationsRequest) -> Variat
         _manage_response_exceptions(e)
 
     if response.variations_result == None:
-        raise ItemsNotFoudException('No variation items have been found')
+        raise ItemsNotFoundException('No variation items have been found')
 
     return response.variations_result
 
@@ -108,7 +116,7 @@ def get_browse_nodes_response(amazon_api, request: GetBrowseNodesRequest) -> Lis
         _manage_response_exceptions(e)
 
     if response.browse_nodes_result == None:
-        raise ItemsNotFoudException('No browse nodes have been found')
+        raise ItemsNotFoundException('No browse nodes have been found')
 
     return response.browse_nodes_result.browse_nodes
 
