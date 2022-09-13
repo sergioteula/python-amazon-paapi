@@ -86,6 +86,7 @@ class ApiClassifications(models.Classifications):
 class ApiContentInfo(models.ContentInfo):
     edition: ApiSingleStringValuedAttribute
     languages: ApiMultiValuedAttributeType
+    publication_date: ApiSingleStringValuedAttribute
 
 
 class ApiContentRating(models.ContentRating):
