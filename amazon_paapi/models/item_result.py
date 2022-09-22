@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from ..sdk import models
 
@@ -86,6 +86,7 @@ class ApiClassifications(models.Classifications):
 class ApiContentInfo(models.ContentInfo):
     edition: ApiSingleStringValuedAttribute
     languages: ApiMultiValuedAttributeType
+    publication_date: Optional[ApiSingleStringValuedAttribute]
 
 
 class ApiContentRating(models.ContentRating):
@@ -148,7 +149,7 @@ class ApiItemInfo(models.ItemInfo):
     external_ids: ApiExternalIds
     features: ApiFeatures
     manufacture_info: ApiManufactureInfo
-    product_info: ApiProductInfo
+    product_info: Optional[ApiProductInfo]
     technical_info: ApiTechnicalInfo
     title: ApiSingleStringValuedAttribute
     trade_in_info: ApiTradeInInfo
