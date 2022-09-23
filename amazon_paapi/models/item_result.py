@@ -144,7 +144,7 @@ class ApiTradeInInfo(models.TradeInInfo):
 class ApiItemInfo(models.ItemInfo):
     by_line_info: ApiByLineInfo
     classifications: ApiClassifications
-    content_info: ApiContentInfo
+    content_info: Optional[ApiContentInfo]
     content_rating: ApiContentRating
     external_ids: ApiExternalIds
     features: ApiFeatures
