@@ -1,0 +1,7 @@
+#! /bin/bash -e
+
+check_if_installed() {
+    if [ -x "$(command -v "${1}")" ]; then
+        echo "${1} is installed"
+    fi
+}

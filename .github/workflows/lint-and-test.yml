@@ -1,0 +1,16 @@
+name: Lint and test
+
+on:
+  push:
+
+jobs:
+
+  isort:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Check imports order
+      uses: sergioteula/pytools
+      run: ./scripts/check_isort

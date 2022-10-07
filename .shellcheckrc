@@ -1,0 +1,3 @@
+# ~/.shellcheckrc
+
+disable=SC1091
