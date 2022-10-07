@@ -1,6 +1,6 @@
-from amazon_paapi import AmazonApi
 import secrets
 
+from amazon_paapi import AmazonApi
 
 amazon = AmazonApi(secrets.KEY, secrets.SECRET, secrets.TAG, secrets.COUNTRY, throttling=2)
 

@@ -1,6 +1,8 @@
 from typing import List
-from .item_result import Item
+
 from ..sdk.models import VariationsResult, VariationSummary
+from .item_result import Item
+
 
 class ApiPrice:
     amount: float
