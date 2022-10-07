@@ -20,6 +20,7 @@ class ApiVariationPrice:
     highest_price: ApiPrice
     lowest_price: ApiPrice
 
+
 class ApiVariationSummary(VariationSummary):
     page_count: int
     price: ApiVariationPrice
