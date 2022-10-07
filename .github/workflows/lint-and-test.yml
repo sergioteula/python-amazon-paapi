@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: sergioteula/pytools
+      volumes:
+        - /code:/volume_mount
     steps:
     - name: Check out code
       uses: actions/checkout@v2
