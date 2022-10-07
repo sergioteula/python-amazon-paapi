@@ -7,9 +7,9 @@ import time
 from typing import List, Union
 
 from . import models
+from .errors import InvalidArgumentException
 from .helpers import arguments, requests
 from .helpers.generators import get_list_chunks
-from .errors import InvalidArgumentException
 from .helpers.items import sort_items
 from .sdk.api.default_api import DefaultApi
 
