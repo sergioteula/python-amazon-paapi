@@ -14,21 +14,17 @@ check_if_installed() {
 }
 
 header(){
-    echo -e "\n${BLUE}${*}\n${LINE}${NC}"
-}
-
-subheader(){
-    echo -e "\n${BLUE}# ${*}${NC}"
+    echo -e "\n${BLUE}${*}\n${BLUE}${LINE}${NC}"
 }
 
 warning(){
-    echo -e "${YELLOW}WARNING: ${*}${NC}\n"
+    echo -e "${YELLOW}WARNING: ${*}${NC}"
 }
 
 error(){
-    echo -e "${RED}ERROR: ${*}${NC}\n"
+    echo -e "${RED}ERROR: ${*}${NC}"
 }
 
 success(){
-    echo -e "${GREEN}${*}${NC}\n"
+    echo -e "${GREEN}${*}${NC}"
 }
