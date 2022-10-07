@@ -50,7 +50,7 @@ def get_items_response(amazon_api, request: GetItemsRequest) -> List[Item]:
     except ApiException as e:
         _manage_response_exceptions(e)
 
-    if response.items_result == None:
+    if response.items_result is None:
         raise ItemsNotFoundException("No items have been found")
 
     return response.items_result.items
@@ -77,7 +77,7 @@ def get_search_items_response(amazon_api, request: SearchItemsRequest) -> Search
     except ApiException as e:
         _manage_response_exceptions(e)
 
-    if response.search_result == None:
+    if response.search_result is None:
         raise ItemsNotFoundException("No items have been found")
 
     return response.search_result
@@ -106,7 +106,7 @@ def get_variations_response(
     except ApiException as e:
         _manage_response_exceptions(e)
 
-    if response.variations_result == None:
+    if response.variations_result is None:
         raise ItemsNotFoundException("No variation items have been found")
 
     return response.variations_result
@@ -135,7 +135,7 @@ def get_browse_nodes_response(
     except ApiException as e:
         _manage_response_exceptions(e)
 
-    if response.browse_nodes_result == None:
+    if response.browse_nodes_result is None:
         raise ItemsNotFoundException("No browse nodes have been found")
 
     return response.browse_nodes_result.browse_nodes
