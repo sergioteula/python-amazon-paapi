@@ -28,15 +28,21 @@ class ApiUnitBasedAttribute(ApiLabelLocale, models.UnitBasedAttribute):
     unit: str
 
 
-class ApiSingleStringValuedAttribute(ApiLabelLocale, models.SingleStringValuedAttribute):
+class ApiSingleStringValuedAttribute(
+    ApiLabelLocale, models.SingleStringValuedAttribute
+):
     display_value: str
 
 
-class ApiSingleBooleanValuedAttribute(ApiLabelLocale, models.SingleBooleanValuedAttribute):
+class ApiSingleBooleanValuedAttribute(
+    ApiLabelLocale, models.SingleBooleanValuedAttribute
+):
     display_value: bool
 
 
-class ApiSingleIntegerValuedAttribute(ApiLabelLocale, models.SingleIntegerValuedAttribute):
+class ApiSingleIntegerValuedAttribute(
+    ApiLabelLocale, models.SingleIntegerValuedAttribute
+):
     display_value: float
 
 
@@ -99,7 +105,7 @@ class ApiExternalIds(models.ExternalIds):
     up_cs: ApiMultiValuedAttributeStr
 
 
-class ApiFeatures():
+class ApiFeatures:
     features: ApiMultiValuedAttributeStr
 
 

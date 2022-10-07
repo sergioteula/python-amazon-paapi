@@ -29,7 +29,15 @@ class AmazonApi:
         ``InvalidArgumentException``
     """
 
-    def __init__(self, key: str, secret: str, tag: str, country: models.Country, throttling: float = 1, **kwargs):
+    def __init__(
+        self,
+        key: str,
+        secret: str,
+        tag: str,
+        country: models.Country,
+        throttling: float = 1,
+        **kwargs
+    ):
         self._key = key
         self._secret = secret
         self._tag = tag
@@ -38,14 +46,13 @@ class AmazonApi:
         self._last_query_time = time.time() - throttling
 
         try:
-            self._host = 'webservices.amazon.' + models.regions.DOMAINS[country]
+            self._host = "webservices.amazon." + models.regions.DOMAINS[country]
             self._region = models.regions.REGIONS[country]
-            self._marketplace = 'www.amazon.' + models.regions.DOMAINS[country]
+            self._marketplace = "www.amazon." + models.regions.DOMAINS[country]
         except KeyError as error:
-            raise InvalidArgumentException('Country code is not correct') from error
+            raise InvalidArgumentException("Country code is not correct") from error
 
         self._api = DefaultApi(key, secret, self._host, self._region)
-
 
     def get_items(
         self,
@@ -57,7 +64,6 @@ class AmazonApi:
         include_unavailable: bool = False,
         **kwargs
     ) -> List[models.Item]:
-
         """Get items information from Amazon.
 
         Args:
@@ -85,12 +91,14 @@ class AmazonApi:
             ``ItemsNotFoundException``
         """
 
-        kwargs.update({
-            'condition': condition,
-            'merchant': merchant,
-            'currency_of_preference': currency_of_preference,
-            'languages_of_preference': languages_of_preference
-        })
+        kwargs.update(
+            {
+                "condition": condition,
+                "merchant": merchant,
+                "currency_of_preference": currency_of_preference,
+                "languages_of_preference": languages_of_preference,
+            }
+        )
 
         items_ids = arguments.get_items_ids(items)
         results = []
@@ -102,7 +110,6 @@ class AmazonApi:
             results.extend(items_response)
 
         return sort_items(results, items_ids, include_unavailable)
-
 
     def search_items(
         self,
@@ -181,35 +188,36 @@ class AmazonApi:
             ``ItemsNotFoundException``
         """
 
-        kwargs.update({
-            'item_count': item_count,
-            'item_page': item_page,
-            'actor': actor,
-            'artist': artist,
-            'author': author,
-            'brand': brand,
-            'keywords': keywords,
-            'title': title,
-            'availability': availability,
-            'browse_node_id': browse_node_id,
-            'condition': condition,
-            'currency_of_preference': currency_of_preference,
-            'delivery_flags': delivery_flags,
-            'languages_of_preference': languages_of_preference,
-            'max_price': max_price,
-            'merchant': merchant,
-            'min_price': min_price,
-            'min_reviews_rating': min_reviews_rating,
-            'min_saving_percent': min_saving_percent,
-            'search_index': search_index,
-            'sort_by': sort_by,
-        })
+        kwargs.update(
+            {
+                "item_count": item_count,
+                "item_page": item_page,
+                "actor": actor,
+                "artist": artist,
+                "author": author,
+                "brand": brand,
+                "keywords": keywords,
+                "title": title,
+                "availability": availability,
+                "browse_node_id": browse_node_id,
+                "condition": condition,
+                "currency_of_preference": currency_of_preference,
+                "delivery_flags": delivery_flags,
+                "languages_of_preference": languages_of_preference,
+                "max_price": max_price,
+                "merchant": merchant,
+                "min_price": min_price,
+                "min_reviews_rating": min_reviews_rating,
+                "min_saving_percent": min_saving_percent,
+                "search_index": search_index,
+                "sort_by": sort_by,
+            }
+        )
 
         arguments.check_search_args(**kwargs)
         request = requests.get_search_items_request(self, **kwargs)
         self._throttle()
         return requests.get_search_items_response(self, request)
-
 
     def get_variations(
         self,
@@ -252,21 +260,22 @@ class AmazonApi:
 
         asin = arguments.get_items_ids(asin)[0]
 
-        kwargs.update({
-            'asin': asin,
-            'variation_count': variation_count,
-            'variation_page': variation_page,
-            'condition': condition,
-            'currency_of_preference': currency_of_preference,
-            'languages_of_preference': languages_of_preference,
-            'merchant': merchant
-        })
+        kwargs.update(
+            {
+                "asin": asin,
+                "variation_count": variation_count,
+                "variation_page": variation_page,
+                "condition": condition,
+                "currency_of_preference": currency_of_preference,
+                "languages_of_preference": languages_of_preference,
+                "merchant": merchant,
+            }
+        )
 
         arguments.check_variations_args(**kwargs)
         request = requests.get_variations_request(self, **kwargs)
         self._throttle()
         return requests.get_variations_response(self, request)
-
 
     def get_browse_nodes(
         self,
@@ -293,16 +302,17 @@ class AmazonApi:
             ``ItemsNotFoundException``
         """
 
-        kwargs.update({
-            'browse_node_ids': browse_node_ids,
-            'languages_of_preference': languages_of_preference
-        })
+        kwargs.update(
+            {
+                "browse_node_ids": browse_node_ids,
+                "languages_of_preference": languages_of_preference,
+            }
+        )
 
         arguments.check_browse_nodes_args(**kwargs)
         request = requests.get_browse_nodes_request(self, **kwargs)
         self._throttle()
         return requests.get_browse_nodes_response(self, request)
-
 
     def _throttle(self):
         wait_time = self._throttling - (time.time() - self._last_query_time)
