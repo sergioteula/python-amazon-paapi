@@ -5,5 +5,6 @@ source "${ROOT_DIR}/scripts/helpers"
 
 ./scripts/check_isort
 ./scripts/check_black
+./scripts/check_flake8
 
 header "Proceeding with push"
