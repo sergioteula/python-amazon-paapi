@@ -1,0 +1,30 @@
+name: Lint and test
+
+on:
+  push:
+
+jobs:
+
+  isort:
+    runs-on: ubuntu-latest
+    container:
+      image: sergioteula/pytools
+      volumes:
+        - ${{github.workspace}}:/code
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+    - name: Check imports order
+      run: ./scripts/check_isort
+
+  black:
+    runs-on: ubuntu-latest
+    container:
+      image: sergioteula/pytools
+      volumes:
+        - ${{github.workspace}}:/code
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+    - name: Check code format
+      run: ./scripts/check_black

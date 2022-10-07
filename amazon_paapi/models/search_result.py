@@ -1,6 +1,8 @@
 from typing import List
-from .item_result import Item
+
 from ..sdk.models import SearchResult
+from .item_result import Item
+
 
 class SearchResult(SearchResult):
     items: List[Item]

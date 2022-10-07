@@ -99,6 +99,14 @@ amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY, throttling=4)  # Makes 1 request e
 amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY, throttling=0)  # No wait time between requests
 ```
 
+## Contribution
+
+Activate githooks with:
+
+```
+git config core.hooksPath .githooks
+```
+
 ## License
 
 Copyright © 2021 Sergio Abad. See [license](https://github.com/sergioteula/python-amazon-paapi/blob/master/LICENSE) for details.

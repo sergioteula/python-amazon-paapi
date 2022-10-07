@@ -1,10 +1,13 @@
 """Module to manage items"""
 
 from typing import List
+
 from .. import models
 
 
-def sort_items(items: List[models.Item], items_ids: List[str], include_unavailable: bool) -> List[models.Item]:
+def sort_items(
+    items: List[models.Item], items_ids: List[str], include_unavailable: bool
+) -> List[models.Item]:
     sorted_items = []
 
     for asin in items_ids:

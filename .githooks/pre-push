@@ -1,0 +1,9 @@
+#! /bin/bash
+
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+source "${ROOT_DIR}/scripts/helpers"
+
+./scripts/check_isort
+./scripts/check_black
+
+header "Proceeding with push"
