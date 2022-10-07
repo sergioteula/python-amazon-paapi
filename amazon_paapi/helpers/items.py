@@ -1,6 +1,7 @@
 """Module to manage items"""
 
 from typing import List
+
 from .. import models
 
 
