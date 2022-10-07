@@ -28,3 +28,15 @@ jobs:
       uses: actions/checkout@v2
     - name: Check code format
       run: ./scripts/check_black
+
+  flake8:
+    runs-on: ubuntu-latest
+    container:
+      image: sergioteula/pytools
+      volumes:
+        - ${{github.workspace}}:/code
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+    - name: Check code errors
+      run: ./scripts/check_flake8
