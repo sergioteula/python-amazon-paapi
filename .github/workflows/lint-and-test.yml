@@ -13,7 +13,7 @@ jobs:
     container:
       image: sergioteula/pytools
       volumes:
-        - ${{env.REPO_PATH}}:/code
+        - ${{github.workspace}}:/code
     steps:
     - name: Check out code
       uses: actions/checkout@v2
