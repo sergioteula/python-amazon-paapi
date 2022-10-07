@@ -16,4 +16,4 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Check imports order
-      run: ls -la && scripts/check_isort
+      run: ls -la && cd scripts && ls -la && ./check_isort
