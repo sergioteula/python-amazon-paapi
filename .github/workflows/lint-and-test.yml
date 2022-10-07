@@ -10,10 +10,10 @@ jobs:
     container:
       image: sergioteula/pytools
       volumes:
-        - /code:/volume_mount
+        - /__w/python-amazon-paapi/python-amazon-paapi:/code
     steps:
     - name: Check out code
       uses: actions/checkout@v2
 
     - name: Check imports order
-      run: ./scripts/check_isort
+      run: ls -la && ./scripts/check_isort
