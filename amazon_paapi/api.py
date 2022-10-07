@@ -64,7 +64,6 @@ class AmazonApi:
         include_unavailable: bool = False,
         **kwargs
     ) -> List[models.Item]:
-
         """Get items information from Amazon.
 
         Args:

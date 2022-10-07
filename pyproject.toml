@@ -1,5 +1,5 @@
 [tool.black]
-experimental-string-processing = true
+preview = true
 exclude = ".*/sdk/.*"
 
 [tool.isort]
