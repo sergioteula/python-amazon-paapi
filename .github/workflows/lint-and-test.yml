@@ -12,6 +12,7 @@ jobs:
       volumes:
         - ${{github.workspace}}:/code
     steps:
-    - uses: actions/checkout@v2
+    - name: Check out code
+      uses: actions/checkout@v2
     - name: Check imports order
       run: ./scripts/check_isort
