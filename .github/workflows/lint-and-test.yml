@@ -3,6 +3,9 @@ name: Lint and test
 on:
   push:
 
+env:
+  REPO_PATH: "/__w/python-amazon-paapi/python-amazon-paapi"
+
 jobs:
 
   isort:
@@ -10,10 +13,10 @@ jobs:
     container:
       image: sergioteula/pytools
       volumes:
-        - /__w/python-amazon-paapi/python-amazon-paapi:/code
+        - ${{env.REPO_PATH}}:/code
     steps:
     - name: Check out code
       uses: actions/checkout@v2
 
     - name: Check imports order
-      run: ls -la && cd scripts && ls -la && ./check_isort
+      run: ./scripts/check_isort
