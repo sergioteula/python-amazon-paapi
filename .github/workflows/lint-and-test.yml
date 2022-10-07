@@ -7,10 +7,11 @@ jobs:
 
   isort:
     runs-on: ubuntu-latest
+    container:
+      image: sergioteula/pytools
     steps:
     - name: Check out code
       uses: actions/checkout@v2
 
     - name: Check imports order
-      uses: sergioteula/pytools
       run: ./scripts/check_isort
