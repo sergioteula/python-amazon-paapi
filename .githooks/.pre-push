@@ -1,0 +1,4 @@
+#! /bin/bash
+
+./scripts/check_isort
+./scripts/check_black
