@@ -2,8 +2,6 @@ from typing import List, Optional
 
 from ..sdk import models
 
-"""Shared models"""
-
 
 class ApiLabelLocale:
     label: str
@@ -55,9 +53,6 @@ class ApiPrice:
     price_type_label: str
 
 
-"""Image models"""
-
-
 class ApiImageSize(models.ImageSize):
     url: str
     height: str
@@ -73,9 +68,6 @@ class ApiImageType(models.ImageType):
 class ApiImages(models.Images):
     primary: ApiImageType
     variants: List[ApiImageType]
-
-
-"""Item info models"""
 
 
 class ApiByLineInfo(models.ByLineInfo):
@@ -161,9 +153,6 @@ class ApiItemInfo(models.ItemInfo):
     trade_in_info: ApiTradeInInfo
 
 
-"""Offers model"""
-
-
 class ApiOfferAvailability(models.OfferAvailability):
     max_order_quantity: int
     message: str
@@ -247,9 +236,6 @@ class ApiOffers(models.Offers):
     listings: List[ApiListings]
 
 
-"""Browse node info model"""
-
-
 class ApiBrowseNode(models.BrowseNode):
     ancestor: str
     context_free_name: str
@@ -268,9 +254,6 @@ class ApiWebsiteSalesRank(models.WebsiteSalesRank):
 class ApiBrowseNodeInfo(models.BrowseNodeInfo):
     browse_nodes: List[ApiBrowseNode]
     website_sales_rank: ApiWebsiteSalesRank
-
-
-"""Main model"""
 
 
 class Item(models.Item):
