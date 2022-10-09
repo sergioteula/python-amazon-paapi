@@ -1,6 +1,7 @@
 [run]
 branch = True
 source = amazon_paapi
+relative_files = True
 omit = **/sdk/**
 
 [report]
