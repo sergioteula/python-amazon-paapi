@@ -1,6 +1,6 @@
 import unittest
 
-from amazon_paapi.errors import AsinNotFoundException, InvalidArgumentException
+from amazon_paapi.errors import AsinNotFound, InvalidArgument
 from amazon_paapi.helpers.arguments import get_items_ids
 
 
@@ -22,9 +22,9 @@ class TestHelpersArguments(unittest.TestCase):
         )
 
     def test_get_items_ids_asin_not_found(self):
-        with self.assertRaises(AsinNotFoundException):
+        with self.assertRaises(AsinNotFound):
             get_items_ids("https://www.amazon.es/gp/")
 
     def test_get_items_ids_invalid_argument(self):
-        with self.assertRaises(InvalidArgumentException):
+        with self.assertRaises(InvalidArgument):
             get_items_ids(34)
