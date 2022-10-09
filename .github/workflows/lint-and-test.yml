@@ -68,4 +68,3 @@ jobs:
           args:
             -Dsonar.projectKey=sergioteula_python-amazon-paapi
             -Dsonar.organization=sergioteula
-            -Dsonar.sources=/github/workspace/amazon_paapi/
