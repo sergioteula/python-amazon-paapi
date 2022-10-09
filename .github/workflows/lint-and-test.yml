@@ -16,7 +16,7 @@ jobs:
         - ${{github.workspace}}:/code
     steps:
     - name: Check out code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Check imports order
       run: ./scripts/check_isort
 
@@ -28,7 +28,7 @@ jobs:
         - ${{github.workspace}}:/code
     steps:
     - name: Check out code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Check code format
       run: ./scripts/check_black
 
@@ -40,7 +40,7 @@ jobs:
         - ${{github.workspace}}:/code
     steps:
     - name: Check out code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Check code errors
       run: ./scripts/check_flake8
 
@@ -52,7 +52,7 @@ jobs:
         - ${{github.workspace}}:/code
     steps:
     - name: Check out code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Check code errors
       run: ./scripts/check_pylint
 
@@ -60,7 +60,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Check code errors
         uses: SonarSource/sonarcloud-github-action@v1.7
         env:
