@@ -59,8 +59,8 @@ jobs:
   sonar:
     runs-on: ubuntu-latest
     steps:
-      - name: Analyze with SonarCloud
-        uses: SonarSource/sonarcloud-github-action
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v1.7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
