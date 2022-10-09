@@ -56,13 +56,35 @@ jobs:
     - name: Check code errors
       run: ./scripts/check_pylint
 
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: sergioteula/pytools
+      volumes:
+        - ${{github.workspace}}:/code
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v3
+    - name: Run tests
+      run: ./scripts/run_tests
+    - name: Save code coverage file
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage
+        path: coverage.xml
+
   sonar:
     runs-on: ubuntu-latest
+    needs: [test]
     steps:
       - name: Check out code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: Download a single artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage
       - name: Check code errors
         uses: SonarSource/sonarcloud-github-action@master
         env:
