@@ -114,7 +114,7 @@ class AmazonApi:
         return sort_items(results, items_ids, include_unavailable)
 
     def search_items(
-        self,
+        self,  # NOSONAR
         item_count: int = None,
         item_page: int = None,
         actor: str = None,
