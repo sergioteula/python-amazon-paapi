@@ -1,4 +1,4 @@
-# Migration guide
+# Migration guide from 3.x to 4.x
 
 This guide explains how to proceed with the migration from version 3.x to version 4.x of your current code.
 If you are still using the old version, it is highly recommended to update, since you wont get any future
