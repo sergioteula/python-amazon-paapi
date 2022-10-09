@@ -3,6 +3,9 @@ name: Lint and test
 on:
   push:
 
+permissions:
+  pull-requests: read
+
 jobs:
 
   isort:
@@ -52,3 +55,18 @@ jobs:
       uses: actions/checkout@v2
     - name: Check code errors
       run: ./scripts/check_pylint
+
+  sonar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Analyze with SonarCloud
+        uses: SonarSource/sonarcloud-github-action
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args:
+            -Dsonar.projectKey=sergioteula_python-amazon-paapi
+            -Dsonar.organization=sergioteula
+            -Dsonar.sources=amazon_paapi
+            -Dsonar.tests=tests
