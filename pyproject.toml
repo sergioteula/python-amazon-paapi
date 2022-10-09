@@ -9,7 +9,7 @@ skip_glob = "*/sdk/*"
 [tool.pylint]
     [tool.pylint.master]
         ignore = ["test.py"]
-        ignore-paths = [".*/sdk", ".*/docs"]
+        ignore-paths = [".*/sdk/", ".*docs/"]
     [tool.pylint.message_control]
         disable = [
             "too-many-instance-attributes",
