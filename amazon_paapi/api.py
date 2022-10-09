@@ -40,19 +40,19 @@ class AmazonApi:
     ):
         self._key = key
         self._secret = secret
-        self._tag = tag
-        self._country = country
-        self._throttling = float(throttling)
         self._last_query_time = time.time() - throttling
+        self.tag = tag
+        self.country = country
+        self.throttling = float(throttling)
 
         try:
             self._host = "webservices.amazon." + models.regions.DOMAINS[country]
-            self._region = models.regions.REGIONS[country]
-            self._marketplace = "www.amazon." + models.regions.DOMAINS[country]
+            self.region = models.regions.REGIONS[country]
+            self.marketplace = "www.amazon." + models.regions.DOMAINS[country]
         except KeyError as error:
             raise InvalidArgumentException("Country code is not correct") from error
 
-        self._api = DefaultApi(key, secret, self._host, self._region)
+        self.api = DefaultApi(key, secret, self._host, self.region)
 
     def get_items(
         self,
@@ -329,7 +329,7 @@ class AmazonApi:
         return requests.get_browse_nodes_response(self, request)
 
     def _throttle(self):
-        wait_time = self._throttling - (time.time() - self._last_query_time)
+        wait_time = self.throttling - (time.time() - self._last_query_time)
         if wait_time > 0:
             time.sleep(wait_time)
         self._last_query_time = time.time()

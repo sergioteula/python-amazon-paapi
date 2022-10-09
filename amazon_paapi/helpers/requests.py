@@ -33,22 +33,22 @@ def get_items_request(amazon_api, asin_chunk: List[str], **kwargs) -> GetItemsRe
         return GetItemsRequest(
             resources=_get_request_resources(GetItemsResource),
             partner_type=PartnerType.ASSOCIATES,
-            marketplace=amazon_api._marketplace,
-            partner_tag=amazon_api._tag,
+            marketplace=amazon_api.marketplace,
+            partner_tag=amazon_api.tag,
             item_ids=asin_chunk,
-            **kwargs
+            **kwargs,
         )
-    except TypeError as e:
+    except TypeError as exc:
         raise MalformedRequestException(
-            "Parameters for get_items request are not correct: " + str(e)
-        )
+            f"Parameters for get_items request are not correct: {exc}"
+        ) from exc
 
 
 def get_items_response(amazon_api, request: GetItemsRequest) -> List[Item]:
     try:
-        response = amazon_api._api.get_items(request)
-    except ApiException as e:
-        _manage_response_exceptions(e)
+        response = amazon_api.api.get_items(request)
+    except ApiException as exc:
+        _manage_response_exceptions(exc)
 
     if response.items_result is None:
         raise ItemsNotFoundException("No items have been found")
@@ -61,21 +61,21 @@ def get_search_items_request(amazon_api, **kwargs) -> SearchItemsRequest:
         return SearchItemsRequest(
             resources=_get_request_resources(SearchItemsResource),
             partner_type=PartnerType.ASSOCIATES,
-            marketplace=amazon_api._marketplace,
-            partner_tag=amazon_api._tag,
-            **kwargs
+            marketplace=amazon_api.marketplace,
+            partner_tag=amazon_api.tag,
+            **kwargs,
         )
-    except TypeError as e:
+    except TypeError as exc:
         raise MalformedRequestException(
-            "Parameters for search_items request are not correct: " + str(e)
-        )
+            f"Parameters for search_items request are not correct: {exc}"
+        ) from exc
 
 
 def get_search_items_response(amazon_api, request: SearchItemsRequest) -> SearchResult:
     try:
-        response = amazon_api._api.search_items(request)
-    except ApiException as e:
-        _manage_response_exceptions(e)
+        response = amazon_api.api.search_items(request)
+    except ApiException as exc:
+        _manage_response_exceptions(exc)
 
     if response.search_result is None:
         raise ItemsNotFoundException("No items have been found")
@@ -88,23 +88,23 @@ def get_variations_request(amazon_api, **kwargs) -> GetVariationsRequest:
         return GetVariationsRequest(
             resources=_get_request_resources(GetVariationsResource),
             partner_type=PartnerType.ASSOCIATES,
-            marketplace=amazon_api._marketplace,
-            partner_tag=amazon_api._tag,
-            **kwargs
+            marketplace=amazon_api.marketplace,
+            partner_tag=amazon_api.tag,
+            **kwargs,
         )
-    except TypeError as e:
+    except TypeError as exc:
         raise MalformedRequestException(
-            "Parameters for get_variations request are not correct: " + str(e)
-        )
+            f"Parameters for get_variations request are not correct: {exc}"
+        ) from exc
 
 
 def get_variations_response(
     amazon_api, request: GetVariationsRequest
 ) -> VariationsResult:
     try:
-        response = amazon_api._api.get_variations(request)
-    except ApiException as e:
-        _manage_response_exceptions(e)
+        response = amazon_api.api.get_variations(request)
+    except ApiException as exc:
+        _manage_response_exceptions(exc)
 
     if response.variations_result is None:
         raise ItemsNotFoundException("No variation items have been found")
@@ -117,23 +117,23 @@ def get_browse_nodes_request(amazon_api, **kwargs) -> GetBrowseNodesRequest:
         return GetBrowseNodesRequest(
             resources=_get_request_resources(GetBrowseNodesResource),
             partner_type=PartnerType.ASSOCIATES,
-            marketplace=amazon_api._marketplace,
-            partner_tag=amazon_api._tag,
-            **kwargs
+            marketplace=amazon_api.marketplace,
+            partner_tag=amazon_api.tag,
+            **kwargs,
         )
-    except TypeError as e:
+    except TypeError as exc:
         raise MalformedRequestException(
-            "Parameters for get_browse_nodes request are not correct: " + str(e)
-        )
+            f"Parameters for get_browse_nodes request are not correct: {exc}"
+        ) from exc
 
 
 def get_browse_nodes_response(
     amazon_api, request: GetBrowseNodesRequest
 ) -> List[BrowseNode]:
     try:
-        response = amazon_api._api.get_browse_nodes(request)
-    except ApiException as e:
-        _manage_response_exceptions(e)
+        response = amazon_api.api.get_browse_nodes(request)
+    except ApiException as exc:
+        _manage_response_exceptions(exc)
 
     if response.browse_nodes_result is None:
         raise ItemsNotFoundException("No browse nodes have been found")
@@ -142,7 +142,7 @@ def get_browse_nodes_response(
 
 
 def _get_request_resources(resources) -> List[str]:
-    resources = inspect.getmembers(resources, lambda a: not (inspect.isroutine(a)))
+    resources = inspect.getmembers(resources, lambda a: not inspect.isroutine(a))
     resources = [
         x[-1] for x in resources if isinstance(x[-1], str) and x[0][0:2] != "__"
     ]
@@ -157,16 +157,16 @@ def _manage_response_exceptions(error) -> None:
                 " trying again"
             )
 
-        elif "InvalidParameterValue" in error.body:
+        if "InvalidParameterValue" in error.body:
             raise InvalidArgumentException(
                 "The value provided in the request for atleast one parameter is"
                 " invalid."
             )
 
-        elif "InvalidPartnerTag" in error.body:
+        if "InvalidPartnerTag" in error.body:
             raise InvalidArgumentException("The partner tag is invalid or not present.")
 
-        elif "InvalidAssociate" in error.body:
+        if "InvalidAssociate" in error.body:
             raise AssociateValidationException(
                 "Used credentials are not valid for the selected country."
             )
