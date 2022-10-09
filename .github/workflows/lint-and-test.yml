@@ -59,7 +59,9 @@ jobs:
   sonar:
     runs-on: ubuntu-latest
     steps:
-      - name: SonarCloud Scan
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Check code errors
         uses: SonarSource/sonarcloud-github-action@v1.7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -68,3 +70,5 @@ jobs:
           args:
             -Dsonar.projectKey=sergioteula_python-amazon-paapi
             -Dsonar.organization=sergioteula
+            -Dsonar.sources=amazon_paapi/
+            -Dsonar.tests=tests/
