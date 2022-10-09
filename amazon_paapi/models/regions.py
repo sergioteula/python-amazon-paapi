@@ -1,4 +1,4 @@
-class Country(object):
+class Country:
     AU = "AU"
     BR = "BR"
     CA = "CA"
@@ -20,7 +20,6 @@ class Country(object):
     US = "US"
 
 
-"""Available regions for the Amazon API."""
 REGIONS = {
     "AU": "us-west-2",
     "BR": "us-east-1",
@@ -43,7 +42,7 @@ REGIONS = {
     "US": "us-east-1",
 }
 
-"""Domains for each region on the Amazon API."""
+
 DOMAINS = {
     "AU": "com.au",
     "BR": "com.br",

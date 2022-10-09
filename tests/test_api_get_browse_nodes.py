@@ -1,7 +1,7 @@
 import unittest
 from unittest import mock
 
-from amazon_paapi import AmazonApi, models
+from amazon_paapi import AmazonApi
 from amazon_paapi.helpers import requests
 
 
