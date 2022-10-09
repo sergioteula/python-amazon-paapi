@@ -9,3 +9,10 @@ skip_glob = "*/sdk/*"
 [tool.pylint]
     [tool.pylint.master]
         ignore-paths = ".*/sdk"
+    [tool.pylint.message_control]
+        disable = [
+            "too-many-instance-attributes",
+            "too-many-arguments",
+            "too-many-locals"
+        ]
+        ignored-argument-names = "args|kwargs"
