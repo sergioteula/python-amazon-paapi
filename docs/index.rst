@@ -29,9 +29,10 @@ Usage guide
 Migration guide
 ---------------
 
-If you are still using version 3.x or lower, it is highly recommended upgrading to the latest version.
+If you are still using version 4.x or lower, it is highly recommended upgrading to the latest version.
 
 .. toctree::
     :maxdepth: 1
 
-    ./pages/migration-guide.md
+    ./pages/migration-guide-4.md
+    ./pages/migration-guide-5.md
