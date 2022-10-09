@@ -3,13 +3,13 @@
 
 from typing import List, Union
 
-from ..errors import AsinNotFoundException, InvalidArgumentException
+from ..errors import AsinNotFound, InvalidArgument
 from ..tools import get_asin
 
 
 def get_items_ids(items: Union[str, List[str]]) -> List[str]:
     if not isinstance(items, str) and not isinstance(items, List):
-        raise InvalidArgumentException(
+        raise InvalidArgument(
             "Invalid items argument, it should be a string or List of strings"
         )
 
@@ -23,7 +23,7 @@ def get_items_ids(items: Union[str, List[str]]) -> List[str]:
     if items_ids:
         return items_ids
 
-    raise AsinNotFoundException("No ASIN codes have been found.")
+    raise AsinNotFound("No ASIN codes have been found.")
 
 
 def check_search_args(**kwargs):
@@ -47,7 +47,7 @@ def _check_search_mandatory_args(**kwargs):
             "At least one of the following args should be provided: keywords, actor,"
             " artist, author, brand, title, browse_node_id or search_index."
         )
-        raise InvalidArgumentException(error_message)
+        raise InvalidArgument(error_message)
 
 
 def _check_search_pagination_args(**kwargs):
@@ -56,10 +56,10 @@ def _check_search_pagination_args(**kwargs):
     pagination_args = [arg for arg in pagination_args if arg]
 
     if not all(isinstance(arg, int) for arg in pagination_args):
-        raise InvalidArgumentException(error_message)
+        raise InvalidArgument(error_message)
 
     if not all(1 <= arg <= 10 for arg in pagination_args):
-        raise InvalidArgumentException(error_message)
+        raise InvalidArgument(error_message)
 
 
 def check_variations_args(**kwargs):
@@ -70,13 +70,13 @@ def check_variations_args(**kwargs):
     variation_args = [arg for arg in variation_args if arg]
 
     if not all(isinstance(arg, int) for arg in variation_args):
-        raise InvalidArgumentException(error_message)
+        raise InvalidArgument(error_message)
 
     if not all(1 <= arg <= 10 for arg in variation_args):
-        raise InvalidArgumentException(error_message)
+        raise InvalidArgument(error_message)
 
 
 def check_browse_nodes_args(**kwargs):
     if not isinstance(kwargs["browse_node_ids"], List):
         error_message = "Argument browse_node_ids should be a List of strings."
-        raise InvalidArgumentException(error_message)
+        raise InvalidArgument(error_message)

@@ -7,7 +7,7 @@ import time
 from typing import List, Union
 
 from . import models
-from .errors import InvalidArgumentException
+from .errors import InvalidArgument
 from .helpers import arguments, requests
 from .helpers.generators import get_list_chunks
 from .helpers.items import sort_items
@@ -50,7 +50,7 @@ class AmazonApi:
             self.region = models.regions.REGIONS[country]
             self.marketplace = "www.amazon." + models.regions.DOMAINS[country]
         except KeyError as error:
-            raise InvalidArgumentException("Country code is not correct") from error
+            raise InvalidArgument("Country code is not correct") from error
 
         self.api = DefaultApi(key, secret, self._host, self.region)
 
