@@ -52,7 +52,7 @@ class AmazonApi:
         except KeyError as error:
             raise InvalidArgumentException("Country code is not correct") from error
 
-        self._api = DefaultApi(key, secret, self._host, self.region)
+        self.api = DefaultApi(key, secret, self._host, self.region)
 
     def get_items(
         self,

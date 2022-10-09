@@ -2,6 +2,7 @@ import secrets
 
 from amazon_paapi import AmazonApi
 
+# pylint: disable=no-member
 amazon = AmazonApi(
     secrets.KEY, secrets.SECRET, secrets.TAG, secrets.COUNTRY, throttling=2
 )
