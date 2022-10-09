@@ -69,4 +69,3 @@ jobs:
             -Dsonar.projectKey=sergioteula_python-amazon-paapi
             -Dsonar.organization=sergioteula
             -Dsonar.sources=amazon_paapi
-            -Dsonar.tests=tests
