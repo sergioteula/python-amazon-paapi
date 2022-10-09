@@ -33,8 +33,8 @@ def get_items_request(amazon_api, asin_chunk: List[str], **kwargs) -> GetItemsRe
         return GetItemsRequest(
             resources=_get_request_resources(GetItemsResource),
             partner_type=PartnerType.ASSOCIATES,
-            marketplace=amazon_api._marketplace,
-            partner_tag=amazon_api._tag,
+            marketplace=amazon_api.marketplace,
+            partner_tag=amazon_api.tag,
             item_ids=asin_chunk,
             **kwargs
         )
@@ -61,8 +61,8 @@ def get_search_items_request(amazon_api, **kwargs) -> SearchItemsRequest:
         return SearchItemsRequest(
             resources=_get_request_resources(SearchItemsResource),
             partner_type=PartnerType.ASSOCIATES,
-            marketplace=amazon_api._marketplace,
-            partner_tag=amazon_api._tag,
+            marketplace=amazon_api.marketplace,
+            partner_tag=amazon_api.tag,
             **kwargs
         )
     except TypeError as e:
@@ -88,8 +88,8 @@ def get_variations_request(amazon_api, **kwargs) -> GetVariationsRequest:
         return GetVariationsRequest(
             resources=_get_request_resources(GetVariationsResource),
             partner_type=PartnerType.ASSOCIATES,
-            marketplace=amazon_api._marketplace,
-            partner_tag=amazon_api._tag,
+            marketplace=amazon_api.marketplace,
+            partner_tag=amazon_api.tag,
             **kwargs
         )
     except TypeError as e:
@@ -117,8 +117,8 @@ def get_browse_nodes_request(amazon_api, **kwargs) -> GetBrowseNodesRequest:
         return GetBrowseNodesRequest(
             resources=_get_request_resources(GetBrowseNodesResource),
             partner_type=PartnerType.ASSOCIATES,
-            marketplace=amazon_api._marketplace,
-            partner_tag=amazon_api._tag,
+            marketplace=amazon_api.marketplace,
+            partner_tag=amazon_api.tag,
             **kwargs
         )
     except TypeError as e:
@@ -142,7 +142,7 @@ def get_browse_nodes_response(
 
 
 def _get_request_resources(resources) -> List[str]:
-    resources = inspect.getmembers(resources, lambda a: not (inspect.isroutine(a)))
+    resources = inspect.getmembers(resources, lambda a: not inspect.isroutine(a))
     resources = [
         x[-1] for x in resources if isinstance(x[-1], str) and x[0][0:2] != "__"
     ]
