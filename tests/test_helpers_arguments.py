@@ -2,9 +2,9 @@ import unittest
 
 from amazon_paapi.errors import AsinNotFound, InvalidArgument
 from amazon_paapi.helpers.arguments import (
-    _check_search_mandatory_args,
-    _check_search_pagination_args,
     check_browse_nodes_args,
+    check_search_mandatory_args,
+    check_search_pagination_args,
     check_variations_args,
     get_items_ids,
 )
@@ -56,22 +56,22 @@ class TestHelpersArguments(unittest.TestCase):
             get_items_ids(34)
 
     def test_check_search_mandatory_args_correct(self):
-        _check_search_mandatory_args(actor="John Doe")
+        check_search_mandatory_args(actor="John Doe")
 
     def test_check_search_mandatory_args_raises_exception(self):
         with self.assertRaises(InvalidArgument):
-            _check_search_mandatory_args()
+            check_search_mandatory_args()
 
     def test_check_search_pagination_args_correct(self):
-        _check_search_pagination_args(item_count=1, item_page=10)
+        check_search_pagination_args(item_count=1, item_page=10)
 
     def test_check_search_pagination_args_if_not_integers(self):
         with self.assertRaises(InvalidArgument):
-            _check_search_pagination_args(item_count=True, item_page="test")
+            check_search_pagination_args(item_count=True, item_page="test")
 
     def test_check_search_pagination_args_if_not_between_1_10(self):
         with self.assertRaises(InvalidArgument):
-            _check_search_pagination_args(item_count=0, item_page=11)
+            check_search_pagination_args(item_count=0, item_page=11)
 
     def test_check_check_variations_args_correct(self):
         check_variations_args(variation_count=1, variation_page=10)
