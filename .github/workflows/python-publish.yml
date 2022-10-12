@@ -21,7 +21,7 @@ jobs:
         pip install setuptools wheel twine
     - name: Update version number
       run: |
-        sed -i 's/<PACKAGE_VERSION>/${{ github.ref_name }}/' setup.py
+        sed -i 's/version="5"/version="${{ github.ref_name }}"/' setup.py
     - name: Build and publish
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
