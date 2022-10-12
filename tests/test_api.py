@@ -15,20 +15,20 @@ class TestApi(unittest.TestCase):
     def test_api_throttling_disabled(self):
         throttling = 0
         amazon = AmazonApi("key", "secret", "tag", "ES", throttling)
-        start = int(time.time())
+        start = int(time.time() * 10)
         amazon._throttle()
         amazon._throttle()
 
-        self.assertEqual(start, int(time.time()))
+        self.assertEqual(start, int(time.time() * 10))
 
     def test_api_throttling_sleeps(self):
-        throttling = 1
+        throttling = 0.1
         amazon = AmazonApi("key", "secret", "tag", "ES", throttling)
-        start = int(time.time())
+        start = int(time.time() * 10)
         amazon._throttle()
         amazon._throttle()
 
-        self.assertTrue(start < int(time.time()))
+        self.assertTrue(start < int(time.time() * 10))
 
     @mock.patch.object(requests, "get_items_response")
     def test_get_items(self, mocked_get_items_response):
