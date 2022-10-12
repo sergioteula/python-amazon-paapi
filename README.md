@@ -1,6 +1,8 @@
 # Amazon Product Advertising API 5.0 wrapper for Python
 
-A simple Python wrapper for the [last version of the Amazon Product Advertising API](https://webservices.amazon.com/paapi5/documentation/quick-start/using-sdk.html). This module allows interacting with Amazon using the official API in an easier way.
+A simple Python wrapper for the [last version of the Amazon Product Advertising
+API](https://webservices.amazon.com/paapi5/documentation/quick-start/using-sdk.html).
+This module allows interacting with Amazon using the official API in an easier way.
 
 [![PyPI](https://img.shields.io/pypi/v/python-amazon-paapi?color=%231182C2&label=PyPI)](https://pypi.org/project/python-amazon-paapi/)
 [![Python](https://img.shields.io/badge/Python->3.6-%23FFD140)](https://www.python.org/)
@@ -90,7 +92,8 @@ asin = get_asin('https://www.amazon.com/dp/B01N5IB20Q')
 
 **Throttling:**
 
-Throttling value represents the wait time in seconds between API calls, being the default value 1 second. Use it to avoid reaching Amazon request limits.
+Throttling value represents the wait time in seconds between API calls, being the
+default value 1 second. Use it to avoid reaching Amazon request limits.
 
 ```python
 amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY, throttling=4)  # Makes 1 request every 4 seconds
@@ -99,12 +102,20 @@ amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY, throttling=0)  # No wait time betw
 
 ## Contribution
 
-Activate githooks with:
+Creating pull requests for this repo is higly appreciated to add new features or solve
+bugs. To help during development process, githooks can be activated to run some scripts
+before pushing new commits. This will run checks for code format and tests, to ensure
+everything follows this repo guidelines. Use next command to activate them:
 
 ```
 git config core.hooksPath .githooks
 ```
 
+The same checks will also run on the repo with GitHub Actions to ensure all tests pass
+before merge.
+
 ## License
 
-Copyright © 2021 Sergio Abad. See [license](https://github.com/sergioteula/python-amazon-paapi/blob/master/LICENSE) for details.
+Copyright © 2021 Sergio Abad. See
+[license](https://github.com/sergioteula/python-amazon-paapi/blob/master/LICENSE) for
+details.
