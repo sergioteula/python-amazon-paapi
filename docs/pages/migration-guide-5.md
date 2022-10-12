@@ -6,6 +6,7 @@ updates nor new features.
 
 ## Changelog summary
 
+- Removed old `amazon` module, check [this migration guide](/pages/migration-guide-4.md) if still using it.
 - Updated custom exceptions names.
 
 ## How to upgrade?
