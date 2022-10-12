@@ -1,6 +1,6 @@
 import unittest
 
-from amazon_paapi.errors import AsinNotFoundException
+from amazon_paapi.errors import AsinNotFound
 from amazon_paapi.tools import get_asin
 
 
@@ -28,8 +28,8 @@ class TestTools(unittest.TestCase):
         )
 
     def test_asin_not_found(self):
-        with self.assertRaises(AsinNotFoundException):
+        with self.assertRaises(AsinNotFound):
             get_asin("https://www.amazon.es/gp/")
 
-        with self.assertRaises(AsinNotFoundException):
+        with self.assertRaises(AsinNotFound):
             get_asin("this is not even a URL")
