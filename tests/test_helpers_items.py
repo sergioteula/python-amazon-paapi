@@ -1,5 +1,4 @@
 import unittest
-from operator import imod
 from unittest import mock
 
 from amazon_paapi.helpers.items import sort_items

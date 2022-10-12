@@ -1,8 +1,6 @@
 from typing import List, Optional
 
-from ..sdk import models
-
-"""Shared models"""
+from ..sdk import models as sdk_models
 
 
 class ApiLabelLocale:
@@ -10,7 +8,7 @@ class ApiLabelLocale:
     locale: str
 
 
-class ApiMultiValuedAttributeStr(ApiLabelLocale, models.MultiValuedAttribute):
+class ApiMultiValuedAttributeStr(ApiLabelLocale, sdk_models.MultiValuedAttribute):
     display_values: List[str]
 
 
@@ -19,24 +17,30 @@ class ApiDisplayValuesType:
     type: str
 
 
-class ApiMultiValuedAttributeType(ApiLabelLocale, models.MultiValuedAttribute):
+class ApiMultiValuedAttributeType(ApiLabelLocale, sdk_models.MultiValuedAttribute):
     display_values: List[ApiDisplayValuesType]
 
 
-class ApiUnitBasedAttribute(ApiLabelLocale, models.UnitBasedAttribute):
+class ApiUnitBasedAttribute(ApiLabelLocale, sdk_models.UnitBasedAttribute):
     display_value: float
     unit: str
 
 
-class ApiSingleStringValuedAttribute(ApiLabelLocale, models.SingleStringValuedAttribute):
+class ApiSingleStringValuedAttribute(
+    ApiLabelLocale, sdk_models.SingleStringValuedAttribute
+):
     display_value: str
 
 
-class ApiSingleBooleanValuedAttribute(ApiLabelLocale, models.SingleBooleanValuedAttribute):
+class ApiSingleBooleanValuedAttribute(
+    ApiLabelLocale, sdk_models.SingleBooleanValuedAttribute
+):
     display_value: bool
 
 
-class ApiSingleIntegerValuedAttribute(ApiLabelLocale, models.SingleIntegerValuedAttribute):
+class ApiSingleIntegerValuedAttribute(
+    ApiLabelLocale, sdk_models.SingleIntegerValuedAttribute
+):
     display_value: float
 
 
@@ -45,78 +49,72 @@ class ApiPrice:
     currency: str
     price_per_unit: float
     display_amount: str
-    price_type: models.PriceType
+    price_type: sdk_models.PriceType
     price_type_label: str
 
 
-"""Image models"""
-
-
-class ApiImageSize(models.ImageSize):
+class ApiImageSize(sdk_models.ImageSize):
     url: str
     height: str
     width: str
 
 
-class ApiImageType(models.ImageType):
+class ApiImageType(sdk_models.ImageType):
     large: ApiImageSize
     medium: ApiImageSize
     small: ApiImageSize
 
 
-class ApiImages(models.Images):
+class ApiImages(sdk_models.Images):
     primary: ApiImageType
     variants: List[ApiImageType]
 
 
-"""Item info models"""
-
-
-class ApiByLineInfo(models.ByLineInfo):
+class ApiByLineInfo(sdk_models.ByLineInfo):
     brand: ApiSingleStringValuedAttribute
     contributors: ApiSingleStringValuedAttribute
     manufacturer: ApiSingleStringValuedAttribute
 
 
-class ApiClassifications(models.Classifications):
+class ApiClassifications(sdk_models.Classifications):
     binding: ApiSingleStringValuedAttribute
     product_group: ApiSingleStringValuedAttribute
 
 
-class ApiContentInfo(models.ContentInfo):
+class ApiContentInfo(sdk_models.ContentInfo):
     edition: ApiSingleStringValuedAttribute
     languages: ApiMultiValuedAttributeType
     publication_date: Optional[ApiSingleStringValuedAttribute]
 
 
-class ApiContentRating(models.ContentRating):
+class ApiContentRating(sdk_models.ContentRating):
     audience_rating: ApiSingleStringValuedAttribute
 
 
-class ApiExternalIds(models.ExternalIds):
+class ApiExternalIds(sdk_models.ExternalIds):
     ea_ns: ApiMultiValuedAttributeStr
     isb_ns: ApiMultiValuedAttributeStr
     up_cs: ApiMultiValuedAttributeStr
 
 
-class ApiFeatures():
+class ApiFeatures:
     features: ApiMultiValuedAttributeStr
 
 
-class ApiManufactureInfo(models.ManufactureInfo):
+class ApiManufactureInfo(sdk_models.ManufactureInfo):
     item_part_number: ApiSingleStringValuedAttribute
     model: ApiSingleStringValuedAttribute
     warranty: ApiSingleStringValuedAttribute
 
 
-class ApiItemDimensions(models.DimensionBasedAttribute):
+class ApiItemDimensions(sdk_models.DimensionBasedAttribute):
     height: ApiUnitBasedAttribute
     length: ApiUnitBasedAttribute
     weight: ApiUnitBasedAttribute
     width: ApiUnitBasedAttribute
 
 
-class ApiProductInfo(models.ProductInfo):
+class ApiProductInfo(sdk_models.ProductInfo):
     color: ApiSingleStringValuedAttribute
     is_adult_product: ApiSingleBooleanValuedAttribute
     item_dimensions: ApiItemDimensions
@@ -125,23 +123,23 @@ class ApiProductInfo(models.ProductInfo):
     unit_count: ApiSingleIntegerValuedAttribute
 
 
-class ApiTechnicalInfo(models.TechnicalInfo):
+class ApiTechnicalInfo(sdk_models.TechnicalInfo):
     formats: ApiMultiValuedAttributeStr
     energy_efficiency_class: ApiSingleStringValuedAttribute
 
 
-class ApiTradeInPrice(models.TradeInPrice):
+class ApiTradeInPrice(sdk_models.TradeInPrice):
     amount: float
     currency: str
     display_amount: str
 
 
-class ApiTradeInInfo(models.TradeInInfo):
+class ApiTradeInInfo(sdk_models.TradeInInfo):
     is_eligible_for_trade_in: bool
     price: ApiTradeInPrice
 
 
-class ApiItemInfo(models.ItemInfo):
+class ApiItemInfo(sdk_models.ItemInfo):
     by_line_info: ApiByLineInfo
     classifications: ApiClassifications
     content_info: Optional[ApiContentInfo]
@@ -155,10 +153,7 @@ class ApiItemInfo(models.ItemInfo):
     trade_in_info: ApiTradeInInfo
 
 
-"""Offers model"""
-
-
-class ApiOfferAvailability(models.OfferAvailability):
+class ApiOfferAvailability(sdk_models.OfferAvailability):
     max_order_quantity: int
     message: str
     min_order_quantity: int
@@ -172,31 +167,31 @@ class ApiOfferConditionInfo:
     value: str
 
 
-class ApiOfferSubCondition(ApiOfferConditionInfo, models.OfferSubCondition):
+class ApiOfferSubCondition(ApiOfferConditionInfo, sdk_models.OfferSubCondition):
     pass
 
 
-class ApiOfferConditionNote(models.OfferConditionNote):
+class ApiOfferConditionNote(sdk_models.OfferConditionNote):
     locale: str
     value: str
 
 
-class ApiOfferCondition(ApiOfferConditionInfo, models.OfferCondition):
+class ApiOfferCondition(ApiOfferConditionInfo, sdk_models.OfferCondition):
     sub_condition: ApiOfferSubCondition
     condition_note: ApiOfferConditionNote
 
 
-class ApiOfferDeliveryInfo(models.OfferDeliveryInfo):
+class ApiOfferDeliveryInfo(sdk_models.OfferDeliveryInfo):
     is_amazon_fulfilled: bool
     is_free_shipping_eligible: bool
     is_prime_eligible: bool
 
 
-class ApiOfferLoyaltyPoints(models.OfferLoyaltyPoints):
+class ApiOfferLoyaltyPoints(sdk_models.OfferLoyaltyPoints):
     points: int
 
 
-class ApiOfferMerchantInfo(models.OfferMerchantInfo):
+class ApiOfferMerchantInfo(sdk_models.OfferMerchantInfo):
     default_shipping_country: str
     feedback_count: int
     feedback_rating: float
@@ -204,25 +199,25 @@ class ApiOfferMerchantInfo(models.OfferMerchantInfo):
     name: str
 
 
-class ApiOfferSavings(ApiPrice, models.OfferSavings):
+class ApiOfferSavings(ApiPrice, sdk_models.OfferSavings):
     percentage: float
 
 
-class ApiOfferPrice(ApiPrice, models.OfferPrice):
-    savings: models.OfferSavings
+class ApiOfferPrice(ApiPrice, sdk_models.OfferPrice):
+    savings: sdk_models.OfferSavings
 
 
-class ApiOfferProgramEligibility(models.OfferProgramEligibility):
+class ApiOfferProgramEligibility(sdk_models.OfferProgramEligibility):
     is_prime_exclusive: bool
     is_prime_pantry: bool
 
 
-class ApiPromotion(ApiPrice, models.OfferPromotion):
+class ApiPromotion(ApiPrice, sdk_models.OfferPromotion):
     type: str
     discount_percent: float
 
 
-class ApiListings(models.OfferListing):
+class ApiListings(sdk_models.OfferListing):
     availability: ApiOfferAvailability
     condition: ApiOfferCondition
     delivery_info: ApiOfferDeliveryInfo
@@ -237,14 +232,11 @@ class ApiListings(models.OfferListing):
     violates_map: bool
 
 
-class ApiOffers(models.Offers):
+class ApiOffers(sdk_models.Offers):
     listings: List[ApiListings]
 
 
-"""Browse node info model"""
-
-
-class ApiBrowseNode(models.BrowseNode):
+class ApiBrowseNode(sdk_models.BrowseNode):
     ancestor: str
     context_free_name: str
     display_name: str
@@ -253,29 +245,26 @@ class ApiBrowseNode(models.BrowseNode):
     sales_rank: str
 
 
-class ApiWebsiteSalesRank(models.WebsiteSalesRank):
+class ApiWebsiteSalesRank(sdk_models.WebsiteSalesRank):
     context_free_name: str
     display_name: str
     sales_rank: str
 
 
-class ApiBrowseNodeInfo(models.BrowseNodeInfo):
+class ApiBrowseNodeInfo(sdk_models.BrowseNodeInfo):
     browse_nodes: List[ApiBrowseNode]
     website_sales_rank: ApiWebsiteSalesRank
 
 
-"""Main model"""
-
-
-class Item(models.Item):
+class Item(sdk_models.Item):
     asin: str
     browse_node_info: ApiBrowseNodeInfo
-    customer_reviews: models.CustomerReviews
+    customer_reviews: sdk_models.CustomerReviews
     detail_page_url: str
     images: ApiImages
     item_info: ApiItemInfo
     offers: ApiOffers
     parent_asin: str
-    rental_offers: models.RentalOffers
+    rental_offers: sdk_models.RentalOffers
     score: float
-    variation_attributes: List[models.VariationAttribute]
+    variation_attributes: List[sdk_models.VariationAttribute]
