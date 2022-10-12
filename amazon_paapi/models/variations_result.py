@@ -1,6 +1,8 @@
 from typing import List
+
+from ..sdk import models as sdk_models
 from .item_result import Item
-from ..sdk.models import VariationsResult, VariationSummary
+
 
 class ApiPrice:
     amount: float
@@ -18,13 +20,14 @@ class ApiVariationPrice:
     highest_price: ApiPrice
     lowest_price: ApiPrice
 
-class ApiVariationSummary(VariationSummary):
+
+class ApiVariationSummary(sdk_models.VariationSummary):
     page_count: int
     price: ApiVariationPrice
     variation_count: int
     variation_dimensions: List[ApiVariationDimension]
 
 
-class VariationsResult(VariationsResult):
+class VariationsResult(sdk_models.VariationsResult):
     items: List[Item]
     variation_summary: ApiVariationSummary

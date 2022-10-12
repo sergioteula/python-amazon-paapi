@@ -1,18 +1,19 @@
 from typing import List
-from ..sdk import models
+
+from ..sdk import models as sdk_models
 
 
-class BrowseNodeChild(models.BrowseNodeChild):
+class BrowseNodeChild(sdk_models.BrowseNodeChild):
     context_free_name: str
     display_name: str
     id: str
 
 
-class BrowseNodeAncestor(BrowseNodeChild, models.BrowseNodeAncestor):
+class BrowseNodeAncestor(BrowseNodeChild, sdk_models.BrowseNodeAncestor):
     ancestor: BrowseNodeChild
 
 
-class BrowseNode(models.BrowseNode):
+class BrowseNode(sdk_models.BrowseNode):
     display_name: str
     id: str
     is_root: bool

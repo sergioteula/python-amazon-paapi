@@ -1,0 +1,24 @@
+[tool.black]
+preview = true
+exclude = ".*/sdk/.*"
+
+[tool.isort]
+profile = "black"
+skip_glob = "*/sdk/*"
+
+[tool.pylint]
+    [tool.pylint.master]
+        ignore = ["test.py"]
+        ignore-paths = [".*/sdk/", ".*docs/"]
+    [tool.pylint.message_control]
+        disable = [
+            "no-self-use",
+            "protected-access",
+            "too-many-arguments",
+            "too-many-instance-attributes",
+            "too-many-locals",
+            "too-many-public-methods",
+        ]
+        ignored-argument-names = "args|kwargs"
+    [tool.pylint.similarities]
+        ignore-imports = true
