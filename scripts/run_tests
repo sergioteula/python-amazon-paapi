@@ -6,7 +6,7 @@ source "${ROOT_DIR}/scripts/helpers"
 header "Running tests"
 
 if [ -n "$(check_if_installed docker)" ]; then
-    docker run -v "${PWD}:/code" sergioteula/pytools bash -c \
+    docker run -v "${PWD}:/code" -u "$(id -u):$(id -g)" sergioteula/pytools bash -c \
         "coverage run -m unittest && coverage xml && coverage html && echo && coverage report"
 elif [ -n "$(check_if_installed coverage)" ]; then
     coverage run -m unittest && coverage xml && coverage html && echo && coverage report

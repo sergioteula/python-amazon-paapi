@@ -12,8 +12,13 @@ skip_glob = "*/sdk/*"
         ignore-paths = [".*/sdk/", ".*docs/"]
     [tool.pylint.message_control]
         disable = [
-            "too-many-instance-attributes",
+            "no-self-use",
+            "protected-access",
             "too-many-arguments",
-            "too-many-locals"
+            "too-many-instance-attributes",
+            "too-many-locals",
+            "too-many-public-methods",
         ]
         ignored-argument-names = "args|kwargs"
+    [tool.pylint.similarities]
+        ignore-imports = true

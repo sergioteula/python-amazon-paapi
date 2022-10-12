@@ -1,7 +1,7 @@
 """Custom exceptions module"""
 
 
-class AmazonException(Exception):
+class AmazonError(Exception):
     """Common base class for all Amazon API exceptions."""
 
     def __init__(self, reason: str):
@@ -12,33 +12,33 @@ class AmazonException(Exception):
         return self.reason
 
 
-class InvalidArgumentException(AmazonException):
-    """Raised when arguments are not correct."""
-
-
-class AsinNotFoundException(AmazonException):
+class AsinNotFound(AmazonError):
     """Raised if the ASIN for an item is not found."""
 
 
-class ApiRequestException(AmazonException):
-    """Raised if the request to Amazon API fails"""
+class AssociateValidationError(AmazonError):
+    """Raised when credentials are not valid for the selected country."""
 
 
-class MalformedRequestException(AmazonException):
-    """Raised if the request for Amazon API is not correctly formed"""
+class InvalidArgument(AmazonError):
+    """Raised when arguments are not correct."""
 
 
-class ItemsNotFoundException(AmazonException):
-    """Raised if no items are found"""
+class InvalidPartnerTag(AmazonError):
+    """Raised if the partner tag is not present or invalid."""
 
 
-class TooManyRequestsException(AmazonException):
-    """Raised when requests limit is reached"""
+class ItemsNotFound(AmazonError):
+    """Raised if no items are found."""
 
 
-class InvalidPartnerTagException(AmazonException):
-    """Raised if the partner tag is not present or invalid"""
+class MalformedRequest(AmazonError):
+    """Raised if the request for Amazon API is not correctly formed."""
 
 
-class AssociateValidationException(AmazonException):
-    """Raised when credentials are not valid for the selected country"""
+class RequestError(AmazonError):
+    """Raised if the request to Amazon API fails."""
+
+
+class TooManyRequests(AmazonError):
+    """Raised when requests limit is reached."""
