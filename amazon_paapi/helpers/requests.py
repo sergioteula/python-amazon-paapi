@@ -150,25 +150,26 @@ def _get_request_resources(resources) -> List[str]:
 
 
 def _manage_response_exceptions(error) -> None:
-    if isinstance(error, ApiException):
-        if error.status == 429:
-            raise TooManyRequests(
-                "Requests limit reached, try increasing throttling or wait before"
-                " trying again"
-            )
+    error_status = getattr(error, "status", None)
+    error_body = getattr(error, "body", "") or ""
 
-        if "InvalidParameterValue" in error.body:
-            raise InvalidArgument(
-                "The value provided in the request for atleast one parameter is"
-                " invalid."
-            )
+    if error_status == 429:
+        raise TooManyRequests(
+            "Requests limit reached, try increasing throttling or wait before"
+            " trying again"
+        )
 
-        if "InvalidPartnerTag" in error.body:
-            raise InvalidArgument("The partner tag is invalid or not present.")
+    if "InvalidParameterValue" in error_body:
+        raise InvalidArgument(
+            "The value provided in the request for atleast one parameter is invalid."
+        )
 
-        if "InvalidAssociate" in error.body:
-            raise AssociateValidationError(
-                "Used credentials are not valid for the selected country."
-            )
+    if "InvalidPartnerTag" in error_body:
+        raise InvalidArgument("The partner tag is invalid or not present.")
+
+    if "InvalidAssociate" in error_body:
+        raise AssociateValidationError(
+            "Used credentials are not valid for the selected country."
+        )
 
     raise RequestError("Request failed: " + str(error.reason))

@@ -1,8 +1,16 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from amazon_paapi.errors.exceptions import MalformedRequest
+from amazon_paapi.errors import (
+    AssociateValidationError,
+    InvalidArgument,
+    ItemsNotFound,
+    MalformedRequest,
+    RequestError,
+    TooManyRequests,
+)
 from amazon_paapi.helpers import requests
+from amazon_paapi.sdk.rest import ApiException
 
 
 class TestRequests(unittest.TestCase):
@@ -71,6 +79,20 @@ class TestRequests(unittest.TestCase):
 
         self.assertEqual("foo", response)
 
+    def test_get_items_response_api_exception(self):
+        amazon_api = Mock()
+        amazon_api.api.get_items.side_effect = ApiException()
+
+        with self.assertRaises(RequestError):
+            requests.get_items_response(amazon_api, Mock())
+
+    def test_get_items_response_items_not_found_exception(self):
+        amazon_api = Mock()
+        amazon_api.api.get_items.return_value = Mock(items_result=None)
+
+        with self.assertRaises(ItemsNotFound):
+            requests.get_items_response(amazon_api, Mock())
+
     def test_search_items_response(self):
         amazon_api = Mock()
         api_result = Mock(search_result="foo")
@@ -78,6 +100,20 @@ class TestRequests(unittest.TestCase):
         response = requests.get_search_items_response(amazon_api, Mock())
 
         self.assertEqual("foo", response)
+
+    def test_get_search_items_response_api_exception(self):
+        amazon_api = Mock()
+        amazon_api.api.search_items.side_effect = ApiException()
+
+        with self.assertRaises(RequestError):
+            requests.get_search_items_response(amazon_api, Mock())
+
+    def test_get_search_items_response_items_not_found_exception(self):
+        amazon_api = Mock()
+        amazon_api.api.search_items.return_value = Mock(search_result=None)
+
+        with self.assertRaises(ItemsNotFound):
+            requests.get_search_items_response(amazon_api, Mock())
 
     def test_get_variations_response(self):
         amazon_api = Mock()
@@ -87,6 +123,20 @@ class TestRequests(unittest.TestCase):
 
         self.assertEqual("foo", response)
 
+    def test_get_variations_response_api_exception(self):
+        amazon_api = Mock()
+        amazon_api.api.get_variations.side_effect = ApiException()
+
+        with self.assertRaises(RequestError):
+            requests.get_variations_response(amazon_api, Mock())
+
+    def test_get_variations_response_items_not_found_exception(self):
+        amazon_api = Mock()
+        amazon_api.api.get_variations.return_value = Mock(variations_result=None)
+
+        with self.assertRaises(ItemsNotFound):
+            requests.get_variations_response(amazon_api, Mock())
+
     def test_get_browse_nodes_response(self):
         amazon_api = Mock()
         api_result = Mock()
@@ -95,3 +145,37 @@ class TestRequests(unittest.TestCase):
         response = requests.get_browse_nodes_response(amazon_api, Mock())
 
         self.assertEqual("foo", response)
+
+    def test_get_browse_nodes_response_api_exception(self):
+        amazon_api = Mock()
+        amazon_api.api.get_browse_nodes.side_effect = ApiException()
+
+        with self.assertRaises(RequestError):
+            requests.get_browse_nodes_response(amazon_api, Mock())
+
+    def test_get_browse_nodes_response_items_not_found_exception(self):
+        amazon_api = Mock()
+        amazon_api.api.get_browse_nodes.return_value = Mock(browse_nodes_result=None)
+
+        with self.assertRaises(ItemsNotFound):
+            requests.get_browse_nodes_response(amazon_api, Mock())
+
+    def test_manage_response_exceptions_too_many_requests(self):
+        error = Mock(spec=ApiException, status=429)
+        with self.assertRaises(TooManyRequests):
+            requests._manage_response_exceptions(error)
+
+    def test_manage_response_exceptions_invalid_parameter_value(self):
+        error = Mock(spec=ApiException, body="InvalidParameterValue", status=200)
+        with self.assertRaises(InvalidArgument):
+            requests._manage_response_exceptions(error)
+
+    def test_manage_response_exceptions_invalid_partner_tag(self):
+        error = Mock(spec=ApiException, body="InvalidPartnerTag", status=200)
+        with self.assertRaises(InvalidArgument):
+            requests._manage_response_exceptions(error)
+
+    def test_manage_response_exceptions_invalid_associate(self):
+        error = Mock(spec=ApiException, body="InvalidAssociate", status=200)
+        with self.assertRaises(AssociateValidationError):
+            requests._manage_response_exceptions(error)

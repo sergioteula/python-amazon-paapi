@@ -17,5 +17,8 @@ skip_glob = "*/sdk/*"
             "too-many-arguments",
             "too-many-instance-attributes",
             "too-many-locals",
+            "too-many-public-methods",
         ]
         ignored-argument-names = "args|kwargs"
+    [tool.pylint.similarities]
+        ignore-imports = true
