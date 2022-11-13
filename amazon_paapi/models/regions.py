@@ -1,5 +1,6 @@
 class Country:
     AU = "AU"
+    BE = "BE"
     BR = "BR"
     CA = "CA"
     FR = "FR"
@@ -22,6 +23,7 @@ class Country:
 
 REGIONS = {
     "AU": "us-west-2",
+    "BE": "eu-west-1",
     "BR": "us-east-1",
     "CA": "us-east-1",
     "FR": "eu-west-1",
@@ -45,6 +47,7 @@ REGIONS = {
 
 DOMAINS = {
     "AU": "com.au",
+    "BE": "com.be",
     "BR": "com.br",
     "CA": "ca",
     "FR": "fr",
