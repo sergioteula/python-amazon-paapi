@@ -61,16 +61,16 @@ jobs:
   test:
     runs-on: ubuntu-latest
     container:
-      image: sergioteula/pytools
-      volumes:
-        - ${{github.workspace}}:/code
+      image: python:3.12
     steps:
     - name: Check out code
       uses: actions/checkout@v4
+    - name: Install dependencies
+      run: pip install coverage certifi six python_dateutil setuptools urllib3
     - name: Run tests
-      run: ./scripts/run_tests
+      run: coverage run -m unittest && coverage xml && coverage report
     - name: Save code coverage file
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: coverage
         path: coverage.xml
