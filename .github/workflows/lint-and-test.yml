@@ -13,50 +13,50 @@ jobs:
   isort:
     runs-on: ubuntu-latest
     container:
-      image: sergioteula/pytools
-      volumes:
-        - ${{github.workspace}}:/code
+      image: python:3.12
     steps:
     - name: Check out code
       uses: actions/checkout@v4
+    - name: Install dependencies
+      run: pip install isort
     - name: Check imports order
-      run: ./scripts/check_isort
+      run: isort -c --color .
 
   black:
     runs-on: ubuntu-latest
     container:
-      image: sergioteula/pytools
-      volumes:
-        - ${{github.workspace}}:/code
+      image: python:3.12
     steps:
     - name: Check out code
       uses: actions/checkout@v4
+    - name: Install dependencies
+      run: pip install black
     - name: Check code format
-      run: ./scripts/check_black
+      run: black --check --diff --color .
 
   flake8:
     runs-on: ubuntu-latest
     container:
-      image: sergioteula/pytools
-      volumes:
-        - ${{github.workspace}}:/code
+      image: python:3.12
     steps:
     - name: Check out code
       uses: actions/checkout@v4
+    - name: Install dependencies
+      run: pip install flake8
     - name: Check code errors
-      run: ./scripts/check_flake8
+      run: flake8 .
 
   pylint:
     runs-on: ubuntu-latest
     container:
-      image: sergioteula/pytools
-      volumes:
-        - ${{github.workspace}}:/code
+      image: python:3.12
     steps:
     - name: Check out code
       uses: actions/checkout@v4
+    - name: Install dependencies
+      run: pip install pylint
     - name: Check code errors
-      run: ./scripts/check_pylint
+      run: find . -type f -name '*.py' | xargs pylint --disable=missing-docstring --disable=too-few-public-methods
 
   test:
     runs-on: ubuntu-latest
