@@ -18,7 +18,7 @@ jobs:
         - ${{github.workspace}}:/code
     steps:
     - name: Check out code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Check imports order
       run: ./scripts/check_isort
 
@@ -30,7 +30,7 @@ jobs:
         - ${{github.workspace}}:/code
     steps:
     - name: Check out code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Check code format
       run: ./scripts/check_black
 
@@ -42,7 +42,7 @@ jobs:
         - ${{github.workspace}}:/code
     steps:
     - name: Check out code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Check code errors
       run: ./scripts/check_flake8
 
@@ -54,7 +54,7 @@ jobs:
         - ${{github.workspace}}:/code
     steps:
     - name: Check out code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Check code errors
       run: ./scripts/check_pylint
 
@@ -66,7 +66,7 @@ jobs:
         - ${{github.workspace}}:/code
     steps:
     - name: Check out code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Run tests
       run: ./scripts/run_tests
     - name: Save code coverage file
@@ -80,7 +80,7 @@ jobs:
     needs: [test]
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Download a single artifact
