@@ -20,7 +20,7 @@ jobs:
     - name: Install dependencies
       run: pip install isort
     - name: Check imports order
-      run: isort -c --color .
+      run: isort -c .
 
   black:
     runs-on: ubuntu-latest
