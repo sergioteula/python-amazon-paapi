@@ -1,10 +1,7 @@
 # Custom folders and files to ignore
 .vscode/
 .DS_Store
-secrets.py
-test.py
 coverage_html_report
-
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
