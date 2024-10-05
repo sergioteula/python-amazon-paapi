@@ -1,0 +1,52 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+default_language_version:
+  python: python3.12
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-ast
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: check-toml
+      - id: name-tests-test
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  - repo: https://github.com/lk16/detect-missing-init
+    rev: v0.1.6
+    hooks:
+      - id: detect-missing-init
+        args: ["--create", "--python-folders", "amazon_paapi"]
+
+  - repo: local
+    hooks:
+      # - id: mypy
+      #   name: Checking types with mypy
+      #   language: system
+      #   entry: "python -m mypy amazon_paapi"
+      #   pass_filenames: false
+
+      - id: test
+        name: Running tests
+        language: system
+        entry: "python -m coverage run -m unittest"
+        pass_filenames: false
+
+      - id: test
+        name: Checking coverage
+        language: system
+        entry: "python -m coverage report"
+        pass_filenames: false

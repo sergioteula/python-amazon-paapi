@@ -1,0 +1,15 @@
+[tool.coverage.run]
+branch = true
+relative_files = true
+source = ["amazon_paapi"]
+omit = ["**/sdk/**"]
+
+[tool.coverage.report]
+precision = 2
+skip_covered = true
+skip_empty = true
+fail_under = 95
+
+[tool.coverage.html]
+directory = "coverage_html_report"
+skip_covered = false

@@ -1,4 +1,5 @@
 certifi
+coverage
 mypy
 pre-commit
 python_dateutil

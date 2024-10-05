@@ -1,0 +1,10 @@
+#! /bin/bash -e
+
+docker build \
+    --build-arg TAG="3.12" \
+    --build-arg UID="$(id -u)" \
+    --build-arg GID="$(id -g)" \
+    -t python-amazon-paapi .
+
+docker run -t --rm -u "$(id -u):$(id -g)" -v "${PWD}:/code" \
+    python-amazon-paapi -c "python -m pre_commit"
