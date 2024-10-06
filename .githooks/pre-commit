@@ -7,4 +7,4 @@ docker build \
     -t python-amazon-paapi .
 
 docker run -t --rm -u "$(id -u):$(id -g)" -v "${PWD}:/code" \
-    python-amazon-paapi -c "python -m pre_commit run -a"
+    python-amazon-paapi -c "python -m pre_commit"

@@ -2,7 +2,7 @@
 name = "python-amazon-paapi"
 version = "5"
 requires-python = ">=3.6"
-dynamic = ["dependencies"]
+dynamic = ["classifiers"]
 
 [tool.ruff]
 cache-dir = ".cache/ruff"
