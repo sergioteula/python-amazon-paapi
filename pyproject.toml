@@ -1,8 +1,69 @@
+[project]
+name = "python-amazon-paapi"
+version = "5"
+requires-python = ">=3.6"
+
+[tool.ruff]
+cache-dir = ".cache/ruff"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "ANN003",
+    "D104",
+    "D100",
+    "D203",
+    "D213",
+    "COM812",
+    "ISC001",
+]
+exclude = [
+    "amazon_paapi/sdk/*",
+    "docs/*",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "ANN201",
+    "D101",
+    "D102",
+    "D107",
+    "PT009",
+    "PT027",
+    "SLF001",
+]
+
+[tool.ruff.format]
+exclude = [
+    "amazon_paapi/sdk/*",
+    "docs/*",
+    ".github",
+]
+
+[tool.mypy]
+python_version = "3.8"
+ignore_missing_imports = true
+no_implicit_optional = true
+strict_equality = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_configs = true
+warn_unused_ignores = true
+cache_dir = '.cache/mypy'
+exclude = ["amazon_paapi/sdk/*"]
+
+[[tool.mypy.overrides]]
+module = [
+  "amazon_paapi/sdk/*",
+]
+follow_imports = "skip"
+
 [tool.coverage.run]
 branch = true
 relative_files = true
 source = ["amazon_paapi"]
-omit = ["**/sdk/**"]
+omit = ["amazon_paapi/sdk/*"]
 
 [tool.coverage.report]
 precision = 2

@@ -1,9 +1,0 @@
-certifi
-coverage
-mypy
-pre-commit
-python_dateutil
-ruff
-setuptools
-six
-urllib3

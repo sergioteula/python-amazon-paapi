@@ -14,7 +14,14 @@ USER user
 
 WORKDIR /code
 
-COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir \
+    coverage \
+    mypy \
+    pre-commit \
+    ruff
+
+COPY setup.py setup.py
+COPY README.md README.md
+RUN pip install --no-cache-dir -e .
 
 ENTRYPOINT [ "bash" ]

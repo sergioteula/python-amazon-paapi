@@ -33,11 +33,11 @@ repos:
 
   - repo: local
     hooks:
-      # - id: mypy
-      #   name: Checking types with mypy
-      #   language: system
-      #   entry: "python -m mypy amazon_paapi"
-      #   pass_filenames: false
+      - id: mypy
+        name: Checking types with mypy
+        language: system
+        entry: "python -m mypy amazon_paapi"
+        pass_filenames: false
 
       - id: test
         name: Running tests
