@@ -41,7 +41,7 @@ jobs:
     - name: Install dependencies
       run: pip install -e .
     - name: Run tests
-      run: unittest
+      run: python -m unittest
 
   test-py36:
     runs-on: ubuntu-latest
@@ -53,7 +53,7 @@ jobs:
     - name: Install dependencies
       run: pip install -e .
     - name: Run tests
-      run: unittest
+      run: python -m unittest
 
   test-py37:
     runs-on: ubuntu-latest
@@ -65,7 +65,7 @@ jobs:
     - name: Install dependencies
       run: pip install -e .
     - name: Run tests
-      run: unittest
+      run: python -m unittest
 
   test-py38:
     runs-on: ubuntu-latest
@@ -77,7 +77,7 @@ jobs:
     - name: Install dependencies
       run: pip install -e .
     - name: Run tests
-      run: unittest
+      run: python -m unittest
 
   test-py39:
     runs-on: ubuntu-latest
@@ -89,7 +89,7 @@ jobs:
     - name: Install dependencies
       run: pip install -e .
     - name: Run tests
-      run: unittest
+      run: python -m unittest
 
   test-py310:
     runs-on: ubuntu-latest
@@ -101,7 +101,7 @@ jobs:
     - name: Install dependencies
       run: pip install -e .
     - name: Run tests
-      run: unittest
+      run: python -m unittest
 
   test-py311:
     runs-on: ubuntu-latest
@@ -113,7 +113,7 @@ jobs:
     - name: Install dependencies
       run: pip install -e .
     - name: Run tests
-      run: unittest
+      run: python -m unittest
 
 
   test-py312:
