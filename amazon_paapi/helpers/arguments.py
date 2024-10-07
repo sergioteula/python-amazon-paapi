@@ -1,6 +1,5 @@
 """Module with helper functions for managing arguments."""
 
-
 from typing import List, Union
 
 from ..errors import InvalidArgument

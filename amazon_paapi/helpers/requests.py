@@ -1,6 +1,5 @@
 """Module with helper functions for creating requests."""
 
-
 import inspect
 from typing import List
 

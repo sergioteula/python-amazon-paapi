@@ -1,6 +1,5 @@
 """Module with helper functions for making generators."""
 
-
 from typing import Generator, List
 
 
