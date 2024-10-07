@@ -1,4 +1,4 @@
-"""Amazon Product Advertising API wrapper for Python"""
+"""Amazon Product Advertising API wrapper for Python."""
 
 __author__ = "Sergio Abad"
 

@@ -1,6 +1,7 @@
 from typing import List
 
-from ..sdk import models as sdk_models
+from amazon_paapi.sdk import models as sdk_models
+
 from .item_result import Item
 
 

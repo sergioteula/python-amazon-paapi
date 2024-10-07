@@ -1,8 +1,8 @@
-"""Module to manage items"""
+"""Module to manage items."""
 
 from typing import List
 
-from .. import models
+from amazon_paapi import models
 
 
 def sort_items(

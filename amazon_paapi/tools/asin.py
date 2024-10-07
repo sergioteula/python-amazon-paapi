@@ -2,7 +2,7 @@
 
 import re
 
-from ..errors import AsinNotFound
+from amazon_paapi.errors import AsinNotFound
 
 
 def get_asin(text: str) -> str:

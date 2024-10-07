@@ -1,6 +1,6 @@
 from typing import List
 
-from ..sdk import models as sdk_models
+from amazon_paapi.sdk import models as sdk_models
 
 
 class BrowseNodeChild(sdk_models.BrowseNodeChild):

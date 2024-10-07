@@ -1,6 +1,7 @@
 [tool.ruff]
 target-version = "py37"
 cache-dir = ".cache/ruff"
+unsafe-fixes = true
 
 [tool.ruff.lint]
 select = ["ALL"]
