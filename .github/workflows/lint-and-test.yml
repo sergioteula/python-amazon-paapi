@@ -31,18 +31,6 @@ jobs:
     - name: Check code errors
       run: mypy amazon_paapi
 
-  test-py36:
-    runs-on: ubuntu-latest
-    container:
-      image: python:3.6
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v4
-    - name: Install dependencies
-      run: pip install -e .
-    - name: Run tests
-      run: python -m unittest
-
   test-py37:
     runs-on: ubuntu-latest
     container:
