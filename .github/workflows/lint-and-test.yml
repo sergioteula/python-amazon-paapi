@@ -100,7 +100,7 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v4
     - name: Install dependencies
-      run: pip install -e . && pip install pytest
+      run: pip install -e . && pip install coverage pytest
     - name: Run tests
       run: coverage run -m pytest && coverage xml && coverage report
     - name: Save code coverage file
