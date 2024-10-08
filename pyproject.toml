@@ -71,3 +71,7 @@ fail_under = 95
 [tool.coverage.html]
 directory = "coverage_html_report"
 skip_covered = false
+
+[tool.pytest.ini_options]
+testpaths = "tests"
+cache_dir = ".cache/pytest"
