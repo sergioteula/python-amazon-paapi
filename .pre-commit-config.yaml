@@ -48,7 +48,7 @@ repos:
       - id: test
         name: Running tests
         language: system
-        entry: "python -m coverage run -m unittest"
+        entry: "python -m coverage run -m pytest"
         pass_filenames: false
 
       - id: test
