@@ -39,9 +39,9 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v4
     - name: Install dependencies
-      run: pip install -e .
+      run: pip install -e . && pip install pytest
     - name: Run tests
-      run: python -m unittest
+      run: python -m pytest
 
   test-py38:
     runs-on: ubuntu-latest
@@ -51,9 +51,9 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v4
     - name: Install dependencies
-      run: pip install -e .
+      run: pip install -e . && pip install pytest
     - name: Run tests
-      run: python -m unittest
+      run: python -m pytest
 
   test-py39:
     runs-on: ubuntu-latest
@@ -63,9 +63,9 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v4
     - name: Install dependencies
-      run: pip install -e .
+      run: pip install -e . && pip install pytest
     - name: Run tests
-      run: python -m unittest
+      run: python -m pytest
 
   test-py310:
     runs-on: ubuntu-latest
@@ -75,9 +75,9 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v4
     - name: Install dependencies
-      run: pip install -e .
+      run: pip install -e . && pip install pytest
     - name: Run tests
-      run: python -m unittest
+      run: python -m pytest
 
   test-py311:
     runs-on: ubuntu-latest
@@ -87,9 +87,9 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v4
     - name: Install dependencies
-      run: pip install -e .
+      run: pip install -e . && pip install pytest
     - name: Run tests
-      run: python -m unittest
+      run: python -m pytest
 
 
   test-py312:
@@ -100,9 +100,9 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v4
     - name: Install dependencies
-      run: pip install coverage certifi six python_dateutil setuptools urllib3
+      run: pip install -e . && pip install pytest
     - name: Run tests
-      run: coverage run -m unittest && coverage xml && coverage report
+      run: coverage run -m pytest && coverage xml && coverage report
     - name: Save code coverage file
       uses: actions/upload-artifact@v4
       with:

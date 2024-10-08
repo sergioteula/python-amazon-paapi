@@ -19,6 +19,7 @@ RUN pip install --no-cache-dir \
     coverage \
     mypy \
     pre-commit \
+    pytest \
     ruff
 
 COPY setup.py setup.py

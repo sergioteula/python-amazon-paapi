@@ -11,16 +11,16 @@ build:
 	@docker build --build-arg TAG="3.12" --build-arg UID="${UID}" --build-arg GID="${GID}" -t python-amazon-paapi .
 
 test: build
-	@docker run --rm -u "${UID}:${GID}" -v "${PWD}:/code" python-amazon-paapi -c "python -m unittest"
+	@docker run -t --rm -u "${UID}:${GID}" -v "${PWD}:/code" python-amazon-paapi -c "python -m pytest"
 
 test-all-python-tags:
 	@for tag in $$PYTHON_TAGS; do \
 		docker build --build-arg TAG="$$tag" --build-arg UID="${UID}" --build-arg GID="${GID}" -t python-amazon-paapi .; \
-		docker run --rm -u "${UID}:${GID}" -v "${PWD}:/code" python-amazon-paapi -c "python -m unittest"; \
+		docker run -t --rm -u "${UID}:${GID}" -v "${PWD}:/code" python-amazon-paapi -c "python -m unittest"; \
 	done
 
 lint: build
-	@docker run --rm -u "${UID}:${GID}" -v "${PWD}:/code" python-amazon-paapi -c "python -m pre_commit run -a"
+	@docker run --rm -t -u "${UID}:${GID}" -v "${PWD}:/code" python-amazon-paapi -c "python -m pre_commit run -a"
 
 pre-commit:
 	@./.githooks/pre-commit
