@@ -38,7 +38,7 @@ exclude = [
 ]
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.7"
 ignore_missing_imports = true
 no_implicit_optional = true
 strict_equality = true
