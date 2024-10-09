@@ -6,6 +6,12 @@ on:
 permissions:
   pull-requests: read
 
+env:
+  API_KEY: ${{ secrets.API_KEY }}
+  API_SECRET: ${{ secrets.API_SECRET }}
+  AFFILIATE_TAG: ${{ secrets.AFFILIATE_TAG }}
+  COUNTRY_CODE: ${{ secrets.COUNTRY_CODE }}
+
 jobs:
   ruff:
     runs-on: ubuntu-latest
