@@ -39,6 +39,7 @@ jobs:
 
   test-py37:
     runs-on: ubuntu-latest
+    needs: [test-py38]
     container:
       image: python:3.7
     steps:
@@ -51,6 +52,7 @@ jobs:
 
   test-py38:
     runs-on: ubuntu-latest
+    needs: [test-py39]
     container:
       image: python:3.8
     steps:
@@ -63,6 +65,7 @@ jobs:
 
   test-py39:
     runs-on: ubuntu-latest
+    needs: [test-py310]
     container:
       image: python:3.9
     steps:
@@ -75,6 +78,7 @@ jobs:
 
   test-py310:
     runs-on: ubuntu-latest
+    needs: [test-py311]
     container:
       image: python:3.10
     steps:
@@ -87,6 +91,7 @@ jobs:
 
   test-py311:
     runs-on: ubuntu-latest
+    needs: [test-py312]
     container:
       image: python:3.11
     steps:
