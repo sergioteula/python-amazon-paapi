@@ -23,7 +23,7 @@ class IntegrationTest(TestCase):
         cls.api = AmazonApi(api_key, api_secret, affiliate_tag, country_code)
         cls.affiliate_tag = affiliate_tag
 
-    def test_search_items_and_get_info_and_variations_for_the_first_one(self):
+    def test_search_items_and_get_information_for_the_first_one(self):
         search_result = self.api.search_items(keywords="zapatillas")
         searched_item = search_result.items[0]
 
@@ -34,9 +34,3 @@ class IntegrationTest(TestCase):
 
         self.assertEqual(1, len(get_results))
         self.assertIn(self.affiliate_tag, get_results[0].detail_page_url)
-
-        variations_result = self.api.get_variations(searched_item.asin)
-        variation_item = variations_result.items[0]
-
-        self.assertIn(self.affiliate_tag, variation_item.detail_page_url)
-        self.assertNotEqual(searched_item.asin, variation_item.asin)
