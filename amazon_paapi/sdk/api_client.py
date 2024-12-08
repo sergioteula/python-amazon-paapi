@@ -91,9 +91,11 @@ class ApiClient(object):
         try:
             self.pool = ThreadPool()
         except:
-            # if multiprocessing is not available, we can't use the pool        self.rest_client = rest.RESTClientObject(configuration)
-            self.default_headers = {}
+            # if multiprocessing is not available, we can't use the pool
+            self.pool = None
 
+        self.rest_client = rest.RESTClientObject(configuration)
+        self.default_headers = {}
         if header_name is not None:
             self.default_headers[header_name] = header_value
         self.cookie = cookie
