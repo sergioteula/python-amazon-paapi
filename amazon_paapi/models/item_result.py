@@ -153,6 +153,13 @@ class ApiItemInfo(sdk_models.ItemInfo):
     trade_in_info: ApiTradeInInfo
 
 
+class ApiOfferAvailabilityV2(sdk_models.OfferAvailabilityV2):
+    max_order_quantity: int
+    message: str
+    min_order_quantity: int
+    type: str
+
+
 class ApiOfferAvailability(sdk_models.OfferAvailability):
     max_order_quantity: int
     message: str
@@ -176,6 +183,20 @@ class ApiOfferConditionNote(sdk_models.OfferConditionNote):
     value: str
 
 
+class ApiOfferDealDetailsV2(sdk_models.deal_details.DealDetails):
+    access_type: str
+    badge: str
+    early_access_duration_in_milliseconds: int
+    end_time: str
+    percent_claimed: float
+    start_time: str
+
+
+class ApiOfferConditionV2(ApiOfferConditionInfo, sdk_models.OfferConditionV2):
+    sub_condition: ApiOfferSubCondition
+    condition_note: ApiOfferConditionNote
+
+
 class ApiOfferCondition(ApiOfferConditionInfo, sdk_models.OfferCondition):
     sub_condition: ApiOfferSubCondition
     condition_note: ApiOfferConditionNote
@@ -187,8 +208,17 @@ class ApiOfferDeliveryInfo(sdk_models.OfferDeliveryInfo):
     is_prime_eligible: bool
 
 
+class ApiOfferLoyaltyPointsV2(sdk_models.OfferLoyaltyPointsV2):
+    points: int
+
+
 class ApiOfferLoyaltyPoints(sdk_models.OfferLoyaltyPoints):
     points: int
+
+
+class ApiOfferMerchantInfoV2(sdk_models.OfferMerchantInfoV2):
+    id: str
+    name: str
 
 
 class ApiOfferMerchantInfo(sdk_models.OfferMerchantInfo):
@@ -217,6 +247,19 @@ class ApiPromotion(ApiPrice, sdk_models.OfferPromotion):
     discount_percent: float
 
 
+class ApiListingsV2(sdk_models.OfferListingV2):
+    availability: ApiOfferAvailabilityV2
+    condition: ApiOfferConditionV2
+    deal_details: ApiOfferDealDetailsV2
+    id: str
+    is_buy_box_winner: bool
+    loyalty_points: ApiOfferLoyaltyPointsV2
+    merchant_info: ApiOfferMerchantInfoV2
+    price: ApiOfferPrice
+    type: str
+    violates_map: bool
+
+
 class ApiListings(sdk_models.OfferListing):
     availability: ApiOfferAvailability
     condition: ApiOfferCondition
@@ -230,6 +273,10 @@ class ApiListings(sdk_models.OfferListing):
     promotions: List[ApiPromotion]
     saving_basis: ApiPrice
     violates_map: bool
+
+
+class ApiOffersV2(sdk_models.OffersV2):
+    listings: List[ApiListingsV2]
 
 
 class ApiOffers(sdk_models.Offers):
@@ -264,6 +311,7 @@ class Item(sdk_models.Item):
     images: ApiImages
     item_info: ApiItemInfo
     offers: ApiOffers
+    offers_v2: ApiOffersV2
     parent_asin: str
     rental_offers: sdk_models.RentalOffers
     score: float
