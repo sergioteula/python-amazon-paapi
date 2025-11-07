@@ -1,4 +1,5 @@
 # Custom folders and files to ignore
+.idea/
 .vscode/
 .DS_Store
 secrets.py

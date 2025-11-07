@@ -1,2 +1,0 @@
-Product Advertising API 5.0 SDK for Python
-Copyright 2019-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved. 

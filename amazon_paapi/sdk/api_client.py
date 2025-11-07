@@ -5,7 +5,7 @@
 from __future__ import absolute_import
 
 """
-  Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  Copyright 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License").
   You may not use this file except in compliance with the License.
@@ -37,11 +37,11 @@ import tempfile
 import six
 from six.moves.urllib.parse import quote
 
-from .configuration import Configuration
-from . import models
-from . import rest
+from amazon_paapi.sdk.configuration import Configuration
+import amazon_paapi.sdk.models
+from amazon_paapi.sdk import rest
 
-from .auth.sign_helper import AWSV4Auth
+from amazon_paapi.sdk.auth.sign_helper import AWSV4Auth
 
 class ApiClient(object):
     """Generic API client for Swagger client library builds.
@@ -95,7 +95,7 @@ class ApiClient(object):
             self.default_headers[header_name] = header_value
         self.cookie = cookie
         # Set default User-Agent.
-        self.user_agent = 'paapi5-python-sdk/1.0.0'
+        self.user_agent = 'paapi5-python-sdk/1.2.3'
 
         self.access_key = access_key
         self.secret_key = secret_key
@@ -288,7 +288,7 @@ class ApiClient(object):
             if klass in self.NATIVE_TYPES_MAPPING:
                 klass = self.NATIVE_TYPES_MAPPING[klass]
             else:
-                klass = getattr(models, klass)
+                klass = getattr(amazon_paapi.sdk.models, klass)
 
         if klass in self.PRIMITIVE_TYPES:
             return self.__deserialize_primitive(data, klass)

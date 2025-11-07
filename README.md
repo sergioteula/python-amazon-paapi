@@ -30,7 +30,7 @@ This module allows interacting with Amazon using the official API in an easier w
 
 You can install or upgrade the module with:
 
-    pip install python-amazon-paapi --upgrade
+    pip install git+https://github.com/salvador-hs/python-amazon-paapi.git
 
 ## Usage guide
 

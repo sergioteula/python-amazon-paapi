@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-  Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  Copyright 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License").
   You may not use this file except in compliance with the License.
@@ -28,13 +28,14 @@ import re  # noqa: F401
 
 import six
 
-from .browse_node_info import BrowseNodeInfo  # noqa: F401,E501
-from .customer_reviews import CustomerReviews  # noqa: F401,E501
-from .images import Images  # noqa: F401,E501
-from .item_info import ItemInfo  # noqa: F401,E501
-from .offers import Offers  # noqa: F401,E501
-from .rental_offers import RentalOffers  # noqa: F401,E501
-from .variation_attribute import VariationAttribute  # noqa: F401,E501
+from amazon_paapi.sdk.models.browse_node_info import BrowseNodeInfo  # noqa: F401,E501
+from amazon_paapi.sdk.models.customer_reviews import CustomerReviews  # noqa: F401,E501
+from amazon_paapi.sdk.models.images import Images  # noqa: F401,E501
+from amazon_paapi.sdk.models.item_info import ItemInfo  # noqa: F401,E501
+from amazon_paapi.sdk.models.offers import Offers  # noqa: F401,E501
+from amazon_paapi.sdk.models.offers_v2 import OffersV2  # noqa: F401,E501
+from amazon_paapi.sdk.models.rental_offers import RentalOffers  # noqa: F401,E501
+from amazon_paapi.sdk.models.variation_attribute import VariationAttribute  # noqa: F401,E501
 
 
 class Item(object):
@@ -58,6 +59,7 @@ class Item(object):
         'images': 'Images',
         'item_info': 'ItemInfo',
         'offers': 'Offers',
+        'offers_v2': 'OffersV2',
         'parent_asin': 'str',
         'rental_offers': 'RentalOffers',
         'score': 'float',
@@ -72,13 +74,14 @@ class Item(object):
         'images': 'Images',
         'item_info': 'ItemInfo',
         'offers': 'Offers',
+        'offers_v2': 'OffersV2',
         'parent_asin': 'ParentASIN',
         'rental_offers': 'RentalOffers',
         'score': 'Score',
         'variation_attributes': 'VariationAttributes'
     }
 
-    def __init__(self, asin=None, browse_node_info=None, customer_reviews=None, detail_page_url=None, images=None, item_info=None, offers=None, parent_asin=None, rental_offers=None, score=None, variation_attributes=None):  # noqa: E501
+    def __init__(self, asin=None, browse_node_info=None, customer_reviews=None, detail_page_url=None, images=None, item_info=None, offers=None, offers_v2=None, parent_asin=None, rental_offers=None, score=None, variation_attributes=None):  # noqa: E501
         """Item - a model defined in Swagger"""  # noqa: E501
 
         self._asin = None
@@ -88,6 +91,7 @@ class Item(object):
         self._images = None
         self._item_info = None
         self._offers = None
+        self._offers_v2 = None
         self._parent_asin = None
         self._rental_offers = None
         self._score = None
@@ -108,6 +112,8 @@ class Item(object):
             self.item_info = item_info
         if offers is not None:
             self.offers = offers
+        if offers_v2 is not None:
+            self.offers_v2 = offers_v2
         if parent_asin is not None:
             self.parent_asin = parent_asin
         if rental_offers is not None:
@@ -263,6 +269,27 @@ class Item(object):
         """
 
         self._offers = offers
+
+    @property
+    def offers_v2(self):
+        """Gets the offers_v2 of this Item.  # noqa: E501
+
+
+        :return: The offers_v2 of this Item.  # noqa: E501
+        :rtype: OffersV2
+        """
+        return self._offers_v2
+
+    @offers_v2.setter
+    def offers_v2(self, offers_v2):
+        """Sets the offers_v2 of this Item.
+
+
+        :param offers_v2: The offers_v2 of this Item.  # noqa: E501
+        :type: OffersV2
+        """
+
+        self._offers_v2 = offers_v2
 
     @property
     def parent_asin(self):

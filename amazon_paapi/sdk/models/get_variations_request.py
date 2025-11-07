@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-  Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  Copyright 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License").
   You may not use this file except in compliance with the License.
@@ -28,12 +28,12 @@ import re  # noqa: F401
 
 import six
 
-from .condition import Condition  # noqa: F401,E501
-from .get_variations_resource import GetVariationsResource  # noqa: F401,E501
-from .merchant import Merchant  # noqa: F401,E501
-from .offer_count import OfferCount  # noqa: F401,E501
-from .partner_type import PartnerType  # noqa: F401,E501
-from .properties import Properties  # noqa: F401,E501
+from amazon_paapi.sdk.models.condition import Condition  # noqa: F401,E501
+from amazon_paapi.sdk.models.get_variations_resource import GetVariationsResource  # noqa: F401,E501
+from amazon_paapi.sdk.models.merchant import Merchant  # noqa: F401,E501
+from amazon_paapi.sdk.models.offer_count import OfferCount  # noqa: F401,E501
+from amazon_paapi.sdk.models.partner_type import PartnerType  # noqa: F401,E501
+from amazon_paapi.sdk.models.properties import Properties  # noqa: F401,E501
 
 
 class GetVariationsRequest(object):
