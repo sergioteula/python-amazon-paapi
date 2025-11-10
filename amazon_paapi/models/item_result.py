@@ -229,6 +229,11 @@ class ApiOfferMerchantInfo(sdk_models.OfferMerchantInfo):
     name: str
 
 
+class OfferSavingsV2(ApiPrice, sdk_models.OfferSavings):
+    money: sdk_models.Money
+    percentage: float
+
+
 class ApiOfferSavings(ApiPrice, sdk_models.OfferSavings):
     percentage: float
 
@@ -236,8 +241,8 @@ class ApiOfferSavings(ApiPrice, sdk_models.OfferSavings):
 class ApiOfferPriceV2(ApiPrice, sdk_models.OfferPrice):
     money: sdk_models.Money
     price_per_unit: sdk_models.Money
-    saving_basis: sdk_models.OfferSavings
-    savings: sdk_models.OfferSavings
+    saving_basis: sdk_models.OfferSavingsV2
+    savings: sdk_models.OfferSavingsV2
 
 
 class ApiOfferPrice(ApiPrice, sdk_models.OfferPrice):
