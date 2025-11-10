@@ -233,6 +233,13 @@ class ApiOfferSavings(ApiPrice, sdk_models.OfferSavings):
     percentage: float
 
 
+class ApiOfferPriceV2(ApiPrice, sdk_models.OfferPrice):
+    money: sdk_models.Money
+    price_per_unit: sdk_models.Money
+    saving_basis: sdk_models.OfferSavings
+    savings: sdk_models.OfferSavings
+
+
 class ApiOfferPrice(ApiPrice, sdk_models.OfferPrice):
     savings: sdk_models.OfferSavings
 
@@ -255,7 +262,7 @@ class ApiListingsV2(sdk_models.OfferListingV2):
     is_buy_box_winner: bool
     loyalty_points: ApiOfferLoyaltyPointsV2
     merchant_info: ApiOfferMerchantInfoV2
-    price: ApiOfferPrice
+    price: ApiOfferPriceV2
     type: str
     violates_map: bool
 
