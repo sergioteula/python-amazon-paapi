@@ -31,11 +31,13 @@ def get_items_ids(items: Union[str, List[str]]) -> List[str]:
 
 
 def check_search_args(**kwargs) -> None:
+    """Validate all search arguments."""
     check_search_mandatory_args(**kwargs)
     check_search_pagination_args(**kwargs)
 
 
 def check_search_mandatory_args(**kwargs) -> None:
+    """Validate that at least one mandatory search argument is provided."""
     mandatory_args = [
         kwargs.get("keywords"),
         kwargs.get("actor"),
@@ -77,6 +79,7 @@ def check_variations_args(**kwargs) -> None:
 
 
 def check_browse_nodes_args(**kwargs) -> None:
+    """Validate browse node arguments."""
     if not isinstance(kwargs.get("browse_node_ids"), List):
         error_message = "Argument browse_node_ids should be a List of strings."
         raise InvalidArgument(error_message)

@@ -1,3 +1,5 @@
+"""Tests for items helper functions."""
+
 import unittest
 from unittest import mock
 

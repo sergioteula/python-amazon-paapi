@@ -1,3 +1,5 @@
+"""Integration tests for Amazon Product Advertising API."""
+
 from __future__ import annotations
 
 import os

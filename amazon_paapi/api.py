@@ -41,6 +41,7 @@ class AmazonApi:
         throttling: float = 1,
         **kwargs,
     ) -> None:
+        """Initialize the Amazon API client with the provided credentials."""
         self._key = key
         self._secret = secret
         self._last_query_time = time.time() - throttling
@@ -142,9 +143,11 @@ class AmazonApi:
         sort_by: models.SortBy = None,
         **kwargs,
     ) -> models.SearchResult:
-        """Searches for items on Amazon based on a search query. At least one of the
-        following parameters should be specified: ``keywords``, ``actor``, ``artist``,
-        ``author``, ``brand``, ``title``, ``browse_node_id`` or ``search_index``.
+        """Search for items on Amazon based on a search query.
+
+        At least one of the following parameters should be specified: ``keywords``,
+        ``actor``, ``artist``, ``author``, ``brand``, ``title``, ``browse_node_id``
+        or ``search_index``.
 
         Args:
             item_count (``int``, optional): Number of items returned. Should be between
@@ -243,8 +246,10 @@ class AmazonApi:
         merchant: models.Merchant = None,
         **kwargs,
     ) -> models.VariationsResult:
-        """Returns a set of items that are the same product, but differ according to a
-        consistent theme, for example size and color. A variation is a child ASIN.
+        """Return a set of items that are the same product but differ by theme.
+
+        Items can differ by size, color, or other variation attributes.
+        A variation is a child ASIN.
 
         Args:
             asin (``str``): One item, using ASIN or product URL.
@@ -299,8 +304,9 @@ class AmazonApi:
         languages_of_preference: Optional[List[str]] = None,
         **kwargs,
     ) -> List[models.BrowseNode]:
-        """Returns the specified browse node's information like name, children and
-        ancestors.
+        """Return the specified browse node's information.
+
+        Information includes name, children, and ancestors.
 
         Args:
             browse_node_ids (``list[str]``): List of browse node ids. A browse node id
@@ -333,6 +339,7 @@ class AmazonApi:
         return requests.get_browse_nodes_response(self, request)
 
     def _throttle(self) -> None:
+        """Wait for the throttling interval to elapse since the last API call."""
         wait_time = self.throttling - (time.time() - self._last_query_time)
         if wait_time > 0:
             time.sleep(wait_time)

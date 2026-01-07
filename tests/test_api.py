@@ -1,3 +1,5 @@
+"""Tests for AmazonApi class."""
+
 import time
 import unittest
 from unittest import mock

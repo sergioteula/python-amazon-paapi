@@ -1,3 +1,5 @@
+"""Models for the Amazon Product Advertising API responses."""
+
 from amazon_paapi.sdk.models import Availability, Condition, Merchant, SortBy
 
 from .browse_nodes_result import BrowseNode

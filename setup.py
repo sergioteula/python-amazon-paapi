@@ -1,3 +1,5 @@
+"""Setup script for python-amazon-paapi package."""
+
 from pathlib import Path
 
 import setuptools

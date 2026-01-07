@@ -1,3 +1,5 @@
+"""Tests for requests helper functions."""
+
 import unittest
 from unittest.mock import Mock, patch
 

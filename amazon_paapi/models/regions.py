@@ -1,3 +1,5 @@
+"""Region and country code definitions for Amazon marketplaces."""
+
 from __future__ import annotations
 
 from typing import Literal

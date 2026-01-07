@@ -1,3 +1,5 @@
+"""Tests for arguments helper functions."""
+
 import unittest
 
 from amazon_paapi.errors import AsinNotFound, InvalidArgument

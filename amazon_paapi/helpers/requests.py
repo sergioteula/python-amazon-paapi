@@ -28,6 +28,7 @@ from amazon_paapi.sdk.rest import ApiException
 
 
 def get_items_request(amazon_api, asin_chunk: List[str], **kwargs) -> GetItemsRequest:
+    """Create a GetItemsRequest for the Amazon API."""
     try:
         return GetItemsRequest(
             resources=_get_request_resources(GetItemsResource),
@@ -43,6 +44,7 @@ def get_items_request(amazon_api, asin_chunk: List[str], **kwargs) -> GetItemsRe
 
 
 def get_items_response(amazon_api, request: GetItemsRequest) -> List[Item]:
+    """Execute a GetItemsRequest and return the list of items."""
     try:
         response = amazon_api.api.get_items(request)
     except ApiException as exc:
@@ -56,6 +58,7 @@ def get_items_response(amazon_api, request: GetItemsRequest) -> List[Item]:
 
 
 def get_search_items_request(amazon_api, **kwargs) -> SearchItemsRequest:
+    """Create a SearchItemsRequest for the Amazon API."""
     try:
         return SearchItemsRequest(
             resources=_get_request_resources(SearchItemsResource),
@@ -70,6 +73,7 @@ def get_search_items_request(amazon_api, **kwargs) -> SearchItemsRequest:
 
 
 def get_search_items_response(amazon_api, request: SearchItemsRequest) -> SearchResult:
+    """Execute a SearchItemsRequest and return the search result."""
     try:
         response = amazon_api.api.search_items(request)
     except ApiException as exc:
@@ -83,6 +87,7 @@ def get_search_items_response(amazon_api, request: SearchItemsRequest) -> Search
 
 
 def get_variations_request(amazon_api, **kwargs) -> GetVariationsRequest:
+    """Create a GetVariationsRequest for the Amazon API."""
     try:
         return GetVariationsRequest(
             resources=_get_request_resources(GetVariationsResource),
@@ -99,6 +104,7 @@ def get_variations_request(amazon_api, **kwargs) -> GetVariationsRequest:
 def get_variations_response(
     amazon_api, request: GetVariationsRequest
 ) -> VariationsResult:
+    """Execute a GetVariationsRequest and return the variations result."""
     try:
         response = amazon_api.api.get_variations(request)
     except ApiException as exc:
@@ -112,6 +118,7 @@ def get_variations_response(
 
 
 def get_browse_nodes_request(amazon_api, **kwargs) -> GetBrowseNodesRequest:
+    """Create a GetBrowseNodesRequest for the Amazon API."""
     try:
         return GetBrowseNodesRequest(
             resources=_get_request_resources(GetBrowseNodesResource),
@@ -128,6 +135,7 @@ def get_browse_nodes_request(amazon_api, **kwargs) -> GetBrowseNodesRequest:
 def get_browse_nodes_response(
     amazon_api, request: GetBrowseNodesRequest
 ) -> List[BrowseNode]:
+    """Execute a GetBrowseNodesRequest and return the list of browse nodes."""
     try:
         response = amazon_api.api.get_browse_nodes(request)
     except ApiException as exc:
@@ -141,11 +149,13 @@ def get_browse_nodes_response(
 
 
 def _get_request_resources(resources) -> List[str]:
+    """Extract all resource strings from a resource class."""
     resources = inspect.getmembers(resources, lambda a: not inspect.isroutine(a))
     return [x[-1] for x in resources if isinstance(x[-1], str) and x[0][0:2] != "__"]
 
 
 def _manage_response_exceptions(error) -> NoReturn:
+    """Handle API exceptions and raise appropriate custom exceptions."""
     error_status = getattr(error, "status", None)
     error_body = getattr(error, "body", "") or ""
 
