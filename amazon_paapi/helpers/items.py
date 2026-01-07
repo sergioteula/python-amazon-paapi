@@ -8,10 +8,11 @@ from amazon_paapi import models
 def sort_items(
     items: List[models.Item], items_ids: List[str], include_unavailable: bool
 ) -> List[models.Item]:
-    sorted_items = []
+    """Sort items by the order of the provided items_ids list."""
+    sorted_items: List[models.Item] = []
 
     for asin in items_ids:
-        matches = list(filter(lambda item, asin=asin: item.asin == asin, items))
+        matches: List[models.Item] = [item for item in items if item.asin == asin]
         if matches:
             sorted_items.append(matches[0])
         elif include_unavailable:

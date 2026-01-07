@@ -11,6 +11,7 @@ from .errors import InvalidArgument
 from .helpers import arguments, requests
 from .helpers.generators import get_list_chunks
 from .helpers.items import sort_items
+from .models.regions import CountryCode
 from .sdk.api.default_api import DefaultApi
 
 
@@ -21,7 +22,8 @@ class AmazonApi:
         key (``str``): Your API key.
         secret (``str``): Your API secret.
         tag (``str``): Your affiliate tracking id, used to create the affiliate link.
-        country (``models.Country``): Country code for your affiliate account.
+        country (``CountryCode``): Country code for your affiliate account.
+            Use values from ``models.Country``, e.g. ``Country.ES``.
         throttling (``float``, optional): Wait time in seconds between API calls. Use it
             to avoid reaching Amazon limits. Defaults to 1 second.
 
@@ -35,7 +37,7 @@ class AmazonApi:
         key: str,
         secret: str,
         tag: str,
-        country: models.Country,
+        country: CountryCode,
         throttling: float = 1,
         **kwargs,
     ) -> None:

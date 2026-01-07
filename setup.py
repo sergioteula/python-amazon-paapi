@@ -1,6 +1,8 @@
+from pathlib import Path
+
 import setuptools
 
-with open("README.md", encoding="utf8") as fh:
+with Path("README.md").open(encoding="utf8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
@@ -20,5 +22,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.7",
+    python_requires=">=3.9",
 )

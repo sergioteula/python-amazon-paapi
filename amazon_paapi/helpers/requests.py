@@ -1,7 +1,7 @@
 """Module with helper functions for creating requests."""
 
 import inspect
-from typing import List
+from typing import List, NoReturn, cast
 
 from amazon_paapi.errors import (
     AssociateValidationError,
@@ -52,7 +52,7 @@ def get_items_response(amazon_api, request: GetItemsRequest) -> List[Item]:
         msg = "No items have been found"
         raise ItemsNotFound(msg)
 
-    return response.items_result.items
+    return cast(List[Item], response.items_result.items)
 
 
 def get_search_items_request(amazon_api, **kwargs) -> SearchItemsRequest:
@@ -79,7 +79,7 @@ def get_search_items_response(amazon_api, request: SearchItemsRequest) -> Search
         msg = "No items have been found"
         raise ItemsNotFound(msg)
 
-    return response.search_result
+    return cast(SearchResult, response.search_result)
 
 
 def get_variations_request(amazon_api, **kwargs) -> GetVariationsRequest:
@@ -108,7 +108,7 @@ def get_variations_response(
         msg = "No variation items have been found"
         raise ItemsNotFound(msg)
 
-    return response.variations_result
+    return cast(VariationsResult, response.variations_result)
 
 
 def get_browse_nodes_request(amazon_api, **kwargs) -> GetBrowseNodesRequest:
@@ -137,7 +137,7 @@ def get_browse_nodes_response(
         msg = "No browse nodes have been found"
         raise ItemsNotFound(msg)
 
-    return response.browse_nodes_result.browse_nodes
+    return cast(List[BrowseNode], response.browse_nodes_result.browse_nodes)
 
 
 def _get_request_resources(resources) -> List[str]:
@@ -145,7 +145,7 @@ def _get_request_resources(resources) -> List[str]:
     return [x[-1] for x in resources if isinstance(x[-1], str) and x[0][0:2] != "__"]
 
 
-def _manage_response_exceptions(error) -> None:
+def _manage_response_exceptions(error) -> NoReturn:
     error_status = getattr(error, "status", None)
     error_body = getattr(error, "body", "") or ""
 

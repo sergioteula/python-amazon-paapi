@@ -1,27 +1,62 @@
+from __future__ import annotations
+
+from typing import Literal
+
+# Type alias for valid country codes
+CountryCode = Literal[
+    "AU",
+    "BE",
+    "BR",
+    "CA",
+    "FR",
+    "DE",
+    "IN",
+    "IT",
+    "JP",
+    "MX",
+    "NL",
+    "PL",
+    "SG",
+    "SA",
+    "ES",
+    "SE",
+    "TR",
+    "AE",
+    "UK",
+    "US",
+]
+
+
 class Country:
-    AU = "AU"
-    BE = "BE"
-    BR = "BR"
-    CA = "CA"
-    FR = "FR"
-    DE = "DE"
-    IN = "IN"
-    IT = "IT"
-    JP = "JP"
-    MX = "MX"
-    NL = "NL"
-    PL = "PL"
-    SG = "SG"
-    SA = "SA"
-    ES = "ES"
-    SE = "SE"
-    TR = "TR"
-    AE = "AE"
-    UK = "UK"
-    US = "US"
+    """Constants for supported Amazon countries.
+
+    Use these constants when specifying the country parameter.
+    Example: AmazonApi(key, secret, tag, Country.ES)
+    """
+
+    AU: CountryCode = "AU"
+    BE: CountryCode = "BE"
+    BR: CountryCode = "BR"
+    CA: CountryCode = "CA"
+    FR: CountryCode = "FR"
+    DE: CountryCode = "DE"
+    IN: CountryCode = "IN"
+    IT: CountryCode = "IT"
+    JP: CountryCode = "JP"
+    MX: CountryCode = "MX"
+    NL: CountryCode = "NL"
+    PL: CountryCode = "PL"
+    SG: CountryCode = "SG"
+    SA: CountryCode = "SA"
+    ES: CountryCode = "ES"
+    SE: CountryCode = "SE"
+    TR: CountryCode = "TR"
+    AE: CountryCode = "AE"
+    UK: CountryCode = "UK"
+    US: CountryCode = "US"
 
 
-REGIONS = {
+REGIONS: dict[str, str] = {
     "AU": "us-west-2",
     "BE": "eu-west-1",
     "BR": "us-east-1",
@@ -45,7 +80,7 @@ REGIONS = {
 }
 
 
-DOMAINS = {
+DOMAINS: dict[str, str] = {
     "AU": "com.au",
     "BE": "com.be",
     "BR": "com.br",
