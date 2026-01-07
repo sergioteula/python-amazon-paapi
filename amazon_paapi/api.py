@@ -4,7 +4,7 @@ A simple Python wrapper for the last version of the Amazon Product Advertising A
 """
 
 import time
-from typing import List, Optional, Union
+from typing import Any, List, Optional, Union
 
 from . import models
 from .errors import InvalidArgument
@@ -39,7 +39,7 @@ class AmazonApi:
         tag: str,
         country: CountryCode,
         throttling: float = 1,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """Initialize the Amazon API client with the provided credentials."""
         self._key = key
@@ -67,7 +67,7 @@ class AmazonApi:
         currency_of_preference: Optional[str] = None,
         languages_of_preference: Optional[List[str]] = None,
         include_unavailable: bool = False,
-        **kwargs,
+        **kwargs: Any,
     ) -> List[models.Item]:
         """Get items information from Amazon.
 
@@ -141,7 +141,7 @@ class AmazonApi:
         min_reviews_rating: Optional[int] = None,
         search_index: Optional[str] = None,
         sort_by: models.SortBy = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> models.SearchResult:
         """Search for items on Amazon based on a search query.
 
@@ -244,7 +244,7 @@ class AmazonApi:
         currency_of_preference: Optional[str] = None,
         languages_of_preference: Optional[List[str]] = None,
         merchant: models.Merchant = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> models.VariationsResult:
         """Return a set of items that are the same product but differ by theme.
 
@@ -302,7 +302,7 @@ class AmazonApi:
         self,
         browse_node_ids: List[str],
         languages_of_preference: Optional[List[str]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> List[models.BrowseNode]:
         """Return the specified browse node's information.
 

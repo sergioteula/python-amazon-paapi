@@ -7,7 +7,7 @@ from amazon_paapi.helpers.items import sort_items
 
 
 class MockedItem(mock.MagicMock):
-    def __init__(self, asin) -> None:
+    def __init__(self, asin: str) -> None:
         super().__init__()
         self.asin = asin
 

@@ -1,7 +1,13 @@
 """Module with helper functions for creating requests."""
 
+from __future__ import annotations
+
 import inspect
-from typing import List, NoReturn, cast
+from typing import TYPE_CHECKING, Any, List, NoReturn, cast
+
+if TYPE_CHECKING:
+    from amazon_paapi.api import AmazonApi
+    from amazon_paapi.sdk.rest import ApiException as ApiExceptionType
 
 from amazon_paapi.errors import (
     AssociateValidationError,
@@ -27,7 +33,11 @@ from amazon_paapi.sdk.models.search_items_resource import SearchItemsResource
 from amazon_paapi.sdk.rest import ApiException
 
 
-def get_items_request(amazon_api, asin_chunk: List[str], **kwargs) -> GetItemsRequest:
+def get_items_request(
+    amazon_api: AmazonApi,
+    asin_chunk: list[str],
+    **kwargs: Any,
+) -> GetItemsRequest:
     """Create a GetItemsRequest for the Amazon API."""
     try:
         return GetItemsRequest(
@@ -43,7 +53,7 @@ def get_items_request(amazon_api, asin_chunk: List[str], **kwargs) -> GetItemsRe
         raise MalformedRequest(msg) from exc
 
 
-def get_items_response(amazon_api, request: GetItemsRequest) -> List[Item]:
+def get_items_response(amazon_api: AmazonApi, request: GetItemsRequest) -> list[Item]:
     """Execute a GetItemsRequest and return the list of items."""
     try:
         response = amazon_api.api.get_items(request)
@@ -57,7 +67,10 @@ def get_items_response(amazon_api, request: GetItemsRequest) -> List[Item]:
     return cast(List[Item], response.items_result.items)
 
 
-def get_search_items_request(amazon_api, **kwargs) -> SearchItemsRequest:
+def get_search_items_request(
+    amazon_api: AmazonApi,
+    **kwargs: Any,
+) -> SearchItemsRequest:
     """Create a SearchItemsRequest for the Amazon API."""
     try:
         return SearchItemsRequest(
@@ -72,7 +85,9 @@ def get_search_items_request(amazon_api, **kwargs) -> SearchItemsRequest:
         raise MalformedRequest(msg) from exc
 
 
-def get_search_items_response(amazon_api, request: SearchItemsRequest) -> SearchResult:
+def get_search_items_response(
+    amazon_api: AmazonApi, request: SearchItemsRequest
+) -> SearchResult:
     """Execute a SearchItemsRequest and return the search result."""
     try:
         response = amazon_api.api.search_items(request)
@@ -86,7 +101,10 @@ def get_search_items_response(amazon_api, request: SearchItemsRequest) -> Search
     return cast(SearchResult, response.search_result)
 
 
-def get_variations_request(amazon_api, **kwargs) -> GetVariationsRequest:
+def get_variations_request(
+    amazon_api: AmazonApi,
+    **kwargs: Any,
+) -> GetVariationsRequest:
     """Create a GetVariationsRequest for the Amazon API."""
     try:
         return GetVariationsRequest(
@@ -102,7 +120,7 @@ def get_variations_request(amazon_api, **kwargs) -> GetVariationsRequest:
 
 
 def get_variations_response(
-    amazon_api, request: GetVariationsRequest
+    amazon_api: AmazonApi, request: GetVariationsRequest
 ) -> VariationsResult:
     """Execute a GetVariationsRequest and return the variations result."""
     try:
@@ -117,7 +135,10 @@ def get_variations_response(
     return cast(VariationsResult, response.variations_result)
 
 
-def get_browse_nodes_request(amazon_api, **kwargs) -> GetBrowseNodesRequest:
+def get_browse_nodes_request(
+    amazon_api: AmazonApi,
+    **kwargs: Any,
+) -> GetBrowseNodesRequest:
     """Create a GetBrowseNodesRequest for the Amazon API."""
     try:
         return GetBrowseNodesRequest(
@@ -133,8 +154,8 @@ def get_browse_nodes_request(amazon_api, **kwargs) -> GetBrowseNodesRequest:
 
 
 def get_browse_nodes_response(
-    amazon_api, request: GetBrowseNodesRequest
-) -> List[BrowseNode]:
+    amazon_api: AmazonApi, request: GetBrowseNodesRequest
+) -> list[BrowseNode]:
     """Execute a GetBrowseNodesRequest and return the list of browse nodes."""
     try:
         response = amazon_api.api.get_browse_nodes(request)
@@ -148,13 +169,13 @@ def get_browse_nodes_response(
     return cast(List[BrowseNode], response.browse_nodes_result.browse_nodes)
 
 
-def _get_request_resources(resources) -> List[str]:
+def _get_request_resources(resources: type[object]) -> list[str]:
     """Extract all resource strings from a resource class."""
     resources = inspect.getmembers(resources, lambda a: not inspect.isroutine(a))
     return [x[-1] for x in resources if isinstance(x[-1], str) and x[0][0:2] != "__"]
 
 
-def _manage_response_exceptions(error) -> NoReturn:
+def _manage_response_exceptions(error: ApiExceptionType) -> NoReturn:
     """Handle API exceptions and raise appropriate custom exceptions."""
     error_status = getattr(error, "status", None)
     error_body = getattr(error, "body", "") or ""

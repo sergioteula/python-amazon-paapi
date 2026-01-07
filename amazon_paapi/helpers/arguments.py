@@ -1,6 +1,6 @@
 """Module with helper functions for managing arguments."""
 
-from typing import List, Union
+from typing import Any, List, Union
 
 from amazon_paapi.errors import InvalidArgument
 from amazon_paapi.tools import get_asin
@@ -30,13 +30,13 @@ def get_items_ids(items: Union[str, List[str]]) -> List[str]:
     raise InvalidArgument(msg)
 
 
-def check_search_args(**kwargs) -> None:
+def check_search_args(**kwargs: Any) -> None:
     """Validate all search arguments."""
     check_search_mandatory_args(**kwargs)
     check_search_pagination_args(**kwargs)
 
 
-def check_search_mandatory_args(**kwargs) -> None:
+def check_search_mandatory_args(**kwargs: Any) -> None:
     """Validate that at least one mandatory search argument is provided."""
     mandatory_args = [
         kwargs.get("keywords"),
@@ -56,7 +56,7 @@ def check_search_mandatory_args(**kwargs) -> None:
         raise InvalidArgument(error_message)
 
 
-def check_search_pagination_args(**kwargs) -> None:
+def check_search_pagination_args(**kwargs: Any) -> None:
     """Validate pagination arguments for search requests."""
     error_message = "Args item_count and item_page should be integers between 1 and 10."
     pagination_args = [kwargs.get("item_count"), kwargs.get("item_page")]
@@ -66,7 +66,7 @@ def check_search_pagination_args(**kwargs) -> None:
             raise InvalidArgument(error_message)
 
 
-def check_variations_args(**kwargs) -> None:
+def check_variations_args(**kwargs: Any) -> None:
     """Validate variation arguments for get_variations requests."""
     error_message = (
         "Args variation_count and variation_page should be integers between 1 and 10."
@@ -78,7 +78,7 @@ def check_variations_args(**kwargs) -> None:
             raise InvalidArgument(error_message)
 
 
-def check_browse_nodes_args(**kwargs) -> None:
+def check_browse_nodes_args(**kwargs: Any) -> None:
     """Validate browse node arguments."""
     if not isinstance(kwargs.get("browse_node_ids"), List):
         error_message = "Argument browse_node_ids should be a List of strings."

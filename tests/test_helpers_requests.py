@@ -1,7 +1,7 @@
 """Tests for requests helper functions."""
 
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 from amazon_paapi.errors import (
     AssociateValidationError,
@@ -17,56 +17,56 @@ from amazon_paapi.sdk.rest import ApiException
 
 class TestRequests(unittest.TestCase):
     @patch.object(requests, "GetItemsRequest")
-    def test_get_items_request(self, mock_get_items_request):
+    def test_get_items_request(self, mock_get_items_request: MagicMock):
         mock_get_items_request.return_value = "foo"
         result = requests.get_items_request(Mock(), ["test"])
 
         self.assertEqual("foo", result)
 
     @patch.object(requests, "GetItemsRequest")
-    def test_get_items_request_error(self, mock_get_items_request):
+    def test_get_items_request_error(self, mock_get_items_request: MagicMock):
         mock_get_items_request.side_effect = TypeError()
 
         with self.assertRaises(MalformedRequest):
             requests.get_items_request(Mock(), ["test"])
 
     @patch.object(requests, "SearchItemsRequest")
-    def test_search_items_request(self, mock_search_items_request):
+    def test_search_items_request(self, mock_search_items_request: MagicMock):
         mock_search_items_request.return_value = "foo"
         result = requests.get_search_items_request(Mock())
 
         self.assertEqual("foo", result)
 
     @patch.object(requests, "SearchItemsRequest")
-    def test_search_items_request_error(self, mock_search_items_request):
+    def test_search_items_request_error(self, mock_search_items_request: MagicMock):
         mock_search_items_request.side_effect = TypeError()
 
         with self.assertRaises(MalformedRequest):
             requests.get_search_items_request(Mock())
 
     @patch.object(requests, "GetVariationsRequest")
-    def test_variations_request(self, mock_variations_request):
+    def test_variations_request(self, mock_variations_request: MagicMock):
         mock_variations_request.return_value = "foo"
         result = requests.get_variations_request(Mock())
 
         self.assertEqual("foo", result)
 
     @patch.object(requests, "GetVariationsRequest")
-    def test_variations_request_error(self, mock_variations_request):
+    def test_variations_request_error(self, mock_variations_request: MagicMock):
         mock_variations_request.side_effect = TypeError()
 
         with self.assertRaises(MalformedRequest):
             requests.get_variations_request(Mock())
 
     @patch.object(requests, "GetBrowseNodesRequest")
-    def test_browse_nodes_request(self, mock_browse_nodes_request):
+    def test_browse_nodes_request(self, mock_browse_nodes_request: MagicMock):
         mock_browse_nodes_request.return_value = "foo"
         result = requests.get_browse_nodes_request(Mock())
 
         self.assertEqual("foo", result)
 
     @patch.object(requests, "GetBrowseNodesRequest")
-    def test_browse_nodes_request_error(self, mock_browse_nodes_request):
+    def test_browse_nodes_request_error(self, mock_browse_nodes_request: MagicMock):
         mock_browse_nodes_request.side_effect = TypeError()
 
         with self.assertRaises(MalformedRequest):

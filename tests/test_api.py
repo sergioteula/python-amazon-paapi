@@ -3,6 +3,7 @@
 import time
 import unittest
 from unittest import mock
+from unittest.mock import MagicMock
 
 from amazon_paapi import AmazonApi, models
 from amazon_paapi.errors.exceptions import InvalidArgument
@@ -33,14 +34,14 @@ class TestApi(unittest.TestCase):
         self.assertTrue(start < int(time.time() * 10))
 
     @mock.patch.object(requests, "get_items_response")
-    def test_get_items(self, mocked_get_items_response):
+    def test_get_items(self, mocked_get_items_response: MagicMock):
         mocked_get_items_response.return_value = []
         amazon = AmazonApi("key", "secret", "tag", "ES")
         response = amazon.get_items("ABCDEFGHIJ")
         self.assertTrue(isinstance(response, list))
 
     @mock.patch.object(requests, "get_search_items_response")
-    def test_search_items(self, mocked_get_search_items_response):
+    def test_search_items(self, mocked_get_search_items_response: MagicMock):
         mocked_response = models.SearchResult()
         mocked_response.items = []
         mocked_get_search_items_response.return_value = mocked_response
@@ -49,7 +50,7 @@ class TestApi(unittest.TestCase):
         self.assertTrue(isinstance(response.items, list))
 
     @mock.patch.object(requests, "get_variations_response")
-    def test_get_variations(self, mocked_get_variations_response):
+    def test_get_variations(self, mocked_get_variations_response: MagicMock):
         mocked_response = models.VariationsResult()
         mocked_response.items = []
         mocked_get_variations_response.return_value = mocked_response
@@ -58,7 +59,7 @@ class TestApi(unittest.TestCase):
         self.assertTrue(isinstance(response.items, list))
 
     @mock.patch.object(requests, "get_browse_nodes_response")
-    def test_get_browse_nodes(self, mocked_get_browse_nodes_response):
+    def test_get_browse_nodes(self, mocked_get_browse_nodes_response: MagicMock):
         mocked_response = []
         mocked_get_browse_nodes_response.return_value = mocked_response
         amazon = AmazonApi("key", "secret", "tag", "ES")

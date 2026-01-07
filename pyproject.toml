@@ -7,6 +7,7 @@ unsafe-fixes = true
 select = ["ALL"]
 ignore = [
     "ANN003",
+    "ANN401",
     "D104",
     "D100",
     "D203",
@@ -14,13 +15,11 @@ ignore = [
     "COM812",
     "ISC001",
 ]
-exclude = [
-    "amazon_paapi/sdk/*",
-    "docs/*",
-]
+exclude = ["amazon_paapi/sdk/*", "docs/*"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = [
+    "ANN001",
     "ANN201",
     "ANN206",
     "D101",
@@ -33,11 +32,7 @@ exclude = [
 ]
 
 [tool.ruff.format]
-exclude = [
-    "amazon_paapi/sdk/*",
-    "docs/*",
-    ".github",
-]
+exclude = ["amazon_paapi/sdk/*", "docs/*", ".github"]
 
 [tool.mypy]
 python_version = "3.9"
@@ -53,9 +48,7 @@ cache_dir = '.cache/mypy'
 exclude = ["amazon_paapi/sdk/*"]
 
 [[tool.mypy.overrides]]
-module = [
-  "amazon_paapi/sdk/*",
-]
+module = ["amazon_paapi/sdk/*"]
 follow_imports = "skip"
 
 [tool.coverage.run]
