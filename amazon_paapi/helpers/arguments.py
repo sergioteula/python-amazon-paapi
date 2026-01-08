@@ -7,6 +7,8 @@ from typing import Any
 from amazon_paapi.errors import InvalidArgument
 from amazon_paapi.tools import get_asin
 
+MAX_PAGINATION_VALUE = 10
+
 
 def get_items_ids(items: str | list[str]) -> list[str]:
     """Parse and extract ASINs from items input.
@@ -64,7 +66,9 @@ def check_search_pagination_args(**kwargs: Any) -> None:
     pagination_args = [kwargs.get("item_count"), kwargs.get("item_page")]
 
     for arg in pagination_args:
-        if arg is not None and (not isinstance(arg, int) or not 1 <= arg <= 10):
+        if arg is not None and (
+            not isinstance(arg, int) or not 1 <= arg <= MAX_PAGINATION_VALUE
+        ):
             raise InvalidArgument(error_message)
 
 
@@ -76,7 +80,9 @@ def check_variations_args(**kwargs: Any) -> None:
     variation_args = [kwargs.get("variation_count"), kwargs.get("variation_page")]
 
     for arg in variation_args:
-        if arg is not None and (not isinstance(arg, int) or not 1 <= arg <= 10):
+        if arg is not None and (
+            not isinstance(arg, int) or not 1 <= arg <= MAX_PAGINATION_VALUE
+        ):
             raise InvalidArgument(error_message)
 
 

@@ -13,10 +13,6 @@ from amazon_paapi.errors import (
     RequestError,
     TooManyRequests,
 )
-from amazon_paapi.models.browse_nodes_result import BrowseNode
-from amazon_paapi.models.item_result import Item
-from amazon_paapi.models.search_result import SearchResult
-from amazon_paapi.models.variations_result import VariationsResult
 from amazon_paapi.sdk.models.get_browse_nodes_request import GetBrowseNodesRequest
 from amazon_paapi.sdk.models.get_browse_nodes_resource import GetBrowseNodesResource
 from amazon_paapi.sdk.models.get_items_request import GetItemsRequest
@@ -29,8 +25,14 @@ from amazon_paapi.sdk.models.search_items_resource import SearchItemsResource
 from amazon_paapi.sdk.rest import ApiException
 from amazon_paapi.sdk.rest import ApiException as ApiExceptionType
 
+HTTP_TOO_MANY_REQUESTS = 429
+
 if TYPE_CHECKING:
     from amazon_paapi.api import AmazonApi
+    from amazon_paapi.models.browse_nodes_result import BrowseNode
+    from amazon_paapi.models.item_result import Item
+    from amazon_paapi.models.search_result import SearchResult
+    from amazon_paapi.models.variations_result import VariationsResult
 
 
 def get_items_request(
@@ -64,7 +66,7 @@ def get_items_response(amazon_api: AmazonApi, request: GetItemsRequest) -> list[
         msg = "No items have been found"
         raise ItemsNotFound(msg)
 
-    return cast(List[Item], response.items_result.items)
+    return cast("List[Item]", response.items_result.items)
 
 
 def get_search_items_request(
@@ -98,7 +100,7 @@ def get_search_items_response(
         msg = "No items have been found"
         raise ItemsNotFound(msg)
 
-    return cast(SearchResult, response.search_result)
+    return cast("SearchResult", response.search_result)
 
 
 def get_variations_request(
@@ -132,7 +134,7 @@ def get_variations_response(
         msg = "No variation items have been found"
         raise ItemsNotFound(msg)
 
-    return cast(VariationsResult, response.variations_result)
+    return cast("VariationsResult", response.variations_result)
 
 
 def get_browse_nodes_request(
@@ -166,7 +168,7 @@ def get_browse_nodes_response(
         msg = "No browse nodes have been found"
         raise ItemsNotFound(msg)
 
-    return cast(List[BrowseNode], response.browse_nodes_result.browse_nodes)
+    return cast("List[BrowseNode]", response.browse_nodes_result.browse_nodes)
 
 
 def _get_request_resources(resource_class: type[object]) -> list[str]:
@@ -180,7 +182,7 @@ def _manage_response_exceptions(error: ApiExceptionType) -> NoReturn:
     error_status = getattr(error, "status", None)
     error_body = getattr(error, "body", "") or ""
 
-    if error_status == 429:
+    if error_status == HTTP_TOO_MANY_REQUESTS:
         msg = (
             "Requests limit reached, try increasing throttling or wait before"
             " trying again"

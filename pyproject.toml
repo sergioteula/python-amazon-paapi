@@ -14,6 +14,9 @@ ignore = [
     "D213",
     "COM812",
     "ISC001",
+    "FBT001",
+    "FBT002",
+    "N818",   # TODO: Exception name should be named with an Error suffix
 ]
 exclude = ["amazon_paapi/sdk/*", "docs/*"]
 
@@ -30,6 +33,7 @@ exclude = ["amazon_paapi/sdk/*", "docs/*"]
     "PT027",
     "SLF001",
 ]
+"api.py" = ["PLR0913"]
 
 [tool.ruff.format]
 exclude = ["amazon_paapi/sdk/*", "docs/*", ".github"]

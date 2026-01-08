@@ -43,7 +43,6 @@ class AmazonApi:
         tag: str,
         country: CountryCode,
         throttling: float = 1,
-        **kwargs: Any,
     ) -> None:
         """Initialize the Amazon API client with the provided credentials."""
         self._key = key
