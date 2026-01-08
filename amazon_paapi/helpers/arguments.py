@@ -1,12 +1,14 @@
 """Module with helper functions for managing arguments."""
 
-from typing import Any, List, Union
+from __future__ import annotations
+
+from typing import Any
 
 from amazon_paapi.errors import InvalidArgument
 from amazon_paapi.tools import get_asin
 
 
-def get_items_ids(items: Union[str, List[str]]) -> List[str]:
+def get_items_ids(items: str | list[str]) -> list[str]:
     """Parse and extract ASINs from items input.
 
     Args:
@@ -80,6 +82,6 @@ def check_variations_args(**kwargs: Any) -> None:
 
 def check_browse_nodes_args(**kwargs: Any) -> None:
     """Validate browse node arguments."""
-    if not isinstance(kwargs.get("browse_node_ids"), List):
+    if not isinstance(kwargs.get("browse_node_ids"), list):
         error_message = "Argument browse_node_ids should be a List of strings."
         raise InvalidArgument(error_message)

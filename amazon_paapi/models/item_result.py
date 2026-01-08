@@ -1,6 +1,6 @@
 """Item result models for Amazon Product Advertising API."""
 
-from typing import List, Optional
+from __future__ import annotations
 
 from amazon_paapi.sdk import models as sdk_models
 
@@ -15,7 +15,7 @@ class ApiLabelLocale:
 class ApiMultiValuedAttributeStr(ApiLabelLocale, sdk_models.MultiValuedAttribute):
     """Multi-valued attribute with string display values."""
 
-    display_values: List[str]
+    display_values: list[str]
 
 
 class ApiDisplayValuesType:
@@ -28,7 +28,7 @@ class ApiDisplayValuesType:
 class ApiMultiValuedAttributeType(ApiLabelLocale, sdk_models.MultiValuedAttribute):
     """Multi-valued attribute with typed display values."""
 
-    display_values: List[ApiDisplayValuesType]
+    display_values: list[ApiDisplayValuesType]
 
 
 class ApiUnitBasedAttribute(ApiLabelLocale, sdk_models.UnitBasedAttribute):
@@ -93,7 +93,7 @@ class ApiImages(sdk_models.Images):
     """Container for primary and variant images."""
 
     primary: ApiImageType
-    variants: List[ApiImageType]
+    variants: list[ApiImageType]
 
 
 class ApiByLineInfo(sdk_models.ByLineInfo):
@@ -116,7 +116,7 @@ class ApiContentInfo(sdk_models.ContentInfo):
 
     edition: ApiSingleStringValuedAttribute
     languages: ApiMultiValuedAttributeType
-    publication_date: Optional[ApiSingleStringValuedAttribute]
+    publication_date: ApiSingleStringValuedAttribute | None
 
 
 class ApiContentRating(sdk_models.ContentRating):
@@ -194,12 +194,12 @@ class ApiItemInfo(sdk_models.ItemInfo):
 
     by_line_info: ApiByLineInfo
     classifications: ApiClassifications
-    content_info: Optional[ApiContentInfo]
+    content_info: ApiContentInfo | None
     content_rating: ApiContentRating
     external_ids: ApiExternalIds
     features: ApiFeatures
     manufacture_info: ApiManufactureInfo
-    product_info: Optional[ApiProductInfo]
+    product_info: ApiProductInfo | None
     technical_info: ApiTechnicalInfo
     title: ApiSingleStringValuedAttribute
     trade_in_info: ApiTradeInInfo
@@ -303,7 +303,7 @@ class ApiListings(sdk_models.OfferListing):
     merchant_info: ApiOfferMerchantInfo
     price: ApiOfferPrice
     program_eligibility: ApiOfferProgramEligibility
-    promotions: List[ApiPromotion]
+    promotions: list[ApiPromotion]
     saving_basis: ApiPrice
     violates_map: bool
 
@@ -311,7 +311,7 @@ class ApiListings(sdk_models.OfferListing):
 class ApiOffers(sdk_models.Offers):
     """Container for offer listings."""
 
-    listings: List[ApiListings]
+    listings: list[ApiListings]
 
 
 class ApiBrowseNode(sdk_models.BrowseNode):
@@ -336,7 +336,7 @@ class ApiWebsiteSalesRank(sdk_models.WebsiteSalesRank):
 class ApiBrowseNodeInfo(sdk_models.BrowseNodeInfo):
     """Browse node information container."""
 
-    browse_nodes: List[ApiBrowseNode]
+    browse_nodes: list[ApiBrowseNode]
     website_sales_rank: ApiWebsiteSalesRank
 
 
@@ -353,4 +353,4 @@ class Item(sdk_models.Item):
     parent_asin: str
     rental_offers: sdk_models.RentalOffers
     score: float
-    variation_attributes: List[sdk_models.VariationAttribute]
+    variation_attributes: list[sdk_models.VariationAttribute]

@@ -1,6 +1,6 @@
 """Browse node result models for Amazon Product Advertising API."""
 
-from typing import List
+from __future__ import annotations
 
 from amazon_paapi.sdk import models as sdk_models
 
@@ -26,5 +26,5 @@ class BrowseNode(sdk_models.BrowseNode):
     id: str
     is_root: bool
     context_free_name: str
-    children: List[BrowseNodeChild]
+    children: list[BrowseNodeChild]
     ancestor: BrowseNodeAncestor

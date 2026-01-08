@@ -18,11 +18,18 @@ setuptools.setup(
     license="MIT",
     url="https://github.com/sergioteula/python-amazon-paapi",
     packages=setuptools.find_packages(),
-    install_requires=["certifi", "six", "python_dateutil", "setuptools", "urllib3"],
+    install_requires=[
+        "certifi",
+        "six",
+        "python_dateutil",
+        "setuptools",
+        "urllib3",
+        "typing_extensions; python_version < '3.8'",
+    ],
     classifiers=[
         "Programming Language :: Python",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.9",
+    python_requires=">=3.7",
 )

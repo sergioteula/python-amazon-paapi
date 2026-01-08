@@ -1,10 +1,13 @@
 """Variations result models for Amazon Product Advertising API."""
 
-from typing import List
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from amazon_paapi.sdk import models as sdk_models
 
-from .item_result import Item
+if TYPE_CHECKING:
+    from .item_result import Item
 
 
 class ApiPrice:
@@ -20,7 +23,7 @@ class ApiVariationDimension:
 
     display_name: str
     name: str
-    values: List[str]
+    values: list[str]
 
 
 class ApiVariationPrice:
@@ -36,11 +39,11 @@ class ApiVariationSummary(sdk_models.VariationSummary):
     page_count: int
     price: ApiVariationPrice
     variation_count: int
-    variation_dimensions: List[ApiVariationDimension]
+    variation_dimensions: list[ApiVariationDimension]
 
 
 class VariationsResult(sdk_models.VariationsResult):
     """Represent the result of a get variations operation."""
 
-    items: List[Item]
+    items: list[Item]
     variation_summary: ApiVariationSummary

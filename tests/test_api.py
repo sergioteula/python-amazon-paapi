@@ -60,8 +60,8 @@ class TestApi(unittest.TestCase):
 
     @mock.patch.object(requests, "get_browse_nodes_response")
     def test_get_browse_nodes(self, mocked_get_browse_nodes_response: MagicMock):
-        mocked_response = []
+        mocked_response: list[models.BrowseNode] = []
         mocked_get_browse_nodes_response.return_value = mocked_response
         amazon = AmazonApi("key", "secret", "tag", "ES")
         response = amazon.get_browse_nodes(["ABCDEFGHIJ"])
-        self.assertTrue(isinstance(response, list))
+        self.assertIsInstance(response, list)

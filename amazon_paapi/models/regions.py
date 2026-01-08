@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Literal
+import sys
 
-# Type alias for valid country codes
+if sys.version_info >= (3, 8):
+    from typing import Literal
+else:
+    from typing_extensions import Literal
+
 CountryCode = Literal[
     "AU",
     "BE",

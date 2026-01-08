@@ -5,10 +5,6 @@ from __future__ import annotations
 import inspect
 from typing import TYPE_CHECKING, Any, List, NoReturn, cast
 
-if TYPE_CHECKING:
-    from amazon_paapi.api import AmazonApi
-    from amazon_paapi.sdk.rest import ApiException as ApiExceptionType
-
 from amazon_paapi.errors import (
     AssociateValidationError,
     InvalidArgument,
@@ -31,6 +27,10 @@ from amazon_paapi.sdk.models.partner_type import PartnerType
 from amazon_paapi.sdk.models.search_items_request import SearchItemsRequest
 from amazon_paapi.sdk.models.search_items_resource import SearchItemsResource
 from amazon_paapi.sdk.rest import ApiException
+from amazon_paapi.sdk.rest import ApiException as ApiExceptionType
+
+if TYPE_CHECKING:
+    from amazon_paapi.api import AmazonApi
 
 
 def get_items_request(
@@ -169,10 +169,10 @@ def get_browse_nodes_response(
     return cast(List[BrowseNode], response.browse_nodes_result.browse_nodes)
 
 
-def _get_request_resources(resources: type[object]) -> list[str]:
+def _get_request_resources(resource_class: type[object]) -> list[str]:
     """Extract all resource strings from a resource class."""
-    resources = inspect.getmembers(resources, lambda a: not inspect.isroutine(a))
-    return [x[-1] for x in resources if isinstance(x[-1], str) and x[0][0:2] != "__"]
+    members = inspect.getmembers(resource_class, lambda a: not inspect.isroutine(a))
+    return [x[-1] for x in members if isinstance(x[-1], str) and x[0][0:2] != "__"]
 
 
 def _manage_response_exceptions(error: ApiExceptionType) -> NoReturn:

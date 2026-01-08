@@ -8,7 +8,7 @@ from unittest import TestCase, skipUnless
 from amazon_paapi.api import AmazonApi
 
 
-def get_api_credentials() -> tuple[str]:
+def get_api_credentials() -> tuple[str | None, str | None, str | None, str | None]:
     api_key = os.environ.get("API_KEY")
     api_secret = os.environ.get("API_SECRET")
     affiliate_tag = os.environ.get("AFFILIATE_TAG")

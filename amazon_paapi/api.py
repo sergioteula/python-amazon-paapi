@@ -3,16 +3,20 @@
 A simple Python wrapper for the last version of the Amazon Product Advertising API.
 """
 
+from __future__ import annotations
+
 import time
-from typing import Any, List, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 from . import models
 from .errors import InvalidArgument
 from .helpers import arguments, requests
 from .helpers.generators import get_list_chunks
 from .helpers.items import sort_items
-from .models.regions import CountryCode
 from .sdk.api.default_api import DefaultApi
+
+if TYPE_CHECKING:
+    from .models.regions import CountryCode
 
 
 class AmazonApi:
@@ -61,14 +65,14 @@ class AmazonApi:
 
     def get_items(
         self,
-        items: Union[str, List[str]],
+        items: str | list[str],
         condition: models.Condition = None,
         merchant: models.Merchant = None,
-        currency_of_preference: Optional[str] = None,
-        languages_of_preference: Optional[List[str]] = None,
+        currency_of_preference: str | None = None,
+        languages_of_preference: list[str] | None = None,
         include_unavailable: bool = False,
         **kwargs: Any,
-    ) -> List[models.Item]:
+    ) -> list[models.Item]:
         """Get items information from Amazon.
 
         Args:
@@ -116,30 +120,30 @@ class AmazonApi:
             items_response = requests.get_items_response(self, request)
             results.extend(items_response)
 
-        return sort_items(results, items_ids, include_unavailable)
+        return sort_items(results, items_ids, include_unavailable=include_unavailable)
 
     def search_items(
         self,  # NOSONAR
-        item_count: Optional[int] = None,
-        item_page: Optional[int] = None,
-        actor: Optional[str] = None,
-        artist: Optional[str] = None,
-        author: Optional[str] = None,
-        brand: Optional[str] = None,
-        keywords: Optional[str] = None,
-        title: Optional[str] = None,
+        item_count: int | None = None,
+        item_page: int | None = None,
+        actor: str | None = None,
+        artist: str | None = None,
+        author: str | None = None,
+        brand: str | None = None,
+        keywords: str | None = None,
+        title: str | None = None,
         availability: models.Availability = None,
-        browse_node_id: Optional[str] = None,
+        browse_node_id: str | None = None,
         condition: models.Condition = None,
-        currency_of_preference: Optional[str] = None,
-        delivery_flags: Optional[List[str]] = None,
-        languages_of_preference: Optional[List[str]] = None,
+        currency_of_preference: str | None = None,
+        delivery_flags: list[str] | None = None,
+        languages_of_preference: list[str] | None = None,
         merchant: models.Merchant = None,
-        max_price: Optional[int] = None,
-        min_price: Optional[int] = None,
-        min_saving_percent: Optional[int] = None,
-        min_reviews_rating: Optional[int] = None,
-        search_index: Optional[str] = None,
+        max_price: int | None = None,
+        min_price: int | None = None,
+        min_saving_percent: int | None = None,
+        min_reviews_rating: int | None = None,
+        search_index: str | None = None,
         sort_by: models.SortBy = None,
         **kwargs: Any,
     ) -> models.SearchResult:
@@ -238,11 +242,11 @@ class AmazonApi:
     def get_variations(
         self,
         asin: str,
-        variation_count: Optional[int] = None,
-        variation_page: Optional[int] = None,
+        variation_count: int | None = None,
+        variation_page: int | None = None,
         condition: models.Condition = None,
-        currency_of_preference: Optional[str] = None,
-        languages_of_preference: Optional[List[str]] = None,
+        currency_of_preference: str | None = None,
+        languages_of_preference: list[str] | None = None,
         merchant: models.Merchant = None,
         **kwargs: Any,
     ) -> models.VariationsResult:
@@ -300,10 +304,10 @@ class AmazonApi:
 
     def get_browse_nodes(
         self,
-        browse_node_ids: List[str],
-        languages_of_preference: Optional[List[str]] = None,
+        browse_node_ids: list[str],
+        languages_of_preference: list[str] | None = None,
         **kwargs: Any,
-    ) -> List[models.BrowseNode]:
+    ) -> list[models.BrowseNode]:
         """Return the specified browse node's information.
 
         Information includes name, children, and ancestors.

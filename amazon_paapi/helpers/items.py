@@ -1,18 +1,18 @@
 """Module to manage items."""
 
-from typing import List
+from __future__ import annotations
 
 from amazon_paapi import models
 
 
 def sort_items(
-    items: List[models.Item], items_ids: List[str], include_unavailable: bool
-) -> List[models.Item]:
+    items: list[models.Item], items_ids: list[str], *, include_unavailable: bool
+) -> list[models.Item]:
     """Sort items by the order of the provided items_ids list."""
-    sorted_items: List[models.Item] = []
+    sorted_items: list[models.Item] = []
 
     for asin in items_ids:
-        matches: List[models.Item] = [item for item in items if item.asin == asin]
+        matches: list[models.Item] = [item for item in items if item.asin == asin]
         if matches:
             sorted_items.append(matches[0])
         elif include_unavailable:
