@@ -1,7 +1,42 @@
+[project]
+name = "python-amazon-paapi"
+version = "5.1.0"
+description = "Amazon Product Advertising API 5.0 wrapper for Python"
+readme = "README.md"
+requires-python = ">=3.7"
+license = "MIT"
+authors = [{ name = "Sergio Abad", email = "sergio.abad@bytelix.com" }]
+classifiers = [
+    "Programming Language :: Python",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "certifi",
+    "six",
+    "python_dateutil",
+    "setuptools",
+    "urllib3",
+    "typing_extensions; python_version < '3.8'",
+]
+
+[project.urls]
+Homepage = "https://github.com/sergioteula/python-amazon-paapi"
+Repository = "https://github.com/sergioteula/python-amazon-paapi"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["amazon_paapi"]
+
+[dependency-groups]
+dev = ["pytest>=7.4.4"]
+
 [tool.ruff]
 target-version = "py37"
 cache-dir = ".cache/ruff"
-unsafe-fixes = true
 
 [tool.ruff.lint]
 select = ["ALL"]
