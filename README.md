@@ -8,8 +8,6 @@ This module allows interacting with Amazon using the official API in an easier w
 [![Python](https://img.shields.io/badge/Python->3.7-%23FFD140)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-%23e83633)](https://github.com/sergioteula/python-amazon-paapi/blob/master/LICENSE)
 [![Amazon API](https://img.shields.io/badge/Amazon%20API-5.0-%23FD9B15)](https://webservices.amazon.com/paapi5/documentation/)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=sergioteula_python-amazon-paapi&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=sergioteula_python-amazon-paapi)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=sergioteula_python-amazon-paapi&metric=coverage)](https://sonarcloud.io/summary/new_code?id=sergioteula_python-amazon-paapi)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/python-amazon-paapi?label=Installs)](https://pypi.org/project/python-amazon-paapi/)
 
 ## Features
