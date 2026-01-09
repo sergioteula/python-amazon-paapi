@@ -1,24 +1,116 @@
-[tool.black]
-preview = true
-exclude = ".*/sdk/.*"
+[project]
+name = "python-amazon-paapi"
+version = "5.1.0"
+description = "Amazon Product Advertising API 5.0 wrapper for Python"
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+authors = [{ name = "Sergio Abad", email = "sergio.abad@bytelix.com" }]
+keywords = ["amazon", "paapi", "product-advertising-api", "affiliate", "api"]
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "certifi>=2023.0.0",
+    "six>=1.16.0",
+    "python_dateutil>=2.8.0",
+    "urllib3>=1.26.0,<3",
+]
 
-[tool.isort]
-profile = "black"
-skip_glob = "*/sdk/*"
+[project.urls]
+Homepage = "https://github.com/sergioteula/python-amazon-paapi"
+Repository = "https://github.com/sergioteula/python-amazon-paapi"
 
-[tool.pylint]
-    [tool.pylint.master]
-        ignore = ["test.py"]
-        ignore-paths = [".*/sdk/", ".*docs/"]
-    [tool.pylint.message_control]
-        disable = [
-            "no-self-use",
-            "protected-access",
-            "too-many-arguments",
-            "too-many-instance-attributes",
-            "too-many-locals",
-            "too-many-public-methods",
-        ]
-        ignored-argument-names = "args|kwargs"
-    [tool.pylint.similarities]
-        ignore-imports = true
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["amazon_paapi"]
+
+[dependency-groups]
+dev = ["pre-commit>=2.21.0", "pytest>=7.4.4", "pytest-cov>=4.1.0"]
+
+[tool.ruff]
+target-version = "py38"
+cache-dir = ".cache/ruff"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "ANN003", # Missing type annotation for **kwargs
+    "ANN401", # Dynamically typed expressions (typing.Any) are disallowed
+    "D203",   # 1 blank line required before class docstring (conflicts with D211)
+    "D213",   # Multi-line docstring summary should start at the second line (conflicts with D212)
+    "COM812", # Missing trailing comma (conflicts with Ruff formatter)
+    "ISC001", # Implicitly concatenated string literals (conflicts with Ruff formatter)
+    "FBT001", # Boolean positional arg in function definition
+    "FBT002", # Boolean default value in function definition
+    "N818",   # TODO: Exception name should be named with an Error suffix
+]
+exclude = ["amazon_paapi/sdk/*", "docs/*"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "ANN201", # Missing return type annotation for public function
+    "ANN206", # Missing return type annotation for classmethod
+    "D",      # pydocstring rules (no docstrings required for tests)
+    "PT009",  # Use a regular assert instead of unittest-style
+    "PT027",  # Use pytest.raises instead of unittest-style
+    "SLF001", # Private member accessed
+]
+"api.py" = ["PLR0913"] # Too many arguments to function call
+
+[tool.ruff.format]
+exclude = ["amazon_paapi/sdk/*", "docs/*", ".github"]
+
+[tool.mypy]
+python_version = "3.9"
+ignore_missing_imports = true
+no_implicit_optional = true
+strict_equality = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_configs = true
+warn_unused_ignores = true
+cache_dir = '.cache/mypy'
+exclude = ["amazon_paapi/sdk/*"]
+
+[[tool.mypy.overrides]]
+module = ["amazon_paapi/sdk/*"]
+follow_imports = "skip"
+
+[tool.coverage.run]
+branch = true
+relative_files = true
+source = ["amazon_paapi"]
+omit = ["amazon_paapi/sdk/*"]
+
+[tool.coverage.report]
+precision = 2
+skip_covered = true
+skip_empty = true
+fail_under = 99
+
+[tool.coverage.html]
+directory = "coverage_html_report"
+skip_covered = false
+
+[tool.pytest.ini_options]
+testpaths = "tests"
+cache_dir = ".cache/pytest"
