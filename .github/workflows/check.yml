@@ -2,6 +2,8 @@ name: Run linters and tests
 
 on:
   push:
+    branches:
+      - master
   pull_request:
 
 permissions:
@@ -50,6 +52,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
 
     strategy:
       fail-fast: false
@@ -72,4 +75,4 @@ jobs:
             ${{ runner.os }}-uv-py${{ matrix.python-version }}-
 
       - name: Run tests
-        run: uv run --python "${{ matrix.python-version }}" pytest -rs --no-cov
+        run: uv run --python "${{ matrix.python-version }}" pytest -rs --no-cov -p no:faulthandler
