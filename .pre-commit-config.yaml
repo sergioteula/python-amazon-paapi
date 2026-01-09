@@ -4,8 +4,15 @@ default_language_version:
   python: python3.12
 
 repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.11
+    hooks:
+      - id: ruff-format
+      - id: ruff-check
+        args: [--fix, --exit-non-zero-on-fix]
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -16,20 +23,20 @@ repos:
       - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
       - id: check-toml
+      - id: check-merge-conflict
+      - id: debug-statements
       - id: name-tests-test
-
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.11
-    hooks:
-      - id: ruff-format
-      - id: ruff-check
-        args: [--fix, --exit-non-zero-on-fix]
 
   - repo: https://github.com/lk16/detect-missing-init
     rev: v0.1.6
     hooks:
       - id: detect-missing-init
         args: ["--create", "--python-folders", "amazon_paapi"]
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.0
+    hooks:
+      - id: gitleaks
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: 'v1.19.1'
@@ -39,20 +46,9 @@ repos:
 
   - repo: local
     hooks:
-      # - id: mypy
-      #   name: Checking types with mypy
-      #   language: system
-      #   entry: "python -m mypy amazon_paapi"
-      #   pass_filenames: false
-
       - id: test
         name: Running tests
         language: system
-        entry: "python -m coverage run -m pytest -rs"
-        pass_filenames: false
-
-      - id: test
-        name: Checking coverage
-        language: system
-        entry: "python -m coverage report"
+        entry: "uv run pytest -rs --cov=amazon_paapi"
+        types_or: [python]
         pass_filenames: false
