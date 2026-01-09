@@ -13,127 +13,62 @@ env:
   COUNTRY_CODE: ${{ secrets.COUNTRY_CODE }}
 
 jobs:
-  ruff:
+  check:
     runs-on: ubuntu-latest
-    container:
-      image: python:3.12
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v4
-    - name: Install dependencies
-      run: pip install ruff
-    - name: Check code errors
-      run: ruff check --output-format=github .
 
-  mypy:
-    runs-on: ubuntu-latest
-    container:
-      image: python:3.12
     steps:
-    - name: Check out code
-      uses: actions/checkout@v4
-    - name: Install dependencies
-      run: pip install mypy
-    - name: Check code errors
-      run: mypy amazon_paapi
+      - uses: actions/checkout@v5
 
-  test-py37:
-    runs-on: ubuntu-latest
-    needs: [test-py38]
-    container:
-      image: python:3.7
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v4
-    - name: Install dependencies
-      run: pip install -e . && pip install pytest
-    - name: Run tests
-      run: python -m pytest
-
-  test-py38:
-    runs-on: ubuntu-latest
-    needs: [test-py39]
-    container:
-      image: python:3.8
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v4
-    - name: Install dependencies
-      run: pip install -e . && pip install pytest
-    - name: Run tests
-      run: python -m pytest
-
-  test-py39:
-    runs-on: ubuntu-latest
-    needs: [test-py310]
-    container:
-      image: python:3.9
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v4
-    - name: Install dependencies
-      run: pip install -e . && pip install pytest
-    - name: Run tests
-      run: python -m pytest
-
-  test-py310:
-    runs-on: ubuntu-latest
-    needs: [test-py311]
-    container:
-      image: python:3.10
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v4
-    - name: Install dependencies
-      run: pip install -e . && pip install pytest
-    - name: Run tests
-      run: python -m pytest
-
-  test-py311:
-    runs-on: ubuntu-latest
-    needs: [test-py312]
-    container:
-      image: python:3.11
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v4
-    - name: Install dependencies
-      run: pip install -e . && pip install pytest
-    - name: Run tests
-      run: python -m pytest
-
-
-  test-py312:
-    runs-on: ubuntu-latest
-    container:
-      image: python:3.12
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v4
-    - name: Install dependencies
-      run: pip install -e . && pip install coverage pytest
-    - name: Run tests
-      run: coverage run -m pytest && coverage xml && coverage report
-    - name: Save code coverage file
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage
-        path: coverage.xml
-
-  sonar:
-    runs-on: ubuntu-latest
-    needs: [test-py312]
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v6
         with:
-          fetch-depth: 0
-      - name: Download a single artifact
-        uses: actions/download-artifact@v4
+          python-version: "3.13"
+
+      - name: Install UV
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Cache UV dependencies
+        uses: actions/cache@v4
         with:
-          name: coverage
-      - name: Check code errors
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          path: ~/.cache/uv
+          key: ${{ runner.os }}-uv-${{ hashFiles('pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-
+
+      - name: Cache pre-commit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: ${{ runner.os }}-pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pre-commit-
+
+      - name: Run all checks
+        run: |
+          SKIP=test uv run pre-commit run --all-files
+
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install UV
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Cache UV dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: ${{ runner.os }}-uv-py${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-py${{ matrix.python-version }}-
+
+      - name: Run tests
+        run: uv run --python "${{ matrix.python-version }}" pytest -rs
