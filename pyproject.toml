@@ -3,14 +3,13 @@ name = "python-amazon-paapi"
 version = "5.1.0"
 description = "Amazon Product Advertising API 5.0 wrapper for Python"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = "MIT"
 authors = [{ name = "Sergio Abad", email = "sergio.abad@bytelix.com" }]
 keywords = ["amazon", "paapi", "product-advertising-api", "affiliate", "api"]
 classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -46,7 +45,7 @@ packages = ["amazon_paapi"]
 dev = ["pre-commit>=2.21.0", "pytest>=7.4.4", "pytest-cov>=4.1.0"]
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py39"
 cache-dir = ".cache/ruff"
 
 [tool.ruff.lint]

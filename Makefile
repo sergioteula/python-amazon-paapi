@@ -1,7 +1,7 @@
 export UID:=$(shell id -u)
 export GID:=$(shell id -g)
 
-export PYTHON_TAGS = 3.8 3.9 3.10 3.11 3.12 3.13 3.14 3.15
+export PYTHON_TAGS = 3.9 3.10 3.11 3.12 3.13 3.14 3.15
 
 setup:
 	@uv run pre-commit install

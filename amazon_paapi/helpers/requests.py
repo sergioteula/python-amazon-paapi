@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import inspect
-from typing import TYPE_CHECKING, Any, List, NoReturn, cast
+from typing import TYPE_CHECKING, Any, NoReturn, cast
 
 from amazon_paapi.errors import (
     AssociateValidationError,
@@ -66,7 +66,7 @@ def get_items_response(amazon_api: AmazonApi, request: GetItemsRequest) -> list[
         msg = "No items have been found"
         raise ItemsNotFound(msg)
 
-    return cast("List[Item]", response.items_result.items)
+    return cast("list[Item]", response.items_result.items)
 
 
 def get_search_items_request(
@@ -168,7 +168,7 @@ def get_browse_nodes_response(
         msg = "No browse nodes have been found"
         raise ItemsNotFound(msg)
 
-    return cast("List[BrowseNode]", response.browse_nodes_result.browse_nodes)
+    return cast("list[BrowseNode]", response.browse_nodes_result.browse_nodes)
 
 
 def _get_request_resources(resource_class: type[object]) -> list[str]:
