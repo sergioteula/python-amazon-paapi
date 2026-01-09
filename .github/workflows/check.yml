@@ -9,15 +9,14 @@ on:
 permissions:
   pull-requests: read
 
-env:
-  API_KEY: ${{ secrets.API_KEY }}
-  API_SECRET: ${{ secrets.API_SECRET }}
-  AFFILIATE_TAG: ${{ secrets.AFFILIATE_TAG }}
-  COUNTRY_CODE: ${{ secrets.COUNTRY_CODE }}
-
 jobs:
   check:
     runs-on: ubuntu-latest
+    env:
+      API_KEY: ${{ secrets.API_KEY }}
+      API_SECRET: ${{ secrets.API_SECRET }}
+      AFFILIATE_TAG: ${{ secrets.AFFILIATE_TAG }}
+      COUNTRY_CODE: ${{ secrets.COUNTRY_CODE }}
 
     steps:
       - uses: actions/checkout@v5
@@ -48,7 +47,7 @@ jobs:
 
       - name: Run all checks
         run: |
-          SKIP=test uv run pre-commit run --all-files
+          uv run pre-commit run --all-files
 
   test:
     runs-on: ubuntu-latest
