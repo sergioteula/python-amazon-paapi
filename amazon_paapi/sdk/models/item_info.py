@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-  Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  Copyright 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License").
   You may not use this file except in compliance with the License.
@@ -28,17 +28,17 @@ import re  # noqa: F401
 
 import six
 
-from .by_line_info import ByLineInfo  # noqa: F401,E501
-from .classifications import Classifications  # noqa: F401,E501
-from .content_info import ContentInfo  # noqa: F401,E501
-from .content_rating import ContentRating  # noqa: F401,E501
-from .external_ids import ExternalIds  # noqa: F401,E501
-from .manufacture_info import ManufactureInfo  # noqa: F401,E501
-from .multi_valued_attribute import MultiValuedAttribute  # noqa: F401,E501
-from .product_info import ProductInfo  # noqa: F401,E501
-from .single_string_valued_attribute import SingleStringValuedAttribute  # noqa: F401,E501
-from .technical_info import TechnicalInfo  # noqa: F401,E501
-from .trade_in_info import TradeInInfo  # noqa: F401,E501
+from ..models.by_line_info import ByLineInfo  # noqa: F401,E501
+from ..models.classifications import Classifications  # noqa: F401,E501
+from ..models.content_info import ContentInfo  # noqa: F401,E501
+from ..models.content_rating import ContentRating  # noqa: F401,E501
+from ..models.external_ids import ExternalIds  # noqa: F401,E501
+from ..models.manufacture_info import ManufactureInfo  # noqa: F401,E501
+from ..models.multi_valued_attribute import MultiValuedAttribute  # noqa: F401,E501
+from ..models.product_info import ProductInfo  # noqa: F401,E501
+from ..models.single_string_valued_attribute import SingleStringValuedAttribute  # noqa: F401,E501
+from ..models.technical_info import TechnicalInfo  # noqa: F401,E501
+from ..models.trade_in_info import TradeInInfo  # noqa: F401,E501
 
 
 class ItemInfo(object):

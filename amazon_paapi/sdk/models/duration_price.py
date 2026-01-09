@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-  Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  Copyright 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License").
   You may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import re  # noqa: F401
 
 import six
 
-from .offer_price import OfferPrice  # noqa: F401,E501
-from .unit_based_attribute import UnitBasedAttribute  # noqa: F401,E501
+from ..models.offer_price import OfferPrice  # noqa: F401,E501
+from ..models.unit_based_attribute import UnitBasedAttribute  # noqa: F401,E501
 
 
 class DurationPrice(object):
