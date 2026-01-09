@@ -18,7 +18,7 @@ coverage: ensure-env
 
 test-all-python-tags: ensure-env
 	@for tag in $$PYTHON_TAGS; do \
-		uv run --env-file .env --python "$$tag" pytest -rs; \
+		uv run --env-file .env --python "$$tag" pytest -rs --no-cov; \
 	done
 
 lint:

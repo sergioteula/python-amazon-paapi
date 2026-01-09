@@ -71,4 +71,4 @@ jobs:
             ${{ runner.os }}-uv-py${{ matrix.python-version }}-
 
       - name: Run tests
-        run: uv run --python "${{ matrix.python-version }}" pytest -rs
+        run: uv run --python "${{ matrix.python-version }}" pytest -rs --no-cov
