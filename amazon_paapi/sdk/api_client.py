@@ -524,7 +524,7 @@ class ApiClient(object):
         """
         if not auth_settings:
             service = 'ProductAdvertisingAPI'
-            utc_timestamp = datetime.datetime.utcnow()
+            utc_timestamp = datetime.datetime.now(datetime.timezone.utc)
             headers['x-amz-target'] = 'com.amazon.paapi5.v1.ProductAdvertisingAPIv1.' + api_name
             headers['content-encoding'] = 'amz-1.0'
             headers['Content-Type'] = 'application/json; charset=utf-8'
