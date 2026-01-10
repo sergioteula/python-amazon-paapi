@@ -42,7 +42,13 @@ build-backend = "hatchling.build"
 packages = ["amazon_paapi"]
 
 [dependency-groups]
-dev = ["pre-commit>=2.21.0", "pytest>=7.4.4", "pytest-cov>=4.1.0"]
+dev = [
+    "mypy>=1.19.1",
+    "pre-commit>=2.21.0",
+    "pytest>=7.4.4",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.14.11",
+]
 
 [tool.ruff]
 target-version = "py39"
