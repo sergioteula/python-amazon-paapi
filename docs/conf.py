@@ -57,10 +57,17 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "furo"
 
 html_theme_options = {
-    "style_external_links": True,
+    "light_css_variables": {
+        "color-brand-primary": "#1182C2",
+        "color-brand-content": "#1182C2",
+    },
+    "dark_css_variables": {
+        "color-brand-primary": "#58a6ff",
+        "color-brand-content": "#58a6ff",
+    },
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -86,5 +93,4 @@ def autodoc_skip_member(app, what, name, obj, skip, options):
 
 
 def setup(app):
-    app.add_css_file("dark.css")
     app.connect("autodoc-skip-member", autodoc_skip_member)
