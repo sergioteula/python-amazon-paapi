@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-  Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  Copyright 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License").
   You may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import re  # noqa: F401
 
 import six
 
-from .browse_node import BrowseNode  # noqa: F401,E501
-from .website_sales_rank import WebsiteSalesRank  # noqa: F401,E501
+from ..models.browse_node import BrowseNode  # noqa: F401,E501
+from ..models.website_sales_rank import WebsiteSalesRank  # noqa: F401,E501
 
 
 class BrowseNodeInfo(object):

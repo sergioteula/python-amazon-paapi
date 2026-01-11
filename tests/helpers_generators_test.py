@@ -1,3 +1,5 @@
+"""Tests for generators helper functions."""
+
 import unittest
 
 from amazon_paapi.helpers.generators import get_list_chunks

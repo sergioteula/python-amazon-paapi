@@ -24,7 +24,7 @@ for item in items:
     print(item.offers.listings[0].price.amount) # Current price
 ```
 
-**Use URL insted of ASIN:**
+**Use URL instead of ASIN:**
 
 ```python
 item = amazon.get_items('https://www.amazon.com/dp/B01N5IB20Q')
@@ -68,4 +68,19 @@ Throttling value represents the wait time in seconds between API calls, being th
 ```python
 amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY, throttling=4)  # Makes 1 request every 4 seconds
 amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY, throttling=0)  # No wait time between requests
+```
+
+**Using OffersV2 resources:**
+
+OffersV2 provides enhanced pricing and offer details. All resources are included by default, so OffersV2 data is available without any additional configuration:
+
+```python
+items = amazon.get_items('B01N5IB20Q')
+
+# Access OffersV2 data
+item = items[0]
+if item.offers_v2 and item.offers_v2.listings:
+    listing = item.offers_v2.listings[0]
+    print(listing.price.money.amount)  # Price amount
+    print(listing.merchant_info.name)  # Merchant name
 ```

@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-  Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  Copyright 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License").
   You may not use this file except in compliance with the License.
@@ -28,14 +28,14 @@ import re  # noqa: F401
 
 import six
 
-from .offer_availability import OfferAvailability  # noqa: F401,E501
-from .offer_condition import OfferCondition  # noqa: F401,E501
-from .offer_delivery_info import OfferDeliveryInfo  # noqa: F401,E501
-from .offer_loyalty_points import OfferLoyaltyPoints  # noqa: F401,E501
-from .offer_merchant_info import OfferMerchantInfo  # noqa: F401,E501
-from .offer_price import OfferPrice  # noqa: F401,E501
-from .offer_program_eligibility import OfferProgramEligibility  # noqa: F401,E501
-from .offer_promotion import OfferPromotion  # noqa: F401,E501
+from ..models.offer_availability import OfferAvailability  # noqa: F401,E501
+from ..models.offer_condition import OfferCondition  # noqa: F401,E501
+from ..models.offer_delivery_info import OfferDeliveryInfo  # noqa: F401,E501
+from ..models.offer_loyalty_points import OfferLoyaltyPoints  # noqa: F401,E501
+from ..models.offer_merchant_info import OfferMerchantInfo  # noqa: F401,E501
+from ..models.offer_price import OfferPrice  # noqa: F401,E501
+from ..models.offer_program_eligibility import OfferProgramEligibility  # noqa: F401,E501
+from ..models.offer_promotion import OfferPromotion  # noqa: F401,E501
 
 
 class OfferListing(object):

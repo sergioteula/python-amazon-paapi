@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-  Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  Copyright 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License").
   You may not use this file except in compliance with the License.
@@ -100,6 +100,14 @@ class GetVariationsResource(object):
     VARIATIONSUMMARY_PRICE_HIGHESTPRICE = "VariationSummary.Price.HighestPrice"
     VARIATIONSUMMARY_PRICE_LOWESTPRICE = "VariationSummary.Price.LowestPrice"
     VARIATIONSUMMARY_VARIATIONDIMENSION = "VariationSummary.VariationDimension"
+    OFFERSV2_LISTINGS_AVAILABILITY = "OffersV2.Listings.Availability"
+    OFFERSV2_LISTINGS_CONDITION = "OffersV2.Listings.Condition"
+    OFFERSV2_LISTINGS_DEALDETAILS = "OffersV2.Listings.DealDetails"
+    OFFERSV2_LISTINGS_ISBUYBOXWINNER = "OffersV2.Listings.IsBuyBoxWinner"
+    OFFERSV2_LISTINGS_LOYALTYPOINTS = "OffersV2.Listings.LoyaltyPoints"
+    OFFERSV2_LISTINGS_MERCHANTINFO = "OffersV2.Listings.MerchantInfo"
+    OFFERSV2_LISTINGS_PRICE = "OffersV2.Listings.Price"
+    OFFERSV2_LISTINGS_TYPE = "OffersV2.Listings.Type"
 
     """
     Attributes:

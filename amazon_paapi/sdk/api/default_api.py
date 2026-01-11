@@ -5,7 +5,7 @@
 from __future__ import absolute_import
 
 """
-  Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  Copyright 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License").
   You may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ from __future__ import absolute_import
 
     https://webservices.amazon.com/paapi5/documentation/index.html  # noqa: E501
 """
-
 
 import re  # noqa: F401
 

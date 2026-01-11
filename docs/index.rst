@@ -36,3 +36,8 @@ If you are still using version 4.x or lower, it is highly recommended upgrading 
 
     ./pages/migration-guide-4.md
     ./pages/migration-guide-5.md
+
+Changelog
+---------
+
+See the `changelog <https://github.com/sergioteula/python-amazon-paapi/blob/master/CHANGELOG.md>`_ for a detailed history of changes.

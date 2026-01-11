@@ -2,11 +2,11 @@
 
 import re
 
-from ..errors import AsinNotFound
+from amazon_paapi.errors import AsinNotFound
 
 
 def get_asin(text: str) -> str:
-    """Returns the ASIN from a given text. Raises AsinNotFoundException on fail."""
+    """Extract the ASIN from a given text or URL."""
     # Return if text is an ASIN
     if re.search(r"^[a-zA-Z0-9]{10}$", text):
         return text.upper()

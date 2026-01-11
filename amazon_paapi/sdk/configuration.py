@@ -5,7 +5,7 @@
 from __future__ import absolute_import
 
 """
-  Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  Copyright 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License").
   You may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ from __future__ import absolute_import
 
     https://webservices.amazon.com/paapi5/documentation/index.html  # noqa: E501
 """
-
 
 import copy
 import logging
@@ -228,6 +227,6 @@ class Configuration(six.with_metaclass(TypeWithDefault, object)):
         return "Python SDK Debug Report:\n"\
                "OS: {env}\n"\
                "Python Version: {pyversion}\n"\
-               "Version of the API: 1.0.0\n"\
-               "SDK Package Version: 1.0.0".\
+               "Version of the API: 5.0.0\n"\
+               "SDK Package Version: 1.2.4".\
                format(env=sys.platform, pyversion=sys.version)

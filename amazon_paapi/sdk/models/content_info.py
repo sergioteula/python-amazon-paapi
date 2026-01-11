@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-  Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  Copyright 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License").
   You may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ import re  # noqa: F401
 
 import six
 
-from .languages import Languages  # noqa: F401,E501
-from .single_integer_valued_attribute import SingleIntegerValuedAttribute  # noqa: F401,E501
-from .single_string_valued_attribute import SingleStringValuedAttribute  # noqa: F401,E501
+from ..models.languages import Languages  # noqa: F401,E501
+from ..models.single_integer_valued_attribute import SingleIntegerValuedAttribute  # noqa: F401,E501
+from ..models.single_string_valued_attribute import SingleStringValuedAttribute  # noqa: F401,E501
 
 
 class ContentInfo(object):

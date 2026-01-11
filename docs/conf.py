@@ -19,11 +19,11 @@ sys.path.insert(0, os.path.abspath(".."))
 # -- Project information -----------------------------------------------------
 
 project = "python-amazon-paapi"
-copyright = "2021, Sergio Abad"
+copyright = "2026, Sergio Abad"
 author = "Sergio Abad"
 
 # The full version, including alpha/beta/rc tags
-release = "4.2.0"
+release = "5.2.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -38,7 +38,7 @@ extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "myst_parser"]
 autodoc_typehints = "none"
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+# templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -57,10 +57,17 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "furo"
 
 html_theme_options = {
-    "style_external_links": True,
+    "light_css_variables": {
+        "color-brand-primary": "#1182C2",
+        "color-brand-content": "#1182C2",
+    },
+    "dark_css_variables": {
+        "color-brand-primary": "#58a6ff",
+        "color-brand-content": "#58a6ff",
+    },
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -86,5 +93,4 @@ def autodoc_skip_member(app, what, name, obj, skip, options):
 
 
 def setup(app):
-    app.add_css_file("dark.css")
     app.connect("autodoc-skip-member", autodoc_skip_member)

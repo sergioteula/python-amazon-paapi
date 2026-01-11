@@ -1,3 +1,5 @@
+"""Tests for error classes."""
+
 import unittest
 
 from amazon_paapi.errors import AmazonError
