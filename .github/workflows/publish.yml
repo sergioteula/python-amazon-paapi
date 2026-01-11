@@ -3,6 +3,11 @@ name: Upload Python Package
 on:
   release:
     types: [created]
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
 
 jobs:
   deploy:
@@ -20,7 +25,8 @@ jobs:
           pip install build twine
       - name: Update version number
         run: |
-          sed -i 's/version = ".*"/version = "${{ github.ref_name }}"/' pyproject.toml
+          VERSION="${{ inputs.version || github.ref_name }}"
+          sed -i "s/version = \".*\"/version = \"$VERSION\"/" pyproject.toml
       - name: Build and publish
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
