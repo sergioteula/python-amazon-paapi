@@ -24,7 +24,7 @@ for item in items:
     print(item.offers.listings[0].price.amount) # Current price
 ```
 
-**Use URL insted of ASIN:**
+**Use URL instead of ASIN:**
 
 ```python
 item = amazon.get_items('https://www.amazon.com/dp/B01N5IB20Q')

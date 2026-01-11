@@ -52,3 +52,10 @@ repos:
         entry: "bash -c 'set -a && source .env 2>/dev/null; set +a && uv run pytest -rs --cov=amazon_paapi'"
         types_or: [python]
         pass_filenames: false
+
+      - id: version-check
+        name: Check version consistency
+        language: system
+        entry: uv run python scripts/check_version.py
+        files: (CHANGELOG\.md|pyproject\.toml|docs/conf\.py)$
+        pass_filenames: false
