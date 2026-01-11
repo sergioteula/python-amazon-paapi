@@ -5,7 +5,7 @@
 from __future__ import absolute_import
 
 """
-  Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  Copyright 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License").
   You may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ from .api_client import ApiClient
 from .configuration import Configuration
 # import models into sdk package
 from .models.availability import Availability
+from .models.big_decimal import BigDecimal
 from .models.browse_node import BrowseNode
 from .models.browse_node_ancestor import BrowseNodeAncestor
 from .models.browse_node_child import BrowseNodeChild
@@ -50,6 +51,7 @@ from .models.content_info import ContentInfo
 from .models.content_rating import ContentRating
 from .models.contributor import Contributor
 from .models.customer_reviews import CustomerReviews
+from .models.deal_details import DealDetails
 from .models.delivery_flag import DeliveryFlag
 from .models.dimension_based_attribute import DimensionBasedAttribute
 from .models.duration_price import DurationPrice
@@ -79,25 +81,39 @@ from .models.merchant import Merchant
 from .models.min_price import MinPrice
 from .models.min_reviews_rating import MinReviewsRating
 from .models.min_saving_percent import MinSavingPercent
+from .models.money import Money
 from .models.multi_valued_attribute import MultiValuedAttribute
 from .models.offer_availability import OfferAvailability
+from .models.offer_availability_v2 import OfferAvailabilityV2
 from .models.offer_condition import OfferCondition
 from .models.offer_condition_note import OfferConditionNote
+from .models.offer_condition_v2 import OfferConditionV2
 from .models.offer_count import OfferCount
 from .models.offer_delivery_info import OfferDeliveryInfo
 from .models.offer_listing import OfferListing
+from .models.offer_listing_v2 import OfferListingV2
+from .models.offer_listings import OfferListings
+from .models.offer_listings_v2 import OfferListingsV2
 from .models.offer_loyalty_points import OfferLoyaltyPoints
+from .models.offer_loyalty_points_v2 import OfferLoyaltyPointsV2
 from .models.offer_merchant_info import OfferMerchantInfo
+from .models.offer_merchant_info_v2 import OfferMerchantInfoV2
 from .models.offer_price import OfferPrice
+from .models.offer_price_v2 import OfferPriceV2
 from .models.offer_program_eligibility import OfferProgramEligibility
 from .models.offer_promotion import OfferPromotion
+from .models.offer_saving_basis import OfferSavingBasis
 from .models.offer_savings import OfferSavings
+from .models.offer_savings_v2 import OfferSavingsV2
 from .models.offer_shipping_charge import OfferShippingCharge
 from .models.offer_sub_condition import OfferSubCondition
 from .models.offer_summary import OfferSummary
+from .models.offer_type import OfferType
 from .models.offers import Offers
+from .models.offers_v2 import OffersV2
 from .models.partner_type import PartnerType
 from .models.price import Price
+from .models.price_type import PriceType
 from .models.product_advertising_api_client_exception import ProductAdvertisingAPIClientException
 from .models.product_advertising_api_service_exception import ProductAdvertisingAPIServiceException
 from .models.product_info import ProductInfo
@@ -107,6 +123,8 @@ from .models.refinement import Refinement
 from .models.refinement_bin import RefinementBin
 from .models.rental_offer_listing import RentalOfferListing
 from .models.rental_offers import RentalOffers
+from .models.saving_basis_type import SavingBasisType
+from .models.search_index import SearchIndex
 from .models.search_items_request import SearchItemsRequest
 from .models.search_items_resource import SearchItemsResource
 from .models.search_items_response import SearchItemsResponse

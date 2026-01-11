@@ -340,6 +340,99 @@ class ApiBrowseNodeInfo(sdk_models.BrowseNodeInfo):
     website_sales_rank: ApiWebsiteSalesRank
 
 
+class ApiMoney(sdk_models.Money):
+    """Money representation for OffersV2 price fields."""
+
+    amount: float
+    currency: str
+    display_amount: str
+
+
+class ApiOfferAvailabilityV2(sdk_models.OfferAvailabilityV2):
+    """OffersV2 availability information."""
+
+    max_order_quantity: int
+    message: str
+    min_order_quantity: int
+    type: str
+
+
+class ApiOfferConditionV2(sdk_models.OfferConditionV2):
+    """OffersV2 condition information."""
+
+    condition_note: str
+    sub_condition: str
+    value: str
+
+
+class ApiDealDetails(sdk_models.DealDetails):
+    """Deal details for OffersV2 listings."""
+
+    access_type: str
+    badge: str
+    early_access_duration_in_milliseconds: int
+    end_time: str
+    percent_claimed: int
+    start_time: str
+
+
+class ApiOfferLoyaltyPointsV2(sdk_models.OfferLoyaltyPointsV2):
+    """OffersV2 loyalty points information."""
+
+    points: int
+
+
+class ApiOfferMerchantInfoV2(sdk_models.OfferMerchantInfoV2):
+    """OffersV2 merchant information."""
+
+    id: str
+    name: str
+
+
+class ApiOfferSavingBasis(sdk_models.OfferSavingBasis):
+    """Saving basis information for OffersV2."""
+
+    money: ApiMoney
+    saving_basis_type: str
+    saving_basis_type_label: str
+
+
+class ApiOfferSavingsV2(sdk_models.OfferSavingsV2):
+    """OffersV2 savings information."""
+
+    money: ApiMoney
+    percentage: int
+
+
+class ApiOfferPriceV2(sdk_models.OfferPriceV2):
+    """OffersV2 price information."""
+
+    money: ApiMoney
+    price_per_unit: ApiMoney
+    saving_basis: ApiOfferSavingBasis
+    savings: ApiOfferSavingsV2
+
+
+class ApiListingsV2(sdk_models.OfferListingV2):
+    """OffersV2 listing with all details."""
+
+    availability: ApiOfferAvailabilityV2
+    condition: ApiOfferConditionV2
+    deal_details: ApiDealDetails
+    is_buy_box_winner: bool
+    loyalty_points: ApiOfferLoyaltyPointsV2
+    merchant_info: ApiOfferMerchantInfoV2
+    price: ApiOfferPriceV2
+    type: sdk_models.OfferType
+    violates_map: bool
+
+
+class ApiOffersV2(sdk_models.OffersV2):
+    """Container for OffersV2 listings."""
+
+    listings: list[ApiListingsV2]
+
+
 class Item(sdk_models.Item):
     """Amazon product item with all details."""
 
@@ -350,6 +443,7 @@ class Item(sdk_models.Item):
     images: ApiImages
     item_info: ApiItemInfo
     offers: ApiOffers
+    offers_v2: ApiOffersV2
     parent_asin: str
     rental_offers: sdk_models.RentalOffers
     score: float

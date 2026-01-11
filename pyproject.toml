@@ -1,6 +1,6 @@
 [project]
 name = "python-amazon-paapi"
-version = "5.1.0"
+version = "5.2.0"
 description = "Amazon Product Advertising API 5.0 wrapper for Python"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -42,7 +42,13 @@ build-backend = "hatchling.build"
 packages = ["amazon_paapi"]
 
 [dependency-groups]
-dev = ["pre-commit>=2.21.0", "pytest>=7.4.4", "pytest-cov>=4.1.0"]
+dev = [
+    "mypy>=1.19.1",
+    "pre-commit>=2.21.0",
+    "pytest>=7.4.4",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.14.11",
+]
 
 [tool.ruff]
 target-version = "py39"

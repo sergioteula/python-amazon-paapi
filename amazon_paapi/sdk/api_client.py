@@ -5,7 +5,7 @@
 from __future__ import absolute_import
 
 """
-  Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  Copyright 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License").
   You may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ class ApiClient(object):
             self.default_headers[header_name] = header_value
         self.cookie = cookie
         # Set default User-Agent.
-        self.user_agent = 'paapi5-python-sdk/1.0.0'
+        self.user_agent = 'paapi5-python-sdk/1.2.4'
 
         self.access_key = access_key
         self.secret_key = secret_key
@@ -103,13 +103,8 @@ class ApiClient(object):
         self.region = region
 
     def __del__(self):
-        try:
-            self.pool.close()
-            self.pool.join()
-        except (OSError, TypeError):
-            # Ignore errors during interpreter shutdown when file descriptors
-            # or other resources may already be deallocated
-            pass
+        self.pool.close()
+        self.pool.join()
 
     @property
     def user_agent(self):
@@ -529,7 +524,7 @@ class ApiClient(object):
         """
         if not auth_settings:
             service = 'ProductAdvertisingAPI'
-            utc_timestamp = datetime.datetime.utcnow()
+            utc_timestamp = datetime.datetime.now(datetime.timezone.utc)
             headers['x-amz-target'] = 'com.amazon.paapi5.v1.ProductAdvertisingAPIv1.' + api_name
             headers['content-encoding'] = 'amz-1.0'
             headers['Content-Type'] = 'application/json; charset=utf-8'

@@ -14,6 +14,7 @@ A simple Python wrapper for the [Amazon Product Advertising API 5.0](https://web
 - 🔍 **Product search** by keywords, categories, or browse nodes
 - 📦 **Product details** via ASIN or Amazon URL
 - 🔄 **Item variations** support (size, color, etc.)
+- 💰 **OffersV2 support** for enhanced pricing and offer details
 - 🌍 **20+ countries** supported ([full list](https://github.com/sergioteula/python-amazon-paapi/blob/master/amazon_paapi/models/regions.py))
 - ⚡ **Batch requests** to get multiple items without the 10-item limit
 - 🛡️ **Built-in throttling** to avoid API rate limits
@@ -39,6 +40,18 @@ print(item.item_info.title.display_value)
 ```
 
 ## Usage Examples
+
+### Using OffersV2 resources
+
+OffersV2 provides enhanced pricing and offer details. All resources are included by default, so OffersV2 data is available without any additional configuration:
+
+```python
+item = amazon.get_items('B01N5IB20Q')[0]
+if item.offers_v2 and item.offers_v2.listings:
+    listing = item.offers_v2.listings[0]
+    print(listing.price.money.amount)  # Price amount
+    print(listing.merchant_info.name)  # Merchant name
+```
 
 ### Get Multiple Products
 

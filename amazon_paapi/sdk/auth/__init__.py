@@ -30,4 +30,4 @@ from __future__ import absolute_import
 """
 
 # import auth into sdk package
-from .sign_helper import AWSV4Auth
+from ..auth.sign_helper import AWSV4Auth
