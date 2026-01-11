@@ -72,6 +72,9 @@ exclude = ["amazon_paapi/sdk/*", "docs/*"]
     "PT027",  # Use pytest.raises instead of unittest-style
     "SLF001", # Private member accessed
 ]
+"scripts/*" = [
+    "T201", # print found (CLI scripts use print)
+]
 "api.py" = ["PLR0913"] # Too many arguments to function call
 
 [tool.ruff.format]
