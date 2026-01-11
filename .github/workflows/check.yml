@@ -10,6 +10,24 @@ permissions:
   pull-requests: read
 
 jobs:
+  changelog:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Check CHANGELOG was updated
+        run: |
+          if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q "^CHANGELOG.md$"; then
+            echo "✅ CHANGELOG.md was updated"
+          else
+            echo "❌ ERROR: CHANGELOG.md was not updated"
+            echo "Please add your changes to the CHANGELOG.md file"
+            exit 1
+          fi
+
   check:
     runs-on: ubuntu-latest
     env:
@@ -56,8 +74,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version:
-          ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
 
     steps:
       - uses: actions/checkout@v5
