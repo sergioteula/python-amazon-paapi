@@ -88,7 +88,12 @@ class ApiClient(object):
             configuration = Configuration()
         self.configuration = configuration
 
-        self.pool = ThreadPool()
+        try:
+            self.pool = ThreadPool()
+        except:
+            # if multiprocessing is not available, we can't use the pool
+            self.pool = None
+
         self.rest_client = rest.RESTClientObject(configuration)
         self.default_headers = {}
         if header_name is not None:
@@ -103,8 +108,9 @@ class ApiClient(object):
         self.region = region
 
     def __del__(self):
-        self.pool.close()
-        self.pool.join()
+        if self.pool is not None:
+            self.pool.close()
+            self.pool.join()
 
     @property
     def user_agent(self):
