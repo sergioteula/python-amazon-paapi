@@ -1,4 +1,4 @@
-name: Create Release
+name: Create Release and Publish
 
 on:
   workflow_dispatch:
@@ -11,8 +11,10 @@ jobs:
   release:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
+    environment: pypi
     outputs:
       version: ${{ steps.changelog.outputs.version }}
+      released: ${{ steps.check_tag.outputs.exists == 'false' }}
 
     steps:
       - name: Checkout code
@@ -60,9 +62,18 @@ jobs:
           echo "⚠️ Tag v${{ steps.changelog.outputs.version }} already exists. Skipping release creation."
           exit 1
 
-  publish:
-    needs: release
-    uses: ./.github/workflows/publish.yml
-    with:
-      version: ${{ needs.release.outputs.version }}
-    secrets: inherit
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+
+      - name: Build package
+        run: python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
