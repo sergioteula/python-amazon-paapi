@@ -23,6 +23,7 @@ This module allows interacting with Amazon using the official API in an easier w
 - Ask for new features through the [issues](https://github.com/sergioteula/python-amazon-paapi/issues) section.
 - Join our [Telegram group](https://t.me/PythonAmazonPAAPI) for support or development.
 - Check the [documentation](https://python-amazon-paapi.readthedocs.io/en/latest/index.html) for reference.
+- See the [changelog](https://github.com/sergioteula/python-amazon-paapi/blob/master/CHANGELOG.md) for version history.
 
 ## Installation
 
