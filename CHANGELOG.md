@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `.env.template` file for easier development setup
 - Code style guide for AI assistants (`.agent/rules/code-style-guide.md`)
 - Pre-commit hooks with Ruff integration
+- Version consistency check script (`scripts/check_version.py`)
+- Manual release workflow (`release.yml`) that creates GitHub releases from CHANGELOG
+- CI check to ensure CHANGELOG is updated in every PR
 
 ### Changed
 
@@ -25,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed test files to use `_test.py` suffix instead of `test_` prefix
 - Updated GitHub Actions workflows to use `uv` instead of Docker
 - Improved docstrings across the codebase
+- Completely rewritten README with clearer structure and examples
+- Updated Read the Docs configuration to v2 format with modern Sphinx versions
 
 ### Removed
 
