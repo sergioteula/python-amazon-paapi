@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved docstrings across the codebase
 - Completely rewritten README with clearer structure and examples
 - Updated Read the Docs configuration to v2 format with modern Sphinx versions
+- Updated documentation to furo theme
 
 ### Removed
 
