@@ -124,6 +124,53 @@ class IntegrationTest(TestCase):
             listing = item.offers_v2.listings[0]
             self.assertIsNotNone(listing)
 
+    def test_offers_v2_listing_has_price_info(self) -> None:
+        """Test that OffersV2 listings include price information."""
+        item = self.item_with_offers
+        self.assertIsNotNone(item.offers_v2)
+
+        if item.offers_v2.listings:
+            listing = item.offers_v2.listings[0]
+            self.assertIsNotNone(listing.price)
+
+            if listing.price and listing.price.money:
+                self.assertIsNotNone(listing.price.money.amount)
+                self.assertIsNotNone(listing.price.money.currency)
+                self.assertIsNotNone(listing.price.money.display_amount)
+
+    def test_offers_v2_listing_has_merchant_info(self) -> None:
+        """Test that OffersV2 listings include merchant information."""
+        item = self.item_with_offers
+        self.assertIsNotNone(item.offers_v2)
+
+        if item.offers_v2.listings:
+            listing = item.offers_v2.listings[0]
+
+            if listing.merchant_info:
+                self.assertIsNotNone(listing.merchant_info.name)
+
+    def test_offers_v2_listing_has_condition(self) -> None:
+        """Test that OffersV2 listings include condition information."""
+        item = self.item_with_offers
+        self.assertIsNotNone(item.offers_v2)
+
+        if item.offers_v2.listings:
+            listing = item.offers_v2.listings[0]
+
+            if listing.condition:
+                self.assertIsNotNone(listing.condition.value)
+
+    def test_offers_v2_listing_has_availability(self) -> None:
+        """Test that OffersV2 listings include availability information."""
+        item = self.item_with_offers
+        self.assertIsNotNone(item.offers_v2)
+
+        if item.offers_v2.listings:
+            listing = item.offers_v2.listings[0]
+
+            if listing.availability:
+                self.assertIsNotNone(listing.availability.type)
+
     def test_get_items_returns_single_result(self) -> None:
         """Test that get_items returns exactly one item when given one ASIN."""
         self.assertEqual(1, len(self.get_items_result))
@@ -133,13 +180,17 @@ class IntegrationTest(TestCase):
         self.assertIn(self.affiliate_tag, self.get_items_result[0].detail_page_url)
 
     def test_get_items_returns_offers_v2(self) -> None:
-        """Test that get_items returns OffersV2 data."""
+        """Test that get_items returns OffersV2 data with price details."""
         item = self.get_items_result[0]
         self.assertIsNotNone(item.offers_v2)
 
         if item.offers_v2.listings:
             listing = item.offers_v2.listings[0]
             self.assertIsNotNone(listing)
+
+            if listing.price and listing.price.money:
+                self.assertIsNotNone(listing.price.money.amount)
+                self.assertIsNotNone(listing.price.money.display_amount)
 
     def test_get_variations_returns_items(self) -> None:
         """Test that get_variations returns a list of variation items."""
@@ -165,3 +216,81 @@ class IntegrationTest(TestCase):
         node = self.browse_nodes_result[0]
         self.assertIsNotNone(node.id)
         self.assertIsNotNone(node.display_name)
+
+    def test_offers_v2_listing_has_is_buy_box_winner(self) -> None:
+        """Test that OffersV2 listings include is_buy_box_winner attribute."""
+        item = self.item_with_offers
+        self.assertIsNotNone(item.offers_v2)
+
+        if item.offers_v2.listings:
+            listing = item.offers_v2.listings[0]
+            self.assertIsInstance(listing.is_buy_box_winner, bool)
+
+    def test_offers_v2_listing_has_type(self) -> None:
+        """Test that OffersV2 listings include offer type."""
+        item = self.item_with_offers
+        self.assertIsNotNone(item.offers_v2)
+
+        if item.offers_v2.listings:
+            listing = item.offers_v2.listings[0]
+            if listing.type:
+                self.assertIsNotNone(listing.type)
+
+    def test_offers_v2_price_has_savings_when_available(self) -> None:
+        """Test that OffersV2 price includes savings info when available."""
+        item = self.item_with_offers
+        self.assertIsNotNone(item.offers_v2)
+
+        if item.offers_v2.listings:
+            listing = item.offers_v2.listings[0]
+            if listing.price and listing.price.savings:
+                savings = listing.price.savings
+                if savings.money:
+                    self.assertIsNotNone(savings.money.amount)
+                if savings.percentage is not None:
+                    self.assertIsInstance(savings.percentage, (int, float))
+
+    def test_search_items_returns_item_info(self) -> None:
+        """Test that search results include item info with title."""
+        item = self.search_result.items[0]
+        self.assertIsNotNone(item.item_info)
+        self.assertIsNotNone(item.item_info.title)
+        self.assertIsNotNone(item.item_info.title.display_value)
+        self.assertIsInstance(item.item_info.title.display_value, str)
+        self.assertGreater(len(item.item_info.title.display_value), 0)
+
+    def test_search_items_returns_valid_asin(self) -> None:
+        """Test that search results return valid ASIN format."""
+        item = self.search_result.items[0]
+        self.assertIsNotNone(item.asin)
+        self.assertEqual(len(item.asin), 10)
+        self.assertTrue(item.asin.isalnum())
+
+    def test_search_items_returns_images(self) -> None:
+        """Test that search results include product images."""
+        item = self.search_result.items[0]
+        self.assertIsNotNone(item.images)
+        if item.images.primary:
+            self.assertIsNotNone(item.images.primary.large)
+            if item.images.primary.large:
+                self.assertIsNotNone(item.images.primary.large.url)
+                self.assertTrue(item.images.primary.large.url.startswith("http"))
+
+    def test_get_items_returns_item_info(self) -> None:
+        """Test that get_items returns item info with title."""
+        item = self.get_items_result[0]
+        self.assertIsNotNone(item.item_info)
+        self.assertIsNotNone(item.item_info.title)
+        self.assertIsNotNone(item.item_info.title.display_value)
+
+    def test_get_variations_returns_offers_v2(self) -> None:
+        """Test that get_variations returns OffersV2 data for variation items."""
+        item_with_offers = next(
+            (item for item in self.variations_result.items if item.offers_v2),
+            None,
+        )
+        if item_with_offers and item_with_offers.offers_v2:
+            self.assertIsNotNone(item_with_offers.offers_v2)
+            if item_with_offers.offers_v2.listings:
+                listing = item_with_offers.offers_v2.listings[0]
+                self.assertIsNotNone(listing)

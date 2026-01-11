@@ -28,7 +28,7 @@ import re  # noqa: F401
 
 import six
 
-from ..models.offer_listings_v2 import OfferListingsV2  # noqa: F401,E501
+from ..models.offer_listing_v2 import OfferListingV2  # noqa: F401,E501
 
 
 class OffersV2(object):
@@ -45,7 +45,7 @@ class OffersV2(object):
                             and the value is json key in definition.
     """
     swagger_types = {
-        'listings': 'OfferListingsV2'
+        'listings': 'list[OfferListingV2]'
     }
 
     attribute_map = {
