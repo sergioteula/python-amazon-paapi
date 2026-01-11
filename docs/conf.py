@@ -19,11 +19,11 @@ sys.path.insert(0, os.path.abspath(".."))
 # -- Project information -----------------------------------------------------
 
 project = "python-amazon-paapi"
-copyright = "2021, Sergio Abad"
+copyright = "2026, Sergio Abad"
 author = "Sergio Abad"
 
 # The full version, including alpha/beta/rc tags
-release = "4.2.0"
+release = "5.1.0"
 
 
 # -- General configuration ---------------------------------------------------

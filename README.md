@@ -50,7 +50,7 @@ for item in items:
     print(item.offers.listings[0].price.amount) # Current price
 ```
 
-**Use URL insted of ASIN:**
+**Use URL instead of ASIN:**
 
 ```python
 item = amazon.get_items('https://www.amazon.com/dp/B01N5IB20Q')
@@ -99,17 +99,29 @@ amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY, throttling=0)  # No wait time betw
 
 ## Contribution
 
-Creating pull requests for this repo is higly appreciated to add new features or solve
-bugs. To help during development process, githooks can be activated to run some scripts
-before pushing new commits. This will run checks for code format and tests, to ensure
-everything follows this repo guidelines. Use next command to activate them:
+Creating pull requests for this repo is highly appreciated to add new features or solve
+bugs. To help during development process, follow these steps:
 
-```
-git config core.hooksPath .githooks
+1. Install [uv](https://docs.astral.sh/uv/) package manager
+2. Clone the repository and install dependencies:
+
+```bash
+git clone https://github.com/sergioteula/python-amazon-paapi.git
+cd python-amazon-paapi
+uv sync
 ```
 
-The same checks will also run on the repo with GitHub Actions to ensure all tests pass
-before merge.
+3. Set up pre-commit hooks:
+
+```bash
+uv run pre-commit install
+```
+
+4. Copy `.env.template` to `.env` and fill in your Amazon API credentials for integration tests.
+
+The pre-commit hooks will run Ruff (linting and formatting), mypy (type checking), and
+tests before each commit. The same checks will also run on the repo with GitHub Actions
+to ensure all tests pass before merge.
 
 ## License
 
