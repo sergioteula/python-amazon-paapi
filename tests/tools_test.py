@@ -1,3 +1,5 @@
+"""Tests for tools module."""
+
 import unittest
 
 from amazon_paapi.errors import AsinNotFound

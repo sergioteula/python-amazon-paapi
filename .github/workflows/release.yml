@@ -1,0 +1,58 @@
+name: Create Release
+
+on:
+    workflow_dispatch:
+
+permissions:
+    contents: write
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        if: github.ref == 'refs/heads/master'
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v5
+
+            - name: Extract version and notes from CHANGELOG
+              id: changelog
+              run: |
+                  # Extract version from first ## [x.x.x] header
+                  VERSION=$(grep -m1 -oP '## \[\K[0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md)
+                  echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+                  # Extract release notes (content between first and second ## headers)
+                  NOTES=$(awk '/^## \['"$VERSION"'\]/{flag=1; next} /^## \[/{flag=0} flag' CHANGELOG.md)
+
+                  # Handle multiline output
+                  {
+                    echo "notes<<EOF"
+                    echo "$NOTES"
+                    echo "EOF"
+                  } >> $GITHUB_OUTPUT
+
+            - name: Check if tag already exists
+              id: check_tag
+              run: |
+                  if git rev-parse "v${{ steps.changelog.outputs.version }}" >/dev/null 2>&1; then
+                    echo "exists=true" >> $GITHUB_OUTPUT
+                  else
+                    echo "exists=false" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Create Release
+              if: steps.check_tag.outputs.exists == 'false'
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: ${{ steps.changelog.outputs.version }}
+                  name: v${{ steps.changelog.outputs.version }}
+                  body: ${{ steps.changelog.outputs.notes }}
+                  draft: false
+                  prerelease: false
+
+            - name: Skip release (tag exists)
+              if: steps.check_tag.outputs.exists == 'true'
+              run: |
+                  echo "⚠️ Tag v${{ steps.changelog.outputs.version }} already exists. Skipping release creation."
+                  exit 1

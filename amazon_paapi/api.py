@@ -1,10 +1,12 @@
-"""Amazon Product Advertising API wrapper for Python
+"""Amazon Product Advertising API wrapper for Python.
 
 A simple Python wrapper for the last version of the Amazon Product Advertising API.
 """
 
+from __future__ import annotations
+
 import time
-from typing import List, Union
+from typing import TYPE_CHECKING, Any
 
 from . import models
 from .errors import InvalidArgument
@@ -12,6 +14,9 @@ from .helpers import arguments, requests
 from .helpers.generators import get_list_chunks
 from .helpers.items import sort_items
 from .sdk.api.default_api import DefaultApi
+
+if TYPE_CHECKING:
+    from .models.regions import CountryCode
 
 
 class AmazonApi:
@@ -21,12 +26,14 @@ class AmazonApi:
         key (``str``): Your API key.
         secret (``str``): Your API secret.
         tag (``str``): Your affiliate tracking id, used to create the affiliate link.
-        country (``models.Country``): Country code for your affiliate account.
+        country (``CountryCode``): Country code for your affiliate account.
+            Use values from ``models.Country``, e.g. ``Country.ES``.
         throttling (``float``, optional): Wait time in seconds between API calls. Use it
             to avoid reaching Amazon limits. Defaults to 1 second.
 
     Raises:
         ``InvalidArgumentException``
+
     """
 
     def __init__(
@@ -34,10 +41,10 @@ class AmazonApi:
         key: str,
         secret: str,
         tag: str,
-        country: models.Country,
+        country: CountryCode,
         throttling: float = 1,
-        **kwargs
-    ):
+    ) -> None:
+        """Initialize the Amazon API client with the provided credentials."""
         self._key = key
         self._secret = secret
         self._last_query_time = time.time() - throttling
@@ -50,20 +57,21 @@ class AmazonApi:
             self.region = models.regions.REGIONS[country]
             self.marketplace = "www.amazon." + models.regions.DOMAINS[country]
         except KeyError as error:
-            raise InvalidArgument("Country code is not correct") from error
+            msg = "Country code is not correct"
+            raise InvalidArgument(msg) from error
 
         self.api = DefaultApi(key, secret, self._host, self.region)
 
     def get_items(
         self,
-        items: Union[str, List[str]],
+        items: str | list[str],
         condition: models.Condition = None,
         merchant: models.Merchant = None,
-        currency_of_preference: str = None,
-        languages_of_preference: List[str] = None,
+        currency_of_preference: str | None = None,
+        languages_of_preference: list[str] | None = None,
         include_unavailable: bool = False,
-        **kwargs
-    ) -> List[models.Item]:
+        **kwargs: Any,
+    ) -> list[models.Item]:
         """Get items information from Amazon.
 
         Args:
@@ -91,8 +99,8 @@ class AmazonApi:
             ``MalformedRequestException``
             ``ApiRequestException``
             ``ItemsNotFoundException``
-        """
 
+        """
         kwargs.update(
             {
                 "condition": condition,
@@ -111,36 +119,38 @@ class AmazonApi:
             items_response = requests.get_items_response(self, request)
             results.extend(items_response)
 
-        return sort_items(results, items_ids, include_unavailable)
+        return sort_items(results, items_ids, include_unavailable=include_unavailable)
 
     def search_items(
         self,  # NOSONAR
-        item_count: int = None,
-        item_page: int = None,
-        actor: str = None,
-        artist: str = None,
-        author: str = None,
-        brand: str = None,
-        keywords: str = None,
-        title: str = None,
+        item_count: int | None = None,
+        item_page: int | None = None,
+        actor: str | None = None,
+        artist: str | None = None,
+        author: str | None = None,
+        brand: str | None = None,
+        keywords: str | None = None,
+        title: str | None = None,
         availability: models.Availability = None,
-        browse_node_id: str = None,
+        browse_node_id: str | None = None,
         condition: models.Condition = None,
-        currency_of_preference: str = None,
-        delivery_flags: List[str] = None,
-        languages_of_preference: List[str] = None,
+        currency_of_preference: str | None = None,
+        delivery_flags: list[str] | None = None,
+        languages_of_preference: list[str] | None = None,
         merchant: models.Merchant = None,
-        max_price: int = None,
-        min_price: int = None,
-        min_saving_percent: int = None,
-        min_reviews_rating: int = None,
-        search_index: str = None,
+        max_price: int | None = None,
+        min_price: int | None = None,
+        min_saving_percent: int | None = None,
+        min_reviews_rating: int | None = None,
+        search_index: str | None = None,
         sort_by: models.SortBy = None,
-        **kwargs
+        **kwargs: Any,
     ) -> models.SearchResult:
-        """Searches for items on Amazon based on a search query. At least one of the
-        following parameters should be specified: ``keywords``, ``actor``, ``artist``,
-        ``author``, ``brand``, ``title``, ``browse_node_id`` or ``search_index``.
+        """Search for items on Amazon based on a search query.
+
+        At least one of the following parameters should be specified: ``keywords``,
+        ``actor``, ``artist``, ``author``, ``brand``, ``title``, ``browse_node_id``
+        or ``search_index``.
 
         Args:
             item_count (``int``, optional): Number of items returned. Should be between
@@ -195,8 +205,8 @@ class AmazonApi:
             ``MalformedRequestException``
             ``ApiRequestException``
             ``ItemsNotFoundException``
-        """
 
+        """
         kwargs.update(
             {
                 "item_count": item_count,
@@ -231,16 +241,18 @@ class AmazonApi:
     def get_variations(
         self,
         asin: str,
-        variation_count: int = None,
-        variation_page: int = None,
+        variation_count: int | None = None,
+        variation_page: int | None = None,
         condition: models.Condition = None,
-        currency_of_preference: str = None,
-        languages_of_preference: List[str] = None,
+        currency_of_preference: str | None = None,
+        languages_of_preference: list[str] | None = None,
         merchant: models.Merchant = None,
-        **kwargs
+        **kwargs: Any,
     ) -> models.VariationsResult:
-        """Returns a set of items that are the same product, but differ according to a
-        consistent theme, for example size and color. A variation is a child ASIN.
+        """Return a set of items that are the same product but differ by theme.
+
+        Items can differ by size, color, or other variation attributes.
+        A variation is a child ASIN.
 
         Args:
             asin (``str``): One item, using ASIN or product URL.
@@ -268,8 +280,8 @@ class AmazonApi:
             ``MalformedRequestException``
             ``ApiRequestException``
             ``ItemsNotFoundException``
-        """
 
+        """
         asin = arguments.get_items_ids(asin)[0]
 
         kwargs.update(
@@ -291,12 +303,13 @@ class AmazonApi:
 
     def get_browse_nodes(
         self,
-        browse_node_ids: List[str],
-        languages_of_preference: List[str] = None,
-        **kwargs
-    ) -> List[models.BrowseNode]:
-        """Returns the specified browse node's information like name, children and
-        ancestors.
+        browse_node_ids: list[str],
+        languages_of_preference: list[str] | None = None,
+        **kwargs: Any,
+    ) -> list[models.BrowseNode]:
+        """Return the specified browse node's information.
+
+        Information includes name, children, and ancestors.
 
         Args:
             browse_node_ids (``list[str]``): List of browse node ids. A browse node id
@@ -314,8 +327,8 @@ class AmazonApi:
             ``MalformedRequestException``
             ``ApiRequestException``
             ``ItemsNotFoundException``
-        """
 
+        """
         kwargs.update(
             {
                 "browse_node_ids": browse_node_ids,
@@ -328,7 +341,8 @@ class AmazonApi:
         self._throttle()
         return requests.get_browse_nodes_response(self, request)
 
-    def _throttle(self):
+    def _throttle(self) -> None:
+        """Wait for the throttling interval to elapse since the last API call."""
         wait_time = self.throttling - (time.time() - self._last_query_time)
         if wait_time > 0:
             time.sleep(wait_time)

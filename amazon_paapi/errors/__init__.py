@@ -1,3 +1,5 @@
+"""Custom exceptions for the Amazon Product Advertising API."""
+
 from .exceptions import (
     AmazonError,
     AsinNotFound,

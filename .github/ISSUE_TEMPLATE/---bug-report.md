@@ -8,9 +8,9 @@ assignees: ''
 ---
 
 **Steps to reproduce**
-1. 
-2. 
-3. 
+1.
+2.
+3.
 
 **Code example**
 ```python

@@ -1,14 +1,16 @@
-"""Custom exceptions module"""
+"""Custom exceptions module."""
 
 
 class AmazonError(Exception):
     """Common base class for all Amazon API exceptions."""
 
-    def __init__(self, reason: str):
+    def __init__(self, reason: str) -> None:
+        """Initialize the exception with a reason message."""
         super().__init__()
         self.reason = reason
 
     def __str__(self) -> str:
+        """Return the string representation of the exception."""
         return self.reason
 
 

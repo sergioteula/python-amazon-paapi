@@ -103,8 +103,13 @@ class ApiClient(object):
         self.region = region
 
     def __del__(self):
-        self.pool.close()
-        self.pool.join()
+        try:
+            self.pool.close()
+            self.pool.join()
+        except (OSError, TypeError):
+            # Ignore errors during interpreter shutdown when file descriptors
+            # or other resources may already be deallocated
+            pass
 
     @property
     def user_agent(self):
