@@ -15,7 +15,9 @@ repos:
     rev: v6.0.0
     hooks:
       - id: trailing-whitespace
+        exclude: ^creatorsapi_python_sdk/
       - id: end-of-file-fixer
+        exclude: ^creatorsapi_python_sdk/
       - id: mixed-line-ending
       - id: check-yaml
       - id: check-added-large-files
@@ -38,18 +40,19 @@ repos:
     hooks:
       - id: gitleaks
 
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: "v1.19.1"
-    hooks:
-      - id: mypy
-        exclude: sdk/
-
   - repo: local
     hooks:
+      - id: mypy
+        name: checking types with mypy
+        entry: uv run mypy .
+        language: system
+        types: [python]
+        pass_filenames: false
+
       - id: test
         name: Running tests
         language: system
-        entry: "bash -c 'set -a && source .env 2>/dev/null; set +a && uv run pytest -rs --cov=amazon_paapi'"
+        entry: "bash -c 'set -a && source .env 2>/dev/null; set +a && uv run pytest -rs --cov=amazon_paapi --cov=amazon_creatorsapi'"
         types_or: [python]
         pass_filenames: false
 

@@ -3,10 +3,16 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar, cast
 from unittest import TestCase, skipUnless
 
+from dotenv import load_dotenv
+
 from amazon_paapi.api import AmazonApi
+
+# Load environment variables from .env file
+load_dotenv(Path(__file__).parents[2] / ".env")
 
 if TYPE_CHECKING:
     from amazon_paapi.models import BrowseNode, CountryCode
@@ -67,6 +73,37 @@ class IntegrationTest(TestCase):
     browse_nodes_result: ClassVar[list[BrowseNode]]
 
     @classmethod
+    def _has_valid_offer(cls, item: Item) -> bool:
+        """Check if an item has a valid offer with price and availability.
+
+        Args:
+            item: The item to check.
+
+        Returns:
+            True if the item has a valid offer with price and is in stock.
+        """
+        if item.offers_v2 is None or not item.offers_v2.listings:
+            return False
+
+        listing = item.offers_v2.listings[0]
+
+        # Check that the listing has a valid price
+        has_price = (
+            listing.price is not None
+            and listing.price.money is not None
+            and listing.price.money.amount is not None
+        )
+
+        # Check that the product is not out of stock
+        is_available = (
+            listing.availability is None
+            or listing.availability.type is None
+            or listing.availability.type != "OutOfStock"
+        )
+
+        return has_price and is_available
+
+    @classmethod
     def setUpClass(cls) -> None:
         """Set up API client and make shared API calls once for all tests."""
         api_key, api_secret, affiliate_tag, country_code = get_api_credentials()
@@ -77,7 +114,7 @@ class IntegrationTest(TestCase):
         cls.search_result = cls.api.search_items(keywords="laptop")
 
         cls.item_with_offers = next(
-            (item for item in cls.search_result.items if item.offers_v2 is not None),
+            (item for item in cls.search_result.items if cls._has_valid_offer(item)),
             cls.search_result.items[0],
         )
         cls.get_items_result = cls.api.get_items(cls.item_with_offers.asin)
