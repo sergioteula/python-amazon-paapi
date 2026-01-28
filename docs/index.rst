@@ -3,20 +3,16 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Python Amazon PAAPI's documentation!
-===============================================
+Welcome to Python Amazon Creators API's documentation!
+=====================================================
 
-A simple Python wrapper for the last version of the Amazon Product Advertising API. This module allows
-interacting with Amazon using the official API in an easier way.
+A simple Python wrapper for the Amazon Product Advertising API and the new Amazon Creators API.
+This module allows interacting with Amazon using the official APIs in an easier way.
 
-Reference
----------
+.. note::
 
-.. toctree::
-
-   amazon_paapi
-   amazon_paapi.errors
-   amazon_paapi.tools
+   The ``amazon_paapi`` module is deprecated. New projects should use the ``amazon_creatorsapi``
+   module instead. See the :doc:`./pages/migration-guide-6` for migration instructions.
 
 Usage guide
 ---------------
@@ -26,16 +22,35 @@ Usage guide
 
     ./pages/usage-guide.md
 
+Creators API Reference
+----------------------
+
+.. toctree::
+
+   amazon_creatorsapi
+   amazon_creatorsapi.errors
+   amazon_creatorsapi.core
+
+PAAPI Reference (Deprecated)
+----------------------------
+
+.. toctree::
+
+   amazon_paapi
+   amazon_paapi.errors
+   amazon_paapi.tools
+
 Migration guide
 ---------------
 
-If you are still using version 4.x or lower, it is highly recommended upgrading to the latest version.
+If you are still using version 5.x or lower, it is highly recommended upgrading to the latest version.
 
 .. toctree::
     :maxdepth: 1
 
-    ./pages/migration-guide-4.md
+    ./pages/migration-guide-6.md
     ./pages/migration-guide-5.md
+    ./pages/migration-guide-4.md
 
 Changelog
 ---------

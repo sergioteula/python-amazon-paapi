@@ -36,7 +36,7 @@ The Creators API is Amazon's new API for affiliate product data, designed to rep
 ### Quick Start
 
 ```python
-from amazon_creatorsapi import AmazonCreatorsApi
+from amazon_creatorsapi import AmazonCreatorsApi, Country
 
 # Initialize with your Creators API credentials
 api = AmazonCreatorsApi(
@@ -44,7 +44,7 @@ api = AmazonCreatorsApi(
     credential_secret="your_credential_secret",
     version="2.2",
     tag="your-affiliate-tag",
-    country="US",
+    country=Country.US,
 )
 
 # Get product information by ASIN

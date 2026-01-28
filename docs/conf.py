@@ -87,10 +87,4 @@ html_favicon = "_static/pa-paapi-icon.ico"
 
 # -- script stuff --------------------------------------------------------
 
-
-def autodoc_skip_member(app, what, name, obj, skip, options):
-    pass
-
-
-def setup(app):
-    app.connect("autodoc-skip-member", autodoc_skip_member)
+# No custom events needed
