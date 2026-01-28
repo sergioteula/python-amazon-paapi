@@ -4,7 +4,7 @@ You can install or upgrade the module with:
 
     pip install python-amazon-paapi --upgrade
 
-# Creators API Usage Guide
+# Usage Guide
 
 The new `amazon_creatorsapi` module provides access to Amazon's Creators API.
 
@@ -68,74 +68,28 @@ amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, throttling=4)  # M
 amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, throttling=0)  # No wait time between requests
 ```
 
----
+**Working with Models:**
 
-# PAAPI Usage Guide (Deprecated)
-
-> **Warning:** The `amazon_paapi` module is deprecated. Use `amazon_creatorsapi` instead.
-
-**Basic usage:**
+All SDK models are available through the `models` module for convenient access:
 
 ```python
-from amazon_paapi import AmazonApi
-amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY)
-item = amazon.get_items('B01N5IB20Q')[0]
-print(item.item_info.title.display_value) # Item title
-```
+from amazon_creatorsapi.models import (
+    Item,
+    Condition,
+    SortBy,
+    GetItemsResource,
+    SearchItemsResource,
+)
 
-**Get multiple items information:**
+# Use Condition enum for filtering
+items = amazon.get_items(['B01N5IB20Q'], condition=Condition.NEW)
 
-```python
-items = amazon.get_items(['B01N5IB20Q', 'B01F9G43WU'])
-for item in items:
-    print(item.images.primary.large.url) # Primary image url
-    print(item.offers.listings[0].price.amount) # Current price
-```
+# Use SortBy enum for search ordering
+results = amazon.search_items(keywords='laptop', sort_by=SortBy.PRICE_LOW_TO_HIGH)
 
-**Use URL instead of ASIN:**
-
-```python
-item = amazon.get_items('https://www.amazon.com/dp/B01N5IB20Q')
-```
-
-**Get item variations:**
-
-```python
-variations = amazon.get_variations('B01N5IB20Q')
-for item in variations.items:
-    print(item.detail_page_url) # Affiliate url
-```
-
-**Search items:**
-
-```python
-search_result = amazon.search_items(keywords='nintendo')
-for item in search_result.items:
-    print(item.item_info.product_info.color) # Item color
-```
-
-**Get browse node information:**
-
-```python
-browse_nodes = amazon.get_browse_nodes(['667049031', '599385031'])
-for browse_node in browse_nodes:
-    print(browse_node.display_name) # The name of the node
-```
-
-**Get the ASIN from URL:**
-
-```python
-from amazon_paapi import get_asin
-asin = get_asin('https://www.amazon.com/dp/B01N5IB20Q')
-```
-
-**Throttling:**
-
-Throttling value represents the wait time in seconds between API calls, being the default value 1 second. Use it to avoid reaching Amazon request limits.
-
-```python
-amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY, throttling=4)  # Makes 1 request every 4 seconds
-amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY, throttling=0)  # No wait time between requests
+# Specify which resources to retrieve
+resources = [GetItemsResource.ITEMINFO_TITLE, GetItemsResource.OFFERS_LISTINGS_PRICE]
+items = amazon.get_items(['B01N5IB20Q'], resources=resources)
 ```
 
 **Using OffersV2 resources:**

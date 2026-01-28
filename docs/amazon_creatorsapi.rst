@@ -1,4 +1,4 @@
-AmazonCreatorsApi Module
+API module
 ========================
 
 This is the main class that provides authentication and methods for accessing the Amazon Creators

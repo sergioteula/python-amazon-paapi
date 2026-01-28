@@ -95,7 +95,30 @@ if item.offers_v2 and item.offers_v2.listings:
     print(listing.merchant_info.name)
 ```
 
----
+### Working with Models
+
+All SDK models are re-exported through `amazon_creatorsapi.models` for convenient access:
+
+```python
+from amazon_creatorsapi.models import (
+    Item,
+    Condition,
+    SortBy,
+    GetItemsResource,
+    SearchItemsResource,
+)
+
+# Use Condition enum for filtering
+items = api.get_items(["B01N5IB20Q"], condition=Condition.NEW)
+
+# Use SortBy enum for search ordering
+results = api.search_items(keywords="laptop", sort_by=SortBy.PRICE_LOW_TO_HIGH)
+
+# Specify which resources to retrieve
+from amazon_creatorsapi.models import GetItemsResource
+resources = [GetItemsResource.ITEMINFO_TITLE, GetItemsResource.OFFERS_LISTINGS_PRICE]
+items = api.get_items(["B01N5IB20Q"], resources=resources)
+```
 
 ## Legacy PAAPI (Deprecated)
 

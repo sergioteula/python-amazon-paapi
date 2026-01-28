@@ -1,7 +1,5 @@
-Errors Module
+Errors
 ===================
-
-Custom exceptions for the Amazon Creators API.
 
 .. automodule:: amazon_creatorsapi.errors
    :members:

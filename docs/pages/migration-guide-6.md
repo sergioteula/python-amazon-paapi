@@ -1,4 +1,4 @@
-# Migration guide from 5.x to 6.x
+# Creators API migration guide
 
 This guide explains how to migrate from the deprecated `amazon_paapi` module to the new
 `amazon_creatorsapi` module, which uses Amazon's Creators API.
@@ -125,6 +125,24 @@ nodes = amazon.get_browse_nodes(['667049031'])
 - from amazon_paapi import get_asin
 + from amazon_creatorsapi.core import get_asin
 ```
+
+### Models module
+
+Version 6.0 introduces a new `models` module that re-exports all SDK models for convenient access:
+
+```python
+from amazon_creatorsapi.models import (
+    Item,
+    Condition,
+    SortBy,
+    GetItemsResource,
+    SearchItemsResource,
+    GetVariationsResource,
+    GetBrowseNodesResource,
+)
+```
+
+This allows you to import models directly without navigating the SDK structure.
 
 ### Exceptions
 
