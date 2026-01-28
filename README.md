@@ -8,7 +8,7 @@ A Python wrapper for Amazon's product APIs. This package supports both the legac
 [![Downloads](https://img.shields.io/pypi/dm/python-amazon-paapi?label=Downloads)](https://pypi.org/project/python-amazon-paapi/)
 
 > [!IMPORTANT]
-> **Migration Advisory**: The `amazon_paapi` module is deprecated. Amazon is transitioning from the Product Advertising API (PAAPI) to the new **Creators API**. Please migrate to the `amazon_creatorsapi` module for new projects. See the [Migration Guide](#migration-from-paapi-to-creators-api) below.
+> **Migration Advisory**: The `amazon_paapi` module is deprecated. Amazon is transitioning from the Product Advertising API (PAAPI) to the new **Creators API**. Please migrate to the `amazon_creatorsapi` module for new projects. See the [Migration Guide](https://python-amazon-paapi.readthedocs.io/en/latest/pages/migration-guide-6.html) for more information.
 
 ## Features
 
@@ -29,11 +29,7 @@ pip install python-amazon-paapi --upgrade
 
 ---
 
-## Amazon Creators API (Recommended)
-
-The Creators API is Amazon's new API for affiliate product data, designed to replace the legacy PAAPI.
-
-### Quick Start
+## Quick Start
 
 ```python
 from amazon_creatorsapi import AmazonCreatorsApi, Country
@@ -54,6 +50,8 @@ print(items[0].item_info.title.display_value)
 # Or use Amazon URLs directly
 items = api.get_items(["https://www.amazon.com/dp/B01N5IB20Q"])
 ```
+
+## Usage Examples
 
 ### Search Products
 
@@ -95,6 +93,15 @@ if item.offers_v2 and item.offers_v2.listings:
     print(listing.merchant_info.name)
 ```
 
+### Throttling
+
+Throttling value represents the wait time in seconds between API calls, being the default value 1 second. Use it to avoid reaching Amazon request limits.
+
+```python
+amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, throttling=4)  # Makes 1 request every 4 seconds
+amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, throttling=0)  # No wait time between requests
+```
+
 ### Working with Models
 
 All SDK models are re-exported through `amazon_creatorsapi.models` for convenient access:
@@ -118,95 +125,6 @@ results = api.search_items(keywords="laptop", sort_by=SortBy.PRICE_LOW_TO_HIGH)
 from amazon_creatorsapi.models import GetItemsResource
 resources = [GetItemsResource.ITEMINFO_TITLE, GetItemsResource.OFFERS_LISTINGS_PRICE]
 items = api.get_items(["B01N5IB20Q"], resources=resources)
-```
-
-## Legacy PAAPI (Deprecated)
-
-> [!WARNING]
-> The `amazon_paapi` module is deprecated and will be removed in a future version. Please migrate to `amazon_creatorsapi`.
-
-### Quick Start
-
-```python
-from amazon_paapi import AmazonApi
-
-amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY)
-item = amazon.get_items('B01N5IB20Q')[0]
-print(item.item_info.title.display_value)
-```
-
-### Usage Examples
-
-<details>
-<summary>Click to expand legacy PAAPI examples</summary>
-
-#### Get Multiple Products
-
-```python
-items = amazon.get_items(['B01N5IB20Q', 'B01F9G43WU'])
-for item in items:
-    print(item.images.primary.large.url)
-```
-
-#### Use Amazon URL Instead of ASIN
-
-```python
-item = amazon.get_items('https://www.amazon.com/dp/B01N5IB20Q')
-```
-
-#### Search Products
-
-```python
-results = amazon.search_items(keywords='nintendo switch')
-for item in results.items:
-    print(item.item_info.title.display_value)
-```
-
-#### Extract ASIN from URL
-
-```python
-from amazon_paapi import get_asin
-
-asin = get_asin('https://www.amazon.com/dp/B01N5IB20Q')
-# Returns: 'B01N5IB20Q'
-```
-
-#### Configure Throttling
-
-```python
-amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY, throttling=4)
-```
-
-</details>
-
----
-
-## Migration from PAAPI to Creators API
-
-### Code Changes
-
-**Before (PAAPI):**
-
-```python
-from amazon_paapi import AmazonApi
-
-amazon = AmazonApi(api_key, api_secret, tag, country)
-items = amazon.get_items('B01N5IB20Q')
-```
-
-**After (Creators API):**
-
-```python
-from amazon_creatorsapi import AmazonCreatorsApi
-
-api = AmazonCreatorsApi(
-    credential_id=credential_id,
-    credential_secret=credential_secret,
-    version="2.2",
-    tag=tag,
-    country=country,
-)
-items = api.get_items(["B01N5IB20Q"])
 ```
 
 ---
