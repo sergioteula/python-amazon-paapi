@@ -8,6 +8,9 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING, Any, NoReturn
 
+from amazon_creatorsapi.core.constants import DEFAULT_THROTTLING
+from amazon_creatorsapi.core.marketplaces import MARKETPLACES
+from amazon_creatorsapi.core.parsers import get_asin, get_items_ids
 from amazon_creatorsapi.errors import (
     AssociateValidationError,
     InvalidArgumentError,
@@ -15,8 +18,6 @@ from amazon_creatorsapi.errors import (
     RequestError,
     TooManyRequestsError,
 )
-from amazon_creatorsapi.helpers.regions import MARKETPLACES
-from amazon_creatorsapi.tools import get_asin, get_items_ids
 from creatorsapi_python_sdk.api.default_api import DefaultApi
 from creatorsapi_python_sdk.api_client import ApiClient
 from creatorsapi_python_sdk.exceptions import ApiException
@@ -42,7 +43,7 @@ from creatorsapi_python_sdk.models.search_items_resource import SearchItemsResou
 if TYPE_CHECKING:
     from enum import Enum
 
-    from amazon_creatorsapi.helpers.regions import CountryCode
+    from amazon_creatorsapi.core.marketplaces import CountryCode
     from creatorsapi_python_sdk.models.browse_node import BrowseNode
     from creatorsapi_python_sdk.models.condition import Condition
     from creatorsapi_python_sdk.models.item import Item
@@ -86,7 +87,7 @@ class AmazonCreatorsApi:
         tag: str,
         country: CountryCode | None = None,
         marketplace: str | None = None,
-        throttling: float = 1,
+        throttling: float = DEFAULT_THROTTLING,
     ) -> None:
         """Initialize the Amazon Creators API client."""
         self._credential_id = credential_id

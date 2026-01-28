@@ -1,4 +1,4 @@
-"""Custom exceptions module."""
+"""Custom exceptions for the Amazon Creators API."""
 
 
 class AmazonCreatorsApiError(Exception):
@@ -27,3 +27,14 @@ class TooManyRequestsError(AmazonCreatorsApiError):
 
 class AssociateValidationError(AmazonCreatorsApiError):
     """Raised when associate credentials are invalid."""
+
+
+__all__ = [
+    "AmazonCreatorsApiError",
+    "AssociateValidationError",
+    "InvalidArgumentError",
+    "ItemsNotFoundError",
+    "MalformedRequestError",
+    "RequestError",
+    "TooManyRequestsError",
+]
