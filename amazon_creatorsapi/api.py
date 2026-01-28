@@ -16,6 +16,7 @@ from amazon_creatorsapi.errors import (
     TooManyRequestsError,
 )
 from amazon_creatorsapi.helpers.regions import MARKETPLACES
+from amazon_creatorsapi.tools import get_asin, get_items_ids
 from creatorsapi_python_sdk.api.default_api import DefaultApi
 from creatorsapi_python_sdk.api_client import ApiClient
 from creatorsapi_python_sdk.exceptions import ApiException
@@ -107,7 +108,6 @@ class AmazonCreatorsApi:
             msg = "Either 'country' or 'marketplace' must be provided"
             raise InvalidArgumentError(msg)
 
-        # Initialize API client
         self._api_client = ApiClient(
             credential_id=credential_id,
             credential_secret=credential_secret,
@@ -117,7 +117,7 @@ class AmazonCreatorsApi:
 
     def get_items(
         self,
-        item_ids: list[str],
+        items: str | list[str],
         condition: Condition | None = None,
         currency_of_preference: str | None = None,
         languages_of_preference: list[str] | None = None,
@@ -126,7 +126,8 @@ class AmazonCreatorsApi:
         """Get items information from Amazon.
 
         Args:
-            item_ids: List of ASINs (1-10 items).
+            items: One or more items, using ASIN or Amazon product URL.
+                Accepts a single string (comma-separated) or a list of strings.
             condition: Filter offers by condition type.
             currency_of_preference: ISO 4217 currency code for prices.
             languages_of_preference: Languages in order of preference.
@@ -142,6 +143,8 @@ class AmazonCreatorsApi:
         """
         if resources is None:
             resources = self._get_all_resources(GetItemsResource)
+
+        item_ids = get_items_ids(items)
 
         request = GetItemsRequestContent(
             partnerTag=self.tag,
@@ -278,7 +281,7 @@ class AmazonCreatorsApi:
         """Return variations of a product (different sizes, colors, etc.).
 
         Args:
-            asin: The ASIN of the product.
+            asin: The ASIN or Amazon product URL of the product.
             variation_count: Number of variations to return (1-10). Defaults to 10.
             variation_page: Page of variations to return (1-10). Defaults to 1.
             condition: Filter offers by condition type.
@@ -295,6 +298,8 @@ class AmazonCreatorsApi:
         """
         if resources is None:
             resources = self._get_all_resources(GetVariationsResource)
+
+        asin = get_asin(asin)
 
         request = GetVariationsRequestContent(
             partnerTag=self.tag,

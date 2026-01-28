@@ -1,12 +1,14 @@
-# Python Amazon PAAPI
+# Python Amazon Creators API
 
-A simple Python wrapper for the [Amazon Product Advertising API 5.0](https://webservices.amazon.com/paapi5/documentation/). Easily interact with Amazon's official API to retrieve product information, search for items, and more.
+A Python wrapper for Amazon's product APIs. This package supports both the legacy [Product Advertising API 5.0](https://webservices.amazon.com/paapi5/documentation/) and the new [Amazon Creators API](https://webservices.amazon.com/creatorsapi/documentation/).
 
 [![PyPI](https://img.shields.io/pypi/v/python-amazon-paapi?color=%231182C2&label=PyPI)](https://pypi.org/project/python-amazon-paapi/)
 [![Python](https://img.shields.io/badge/Python-≥3.9-%23FFD140)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-%23e83633)](https://github.com/sergioteula/python-amazon-paapi/blob/master/LICENSE)
-[![Amazon API](https://img.shields.io/badge/Amazon%20API-5.0-%23FD9B15)](https://webservices.amazon.com/paapi5/documentation/)
 [![Downloads](https://img.shields.io/pypi/dm/python-amazon-paapi?label=Downloads)](https://pypi.org/project/python-amazon-paapi/)
+
+> [!IMPORTANT]
+> **Migration Advisory**: The `amazon_paapi` module is deprecated. Amazon is transitioning from the Product Advertising API (PAAPI) to the new **Creators API**. Please migrate to the `amazon_creatorsapi` module for new projects. See the [Migration Guide](#migration-from-paapi-to-creators-api) below.
 
 ## Features
 
@@ -15,8 +17,7 @@ A simple Python wrapper for the [Amazon Product Advertising API 5.0](https://web
 - 📦 **Product details** via ASIN or Amazon URL
 - 🔄 **Item variations** support (size, color, etc.)
 - 💰 **OffersV2 support** for enhanced pricing and offer details
-- 🌍 **20+ countries** supported ([full list](https://github.com/sergioteula/python-amazon-paapi/blob/master/amazon_paapi/models/regions.py))
-- ⚡ **Batch requests** to get multiple items without the 10-item limit
+- 🌍 **20+ countries** supported
 - 🛡️ **Built-in throttling** to avoid API rate limits
 - 📝 **Full type hints** for better IDE support
 
@@ -26,52 +27,38 @@ A simple Python wrapper for the [Amazon Product Advertising API 5.0](https://web
 pip install python-amazon-paapi --upgrade
 ```
 
-## Quick Start
+---
+
+## Amazon Creators API (Recommended)
+
+The Creators API is Amazon's new API for affiliate product data, designed to replace the legacy PAAPI.
+
+### Quick Start
 
 ```python
-from amazon_paapi import AmazonApi
+from amazon_creatorsapi import AmazonCreatorsApi
 
-# Initialize the API (get credentials from Amazon Associates)
-amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY)
+# Initialize with your Creators API credentials
+api = AmazonCreatorsApi(
+    credential_id="your_credential_id",
+    credential_secret="your_credential_secret",
+    version="2.2",
+    tag="your-affiliate-tag",
+    country="US",
+)
 
 # Get product information by ASIN
-item = amazon.get_items('B01N5IB20Q')[0]
-print(item.item_info.title.display_value)
-```
+items = api.get_items(["B01N5IB20Q"])
+print(items[0].item_info.title.display_value)
 
-## Usage Examples
-
-### Using OffersV2 resources
-
-OffersV2 provides enhanced pricing and offer details. All resources are included by default, so OffersV2 data is available without any additional configuration:
-
-```python
-item = amazon.get_items('B01N5IB20Q')[0]
-if item.offers_v2 and item.offers_v2.listings:
-    listing = item.offers_v2.listings[0]
-    print(listing.price.money.amount)  # Price amount
-    print(listing.merchant_info.name)  # Merchant name
-```
-
-### Get Multiple Products
-
-```python
-items = amazon.get_items(['B01N5IB20Q', 'B01F9G43WU'])
-for item in items:
-    print(item.images.primary.large.url)
-    print(item.offers.listings[0].price.amount)
-```
-
-### Use Amazon URL Instead of ASIN
-
-```python
-item = amazon.get_items('https://www.amazon.com/dp/B01N5IB20Q')
+# Or use Amazon URLs directly
+items = api.get_items(["https://www.amazon.com/dp/B01N5IB20Q"])
 ```
 
 ### Search Products
 
 ```python
-results = amazon.search_items(keywords='nintendo switch')
+results = api.search_items(keywords="nintendo switch")
 for item in results.items:
     print(item.item_info.title.display_value)
 ```
@@ -79,7 +66,12 @@ for item in results.items:
 ### Get Product Variations
 
 ```python
-variations = amazon.get_variations('B01N5IB20Q')
+# Using ASIN
+variations = api.get_variations("B01N5IB20Q")
+
+# Or using Amazon URL
+variations = api.get_variations("https://www.amazon.com/dp/B01N5IB20Q")
+
 for item in variations.items:
     print(item.detail_page_url)
 ```
@@ -87,12 +79,67 @@ for item in variations.items:
 ### Get Browse Node Information
 
 ```python
-nodes = amazon.get_browse_nodes(['667049031', '599385031'])
+nodes = api.get_browse_nodes(["667049031"])
 for node in nodes:
     print(node.display_name)
 ```
 
-### Extract ASIN from URL
+### Using OffersV2 Resources
+
+```python
+items = api.get_items(["B01N5IB20Q"])
+item = items[0]
+if item.offers_v2 and item.offers_v2.listings:
+    listing = item.offers_v2.listings[0]
+    print(listing.price.money.amount)
+    print(listing.merchant_info.name)
+```
+
+---
+
+## Legacy PAAPI (Deprecated)
+
+> [!WARNING]
+> The `amazon_paapi` module is deprecated and will be removed in a future version. Please migrate to `amazon_creatorsapi`.
+
+### Quick Start
+
+```python
+from amazon_paapi import AmazonApi
+
+amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY)
+item = amazon.get_items('B01N5IB20Q')[0]
+print(item.item_info.title.display_value)
+```
+
+### Usage Examples
+
+<details>
+<summary>Click to expand legacy PAAPI examples</summary>
+
+#### Get Multiple Products
+
+```python
+items = amazon.get_items(['B01N5IB20Q', 'B01F9G43WU'])
+for item in items:
+    print(item.images.primary.large.url)
+```
+
+#### Use Amazon URL Instead of ASIN
+
+```python
+item = amazon.get_items('https://www.amazon.com/dp/B01N5IB20Q')
+```
+
+#### Search Products
+
+```python
+results = amazon.search_items(keywords='nintendo switch')
+for item in results.items:
+    print(item.item_info.title.display_value)
+```
+
+#### Extract ASIN from URL
 
 ```python
 from amazon_paapi import get_asin
@@ -101,17 +148,45 @@ asin = get_asin('https://www.amazon.com/dp/B01N5IB20Q')
 # Returns: 'B01N5IB20Q'
 ```
 
-### Configure Throttling
-
-Control the wait time between API calls to avoid rate limits:
+#### Configure Throttling
 
 ```python
-# Wait 4 seconds between requests
 amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY, throttling=4)
-
-# No throttling (use with caution)
-amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY, throttling=0)
 ```
+
+</details>
+
+---
+
+## Migration from PAAPI to Creators API
+
+### Code Changes
+
+**Before (PAAPI):**
+
+```python
+from amazon_paapi import AmazonApi
+
+amazon = AmazonApi(api_key, api_secret, tag, country)
+items = amazon.get_items('B01N5IB20Q')
+```
+
+**After (Creators API):**
+
+```python
+from amazon_creatorsapi import AmazonCreatorsApi
+
+api = AmazonCreatorsApi(
+    credential_id=credential_id,
+    credential_secret=credential_secret,
+    version="2.2",
+    tag=tag,
+    country=country,
+)
+items = api.get_items(["B01N5IB20Q"])
+```
+
+---
 
 ## Documentation
 
@@ -133,7 +208,7 @@ uv sync
 uv run pre-commit install
 ```
 
-3. Copy `.env.template` to `.env` and add your Amazon API credentials for integration tests.
+3. Copy `.env.template` to `.env` and add your API credentials for integration tests.
 
 Pre-commit hooks will automatically run Ruff, mypy, and tests before each commit.
 
