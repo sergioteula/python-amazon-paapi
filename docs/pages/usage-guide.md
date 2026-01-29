@@ -2,85 +2,125 @@
 
 You can install or upgrade the module with:
 
-    pip install python-amazon-paapi --upgrade
-
-# Usage guide
-
-**Basic usage:**
-
-```python
-from amazon_paapi import AmazonApi
-amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY)
-item = amazon.get_items('B01N5IB20Q')[0]
-print(item.item_info.title.display_value) # Item title
+```bash
+pip install python-amazon-paapi --upgrade
 ```
 
-**Get multiple items information:**
+# Usage Guide
+
+The `amazon_creatorsapi` module provides access to Amazon's Creators API.
+
+> **Note:** The `amazon_paapi` module is deprecated. New projects should use the Creators API.
+
+## Basic Usage
 
 ```python
-items = amazon.get_items(['B01N5IB20Q', 'B01F9G43WU'])
+from amazon_creatorsapi import AmazonCreatorsApi, Country
+
+api = AmazonCreatorsApi(
+    credential_id="your_credential_id",
+    credential_secret="your_credential_secret",
+    version="2.2",
+    tag="your-affiliate-tag",
+    country=Country.US,
+)
+
+# Get product information by ASIN
+items = api.get_items(["B01N5IB20Q"])
+print(items[0].item_info.title.display_value)
+
+# Or use Amazon URLs directly
+items = api.get_items(["https://www.amazon.com/dp/B01N5IB20Q"])
+```
+
+## Get Multiple Items
+
+```python
+items = api.get_items(["B01N5IB20Q", "B01F9G43WU"])
 for item in items:
-    print(item.images.primary.large.url) # Primary image url
-    print(item.offers.listings[0].price.amount) # Current price
+    print(item.images.primary.large.url)
 ```
 
-**Use URL instead of ASIN:**
+## Search Products
 
 ```python
-item = amazon.get_items('https://www.amazon.com/dp/B01N5IB20Q')
+results = api.search_items(keywords="nintendo switch")
+for item in results.items:
+    print(item.item_info.title.display_value)
 ```
 
-**Get item variations:**
+## Get Product Variations
 
 ```python
-variations = amazon.get_variations('B01N5IB20Q')
+# Using ASIN
+variations = api.get_variations("B01N5IB20Q")
+
+# Or using Amazon URL
+variations = api.get_variations("https://www.amazon.com/dp/B01N5IB20Q")
+
 for item in variations.items:
-    print(item.detail_page_url) # Affiliate url
+    print(item.detail_page_url)
 ```
 
-**Search items:**
+## Get Browse Node Information
 
 ```python
-search_result = amazon.search_items(keywords='nintendo')
-for item in search_result.items:
-    print(item.item_info.product_info.color) # Item color
+nodes = api.get_browse_nodes(["667049031"])
+for node in nodes:
+    print(node.display_name)
 ```
 
-**Get browse node information:**
+## Get the ASIN from URL
 
 ```python
-browse_nodes = amazon.get_browse_nodes(['667049031', '599385031'])
-for browse_node in browse_nodes:
-    print(browse_node.display_name) # The name of the node
+from amazon_creatorsapi import get_asin
+
+asin = get_asin("https://www.amazon.com/dp/B01N5IB20Q")
 ```
 
-**Get the ASIN from URL:**
+## Using OffersV2 Resources
+
+OffersV2 provides enhanced pricing and offer details. All resources are included by default:
 
 ```python
-from amazon_paapi import get_asin
-asin = get_asin('https://www.amazon.com/dp/B01N5IB20Q')
+items = api.get_items(["B01N5IB20Q"])
+item = items[0]
+if item.offers_v2 and item.offers_v2.listings:
+    listing = item.offers_v2.listings[0]
+    print(listing.price.money.amount)
+    print(listing.merchant_info.name)
 ```
 
-**Throttling:**
+## Throttling
 
 Throttling value represents the wait time in seconds between API calls, being the default value 1 second. Use it to avoid reaching Amazon request limits.
 
 ```python
-amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY, throttling=4)  # Makes 1 request every 4 seconds
-amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY, throttling=0)  # No wait time between requests
+api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, throttling=4)  # Makes 1 request every 4 seconds
+api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, throttling=0)  # No wait time between requests
 ```
 
-**Using OffersV2 resources:**
+## Working with Models
 
-OffersV2 provides enhanced pricing and offer details. All resources are included by default, so OffersV2 data is available without any additional configuration:
+All SDK models are re-exported through `amazon_creatorsapi.models` for convenient access:
 
 ```python
-items = amazon.get_items('B01N5IB20Q')
+from amazon_creatorsapi.models import (
+    Item,
+    Condition,
+    SortBy,
+    GetItemsResource,
+    SearchItemsResource,
+)
 
-# Access OffersV2 data
-item = items[0]
-if item.offers_v2 and item.offers_v2.listings:
-    listing = item.offers_v2.listings[0]
-    print(listing.price.money.amount)  # Price amount
-    print(listing.merchant_info.name)  # Merchant name
+# Use Condition enum for filtering
+items = api.get_items(["B01N5IB20Q"], condition=Condition.NEW)
+
+# Use SortBy enum for search ordering
+results = api.search_items(keywords="laptop", sort_by=SortBy.PRICE_LOW_TO_HIGH)
+
+# Specify which resources to retrieve
+from amazon_creatorsapi.models import GetItemsResource
+resources = [GetItemsResource.ITEMINFO_TITLE, GetItemsResource.OFFERS_LISTINGS_PRICE]
+items = api.get_items(["B01N5IB20Q"], resources=resources)
 ```

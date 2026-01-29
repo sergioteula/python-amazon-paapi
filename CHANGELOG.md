@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.0] - 2026-01-29
+
+### Added
+
+- New `amazon_creatorsapi` module for Amazon Creators API support
+- `creatorsapi_python_sdk` package bundled for OAuth2 authentication
+- `models` submodule exposing all SDK model classes (Item, Condition, SortBy, etc.)
+- Migration guide from PAAPI to Creators API (`docs/pages/migration-guide-6.md`)
+- Integration tests for the new Creators API module
+- New dependencies: `pydantic>=2.0.0` and `requests>=2.28.0`
+
+### Changed
+
+- **BREAKING**: The `amazon_paapi` module is now deprecated in favor of `amazon_creatorsapi`
+- Updated documentation to reflect the new Creators API module
+- Reorganized utility functions into `amazon_creatorsapi.core` package
+- Updated README with Creators API examples and deprecation notice
+
+### Deprecated
+
+- `amazon_paapi` module - use `amazon_creatorsapi` instead
+- All PAAPI-specific documentation pages removed
+
+### Removed
+
+- Migration guides for versions 4 and 5 (`migration-guide-4.md`, `migration-guide-5.md`)
+
 ## [5.2.0] - 2026-01-11
 
 ### Added

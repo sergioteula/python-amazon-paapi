@@ -23,7 +23,7 @@ copyright = "2026, Sergio Abad"
 author = "Sergio Abad"
 
 # The full version, including alpha/beta/rc tags
-release = "5.2.0"
+release = "6.0.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -87,10 +87,4 @@ html_favicon = "_static/pa-paapi-icon.ico"
 
 # -- script stuff --------------------------------------------------------
 
-
-def autodoc_skip_member(app, what, name, obj, skip, options):
-    pass
-
-
-def setup(app):
-    app.connect("autodoc-skip-member", autodoc_skip_member)
+# No custom events needed

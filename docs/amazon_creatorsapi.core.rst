@@ -1,7 +1,7 @@
-Tools Module
+Core Utilities
 ===========================
 
-.. automodule:: amazon_paapi.tools.asin
+.. automodule:: amazon_creatorsapi.core
    :members:
    :undoc-members:
    :show-inheritance:

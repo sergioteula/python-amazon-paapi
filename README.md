@@ -1,12 +1,14 @@
-# Python Amazon PAAPI
+# Python Amazon Creators API
 
-A simple Python wrapper for the [Amazon Product Advertising API 5.0](https://webservices.amazon.com/paapi5/documentation/). Easily interact with Amazon's official API to retrieve product information, search for items, and more.
+A Python wrapper for Amazon's product APIs. This package supports both the legacy [Product Advertising API 5.0](https://webservices.amazon.com/paapi5/documentation/) and the new [Amazon Creators API](https://webservices.amazon.com/creatorsapi/documentation/).
 
 [![PyPI](https://img.shields.io/pypi/v/python-amazon-paapi?color=%231182C2&label=PyPI)](https://pypi.org/project/python-amazon-paapi/)
 [![Python](https://img.shields.io/badge/Python-≥3.9-%23FFD140)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-%23e83633)](https://github.com/sergioteula/python-amazon-paapi/blob/master/LICENSE)
-[![Amazon API](https://img.shields.io/badge/Amazon%20API-5.0-%23FD9B15)](https://webservices.amazon.com/paapi5/documentation/)
 [![Downloads](https://img.shields.io/pypi/dm/python-amazon-paapi?label=Downloads)](https://pypi.org/project/python-amazon-paapi/)
+
+> [!IMPORTANT]
+> **Migration Advisory**: The `amazon_paapi` module is deprecated. Amazon is transitioning from the Product Advertising API (PAAPI) to the new **Creators API**. Please migrate to the `amazon_creatorsapi` module for new projects. See the [Migration Guide](https://python-amazon-paapi.readthedocs.io/en/latest/pages/migration-guide-6.html) for more information.
 
 ## Features
 
@@ -15,8 +17,7 @@ A simple Python wrapper for the [Amazon Product Advertising API 5.0](https://web
 - 📦 **Product details** via ASIN or Amazon URL
 - 🔄 **Item variations** support (size, color, etc.)
 - 💰 **OffersV2 support** for enhanced pricing and offer details
-- 🌍 **20+ countries** supported ([full list](https://github.com/sergioteula/python-amazon-paapi/blob/master/amazon_paapi/models/regions.py))
-- ⚡ **Batch requests** to get multiple items without the 10-item limit
+- 🌍 **20+ countries** supported
 - 🛡️ **Built-in throttling** to avoid API rate limits
 - 📝 **Full type hints** for better IDE support
 
@@ -26,52 +27,44 @@ A simple Python wrapper for the [Amazon Product Advertising API 5.0](https://web
 pip install python-amazon-paapi --upgrade
 ```
 
+---
+
 ## Quick Start
 
 ```python
-from amazon_paapi import AmazonApi
+from amazon_creatorsapi import AmazonCreatorsApi, Country
 
-# Initialize the API (get credentials from Amazon Associates)
-amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY)
+# Initialize with your Creators API credentials
+api = AmazonCreatorsApi(
+    credential_id="your_credential_id",
+    credential_secret="your_credential_secret",
+    version="2.2",
+    tag="your-affiliate-tag",
+    country=Country.US,
+)
 
 # Get product information by ASIN
-item = amazon.get_items('B01N5IB20Q')[0]
-print(item.item_info.title.display_value)
+items = api.get_items(["B01N5IB20Q"])
+print(items[0].item_info.title.display_value)
+
+# Or use Amazon URLs directly
+items = api.get_items(["https://www.amazon.com/dp/B01N5IB20Q"])
 ```
 
 ## Usage Examples
 
-### Using OffersV2 resources
-
-OffersV2 provides enhanced pricing and offer details. All resources are included by default, so OffersV2 data is available without any additional configuration:
+### Get Multiple Items
 
 ```python
-item = amazon.get_items('B01N5IB20Q')[0]
-if item.offers_v2 and item.offers_v2.listings:
-    listing = item.offers_v2.listings[0]
-    print(listing.price.money.amount)  # Price amount
-    print(listing.merchant_info.name)  # Merchant name
-```
-
-### Get Multiple Products
-
-```python
-items = amazon.get_items(['B01N5IB20Q', 'B01F9G43WU'])
+items = api.get_items(["B01N5IB20Q", "B01F9G43WU"])
 for item in items:
     print(item.images.primary.large.url)
-    print(item.offers.listings[0].price.amount)
-```
-
-### Use Amazon URL Instead of ASIN
-
-```python
-item = amazon.get_items('https://www.amazon.com/dp/B01N5IB20Q')
 ```
 
 ### Search Products
 
 ```python
-results = amazon.search_items(keywords='nintendo switch')
+results = api.search_items(keywords="nintendo switch")
 for item in results.items:
     print(item.item_info.title.display_value)
 ```
@@ -79,7 +72,12 @@ for item in results.items:
 ### Get Product Variations
 
 ```python
-variations = amazon.get_variations('B01N5IB20Q')
+# Using ASIN
+variations = api.get_variations("B01N5IB20Q")
+
+# Or using Amazon URL
+variations = api.get_variations("https://www.amazon.com/dp/B01N5IB20Q")
+
 for item in variations.items:
     print(item.detail_page_url)
 ```
@@ -87,31 +85,65 @@ for item in variations.items:
 ### Get Browse Node Information
 
 ```python
-nodes = amazon.get_browse_nodes(['667049031', '599385031'])
+nodes = api.get_browse_nodes(["667049031"])
 for node in nodes:
     print(node.display_name)
 ```
 
-### Extract ASIN from URL
+### Get the ASIN from URL
 
 ```python
-from amazon_paapi import get_asin
+from amazon_creatorsapi import get_asin
 
-asin = get_asin('https://www.amazon.com/dp/B01N5IB20Q')
-# Returns: 'B01N5IB20Q'
+asin = get_asin("https://www.amazon.com/dp/B01N5IB20Q")
 ```
 
-### Configure Throttling
-
-Control the wait time between API calls to avoid rate limits:
+### Using OffersV2 Resources
 
 ```python
-# Wait 4 seconds between requests
-amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY, throttling=4)
-
-# No throttling (use with caution)
-amazon = AmazonApi(KEY, SECRET, TAG, COUNTRY, throttling=0)
+items = api.get_items(["B01N5IB20Q"])
+item = items[0]
+if item.offers_v2 and item.offers_v2.listings:
+    listing = item.offers_v2.listings[0]
+    print(listing.price.money.amount)
+    print(listing.merchant_info.name)
 ```
+
+### Throttling
+
+Throttling value represents the wait time in seconds between API calls, being the default value 1 second. Use it to avoid reaching Amazon request limits.
+
+```python
+amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, throttling=4)  # Makes 1 request every 4 seconds
+amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, throttling=0)  # No wait time between requests
+```
+
+### Working with Models
+
+All SDK models are re-exported through `amazon_creatorsapi.models` for convenient access:
+
+```python
+from amazon_creatorsapi.models import (
+    Item,
+    Condition,
+    SortBy,
+    GetItemsResource,
+    SearchItemsResource,
+)
+
+# Use Condition enum for filtering
+items = api.get_items(["B01N5IB20Q"], condition=Condition.NEW)
+
+# Use SortBy enum for search ordering
+results = api.search_items(keywords="laptop", sort_by=SortBy.PRICE_LOW_TO_HIGH)
+
+# Specify which resources to retrieve
+from amazon_creatorsapi.models import GetItemsResource
+resources = [GetItemsResource.ITEMINFO_TITLE, GetItemsResource.OFFERS_LISTINGS_PRICE]
+items = api.get_items(["B01N5IB20Q"], resources=resources)
+```
+
+---
 
 ## Documentation
 
@@ -133,7 +165,7 @@ uv sync
 uv run pre-commit install
 ```
 
-3. Copy `.env.template` to `.env` and add your Amazon API credentials for integration tests.
+3. Copy `.env.template` to `.env` and add your API credentials for integration tests.
 
 Pre-commit hooks will automatically run Ruff, mypy, and tests before each commit.
 
