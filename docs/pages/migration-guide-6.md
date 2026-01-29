@@ -155,7 +155,6 @@ from amazon_creatorsapi.errors import (
     ItemsNotFoundError,
     TooManyRequestsError,
     AssociateValidationError,
-    MalformedRequestError,
     RequestError,
 )
 ```

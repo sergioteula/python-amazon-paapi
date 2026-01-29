@@ -25,7 +25,7 @@ from creatorsapi_python_sdk.models.get_variations_resource import GetVariationsR
 from creatorsapi_python_sdk.models.search_items_resource import SearchItemsResource
 
 if TYPE_CHECKING:
-    from amazon_creatorsapi.helpers import CountryCode
+    from amazon_creatorsapi.core.marketplaces import CountryCode
 
 
 class TestAmazonCreatorsApi(unittest.TestCase):

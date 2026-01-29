@@ -9,10 +9,6 @@ class InvalidArgumentError(AmazonCreatorsApiError):
     """Raised when an invalid argument is provided."""
 
 
-class MalformedRequestError(AmazonCreatorsApiError):
-    """Raised when the request is malformed."""
-
-
 class RequestError(AmazonCreatorsApiError):
     """Raised when the API request fails."""
 
@@ -34,7 +30,6 @@ __all__ = [
     "AssociateValidationError",
     "InvalidArgumentError",
     "ItemsNotFoundError",
-    "MalformedRequestError",
     "RequestError",
     "TooManyRequestsError",
 ]

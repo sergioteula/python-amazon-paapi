@@ -42,9 +42,6 @@ def get_items_ids(items: str | list[str]) -> list[str]:
     Returns:
         A list of extracted ASINs.
 
-    Raises:
-        InvalidArgumentError: If items is not a string or list.
-
     """
     if isinstance(items, str):
         items = items.split(",")
