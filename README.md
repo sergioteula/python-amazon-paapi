@@ -53,6 +53,14 @@ items = api.get_items(["https://www.amazon.com/dp/B01N5IB20Q"])
 
 ## Usage Examples
 
+### Get Multiple Items
+
+```python
+items = api.get_items(["B01N5IB20Q", "B01F9G43WU"])
+for item in items:
+    print(item.images.primary.large.url)
+```
+
 ### Search Products
 
 ```python
@@ -80,6 +88,14 @@ for item in variations.items:
 nodes = api.get_browse_nodes(["667049031"])
 for node in nodes:
     print(node.display_name)
+```
+
+### Get the ASIN from URL
+
+```python
+from amazon_creatorsapi import get_asin
+
+asin = get_asin("https://www.amazon.com/dp/B01N5IB20Q")
 ```
 
 ### Using OffersV2 Resources
