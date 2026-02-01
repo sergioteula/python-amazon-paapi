@@ -33,7 +33,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
 
     def setUp(self) -> None:
         self.credential_id = "test_credential_id"
-        self.credential_secret = "test_credential_secret"  # noqa: S105
+        self.credential_secret = "test_credential_secret"
         self.version = "2.2"
         self.tag = "test-tag"
         self.country: CountryCode = "ES"

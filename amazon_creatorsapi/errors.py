@@ -25,9 +25,14 @@ class AssociateValidationError(AmazonCreatorsApiError):
     """Raised when associate credentials are invalid."""
 
 
+class AuthenticationError(AmazonCreatorsApiError):
+    """Raised when OAuth2 authentication fails."""
+
+
 __all__ = [
     "AmazonCreatorsApiError",
     "AssociateValidationError",
+    "AuthenticationError",
     "InvalidArgumentError",
     "ItemsNotFoundError",
     "RequestError",
