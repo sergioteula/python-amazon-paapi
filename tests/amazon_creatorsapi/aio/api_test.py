@@ -14,6 +14,12 @@ from amazon_creatorsapi.errors import (
     TooManyRequestsError,
 )
 from creatorsapi_python_sdk.models.condition import Condition
+from creatorsapi_python_sdk.models.get_browse_nodes_resource import (
+    GetBrowseNodesResource,
+)
+from creatorsapi_python_sdk.models.get_items_resource import GetItemsResource
+from creatorsapi_python_sdk.models.get_variations_resource import GetVariationsResource
+from creatorsapi_python_sdk.models.search_items_resource import SearchItemsResource
 from creatorsapi_python_sdk.models.sort_by import SortBy
 
 
@@ -120,6 +126,22 @@ class TestAsyncAmazonCreatorsApiContextManager(unittest.IsolatedAsyncioTestCase)
 
         mock_client.__aexit__.assert_called_once()
 
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    async def test_context_manager_exit_without_client(
+        self,
+        mock_token_manager: MagicMock,
+    ) -> None:
+        """Test __aexit__ works explicitly when no client initialized."""
+        api = AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+        )
+        # Should not raise
+        await api.__aexit__(None, None, None)
+
 
 class TestAsyncAmazonCreatorsApiGetItems(unittest.IsolatedAsyncioTestCase):
     """Tests for get_items() method."""
@@ -165,6 +187,45 @@ class TestAsyncAmazonCreatorsApiGetItems(unittest.IsolatedAsyncioTestCase):
             items = await api.get_items(["B0DLFMFBJW"])
 
         self.assertEqual(len(items), 1)
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_get_items_with_resources(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test get_items with explicit resources."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "itemsResult": {"items": [{"ASIN": "B0DLFMFBJW"}]}
+        }
+
+        mock_client = AsyncMock()
+        mock_client.post.return_value = mock_response
+        mock_client.__aenter__.return_value = mock_client
+        mock_http_client_class.return_value = mock_client
+
+        mock_token_manager = AsyncMock()
+        mock_token_manager.get_token.return_value = "test_token"
+        mock_token_manager_class.return_value = mock_token_manager
+
+        async with AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+        ) as api:
+            items = await api.get_items(
+                ["B0DLFMFBJW"], resources=[GetItemsResource.ITEM_INFO_DOT_TITLE]
+            )
+
+        self.assertEqual(len(items), 1)
+        # Verify resources were passed
+        call_args = mock_client.post.call_args
+        self.assertIn("'resources': ['itemInfo.title']", str(call_args))
 
     @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
     @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
@@ -279,6 +340,72 @@ class TestAsyncAmazonCreatorsApiSearchItems(unittest.IsolatedAsyncioTestCase):
             result = await api.search_items(keywords="test")
 
         self.assertIsNotNone(result)
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_search_items_with_resources(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test search_items with explicit resources."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "searchResult": {"items": [{"ASIN": "B0DLFMFBJY"}]}
+        }
+        mock_client = AsyncMock()
+        mock_client.post.return_value = mock_response
+        mock_client.__aenter__.return_value = mock_client
+        mock_http_client_class.return_value = mock_client
+        mock_token_manager = AsyncMock()
+        mock_token_manager.get_token.return_value = "test_token"
+        mock_token_manager_class.return_value = mock_token_manager
+
+        async with AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+        ) as api:
+            await api.search_items(
+                keywords="test", resources=[SearchItemsResource.ITEM_INFO_DOT_TITLE]
+            )
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_search_items_without_keywords(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test search_items without keywords (using other params)."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "searchResult": {"items": [{"ASIN": "B0DLFMFBJY"}]}
+        }
+        mock_client = AsyncMock()
+        mock_client.post.return_value = mock_response
+        mock_client.__aenter__.return_value = mock_client
+        mock_http_client_class.return_value = mock_client
+        mock_token_manager = AsyncMock()
+        mock_token_manager.get_token.return_value = "test_token"
+        mock_token_manager_class.return_value = mock_token_manager
+
+        async with AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+        ) as api:
+            await api.search_items(browse_node_id="123456")
+
+        call_args = mock_client.post.call_args
+        self.assertNotIn("keywords", str(call_args))
+        self.assertIn("browseNodeId", str(call_args))
 
 
 class TestAsyncAmazonCreatorsApiErrorHandling(unittest.IsolatedAsyncioTestCase):
@@ -469,6 +596,38 @@ class TestAsyncAmazonCreatorsApiGetVariations(unittest.IsolatedAsyncioTestCase):
 
     @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
     @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_get_variations_with_resources(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test get_variations with explicit resources."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "variationsResult": {"items": [{"ASIN": "B0DLFMFBJV"}]}
+        }
+        mock_client = AsyncMock()
+        mock_client.post.return_value = mock_response
+        mock_client.__aenter__.return_value = mock_client
+        mock_http_client_class.return_value = mock_client
+        mock_token_manager = AsyncMock()
+        mock_token_manager.get_token.return_value = "test_token"
+        mock_token_manager_class.return_value = mock_token_manager
+
+        async with AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+        ) as api:
+            await api.get_variations(
+                "B0DLFMFBJV", resources=[GetVariationsResource.ITEM_INFO_DOT_TITLE]
+            )
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_get_variations_with_params(
         self,
         mock_http_client_class: MagicMock,
@@ -584,6 +743,40 @@ class TestAsyncAmazonCreatorsApiGetBrowseNodes(unittest.IsolatedAsyncioTestCase)
             result = await api.get_browse_nodes(["123456"])
 
         self.assertEqual(len(result), 1)
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_get_browse_nodes_with_resources(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test get_browse_nodes with explicit resources."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "browseNodesResult": {
+                "browseNodes": [{"Id": "123456", "DisplayName": "Electronics"}]
+            }
+        }
+        mock_client = AsyncMock()
+        mock_client.post.return_value = mock_response
+        mock_client.__aenter__.return_value = mock_client
+        mock_http_client_class.return_value = mock_client
+        mock_token_manager = AsyncMock()
+        mock_token_manager.get_token.return_value = "test_token"
+        mock_token_manager_class.return_value = mock_token_manager
+
+        async with AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+        ) as api:
+            await api.get_browse_nodes(
+                ["123456"], resources=[GetBrowseNodesResource.BROWSE_NODES_DOT_ANCESTOR]
+            )
 
     @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
     @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")

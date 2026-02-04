@@ -2,7 +2,7 @@
 
 try:
     import httpx  # noqa: F401
-except ImportError as exc:
+except ImportError as exc:  # pragma: no cover
     msg = (
         "httpx is required for async support. "
         "Install with: pip install python-amazon-paapi[async]"
