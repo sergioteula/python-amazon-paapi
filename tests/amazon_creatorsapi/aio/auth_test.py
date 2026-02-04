@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 
-from amazon_creatorsapi.core.async_auth import (
+from amazon_creatorsapi.aio.auth import (
     GRANT_TYPE,
     SCOPE,
     TOKEN_EXPIRATION_BUFFER,
@@ -161,7 +161,7 @@ class TestAsyncOAuth2TokenManagerGetToken(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(token, "token_from_other_coroutine")
         mock_refresh.assert_not_called()
 
-    @patch("amazon_creatorsapi.core.async_auth.httpx.AsyncClient")
+    @patch("amazon_creatorsapi.aio.auth.httpx.AsyncClient")
     async def test_refreshes_token_when_expired(
         self,
         mock_async_client_class: MagicMock,
@@ -191,7 +191,7 @@ class TestAsyncOAuth2TokenManagerGetToken(unittest.IsolatedAsyncioTestCase):
 class TestAsyncOAuth2TokenManagerRefreshToken(unittest.IsolatedAsyncioTestCase):
     """Tests for refresh_token() method."""
 
-    @patch("amazon_creatorsapi.core.async_auth.httpx.AsyncClient")
+    @patch("amazon_creatorsapi.aio.auth.httpx.AsyncClient")
     async def test_successful_token_refresh(
         self,
         mock_async_client_class: MagicMock,
@@ -230,7 +230,7 @@ class TestAsyncOAuth2TokenManagerRefreshToken(unittest.IsolatedAsyncioTestCase):
         self.assertIn(GRANT_TYPE, str(call_args))
         self.assertIn(SCOPE, str(call_args))
 
-    @patch("amazon_creatorsapi.core.async_auth.httpx.AsyncClient")
+    @patch("amazon_creatorsapi.aio.auth.httpx.AsyncClient")
     async def test_raises_error_on_non_200_response(
         self,
         mock_async_client_class: MagicMock,
@@ -252,7 +252,7 @@ class TestAsyncOAuth2TokenManagerRefreshToken(unittest.IsolatedAsyncioTestCase):
 
         self.assertIn("401", str(context.exception))
 
-    @patch("amazon_creatorsapi.core.async_auth.httpx.AsyncClient")
+    @patch("amazon_creatorsapi.aio.auth.httpx.AsyncClient")
     async def test_raises_error_when_no_access_token_in_response(
         self,
         mock_async_client_class: MagicMock,
@@ -274,7 +274,7 @@ class TestAsyncOAuth2TokenManagerRefreshToken(unittest.IsolatedAsyncioTestCase):
 
         self.assertIn("No access token", str(context.exception))
 
-    @patch("amazon_creatorsapi.core.async_auth.httpx.AsyncClient")
+    @patch("amazon_creatorsapi.aio.auth.httpx.AsyncClient")
     async def test_raises_error_on_request_error(
         self,
         mock_async_client_class: MagicMock,

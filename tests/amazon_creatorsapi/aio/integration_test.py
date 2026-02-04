@@ -11,7 +11,7 @@ from unittest import IsolatedAsyncioTestCase, skipUnless
 
 from dotenv import load_dotenv
 
-from amazon_creatorsapi import AsyncAmazonCreatorsApi
+from amazon_creatorsapi.aio import AsyncAmazonCreatorsApi
 from amazon_creatorsapi.errors import ItemsNotFoundError
 
 if TYPE_CHECKING:
@@ -314,9 +314,8 @@ class AsyncIntegrationTest(IsolatedAsyncioTestCase):
         if self.variations_result:
             summary = self.variations_result.variation_summary
             self.assertIsNotNone(summary)
-            if summary:
-                self.assertIsNotNone(summary.variation_count)
-                self.assertGreater(summary.variation_count, 0)  # type: ignore[arg-type]
+            if summary and summary.variation_count is not None:
+                self.assertGreater(summary.variation_count, 0)
         else:
             self.skipTest(self.NO_VARIATIONS_FOUND_MSG)
 

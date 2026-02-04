@@ -3,7 +3,7 @@
 import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from amazon_creatorsapi.async_api import (
+from amazon_creatorsapi.aio import (
     AsyncAmazonCreatorsApi,
 )
 from amazon_creatorsapi.errors import (
@@ -20,7 +20,7 @@ from creatorsapi_python_sdk.models.sort_by import SortBy
 class TestAsyncAmazonCreatorsApiInit(unittest.TestCase):
     """Tests for AsyncAmazonCreatorsApi initialization."""
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
     def test_with_country_code(self, mock_token_manager: MagicMock) -> None:
         """Test initialization with country code."""
         api = AsyncAmazonCreatorsApi(
@@ -35,7 +35,7 @@ class TestAsyncAmazonCreatorsApiInit(unittest.TestCase):
         self.assertEqual(api.marketplace, "www.amazon.es")
         self.assertEqual(api.throttling, 1.0)
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
     def test_with_marketplace(self, mock_token_manager: MagicMock) -> None:
         """Test initialization with explicit marketplace."""
         api = AsyncAmazonCreatorsApi(
@@ -48,7 +48,7 @@ class TestAsyncAmazonCreatorsApiInit(unittest.TestCase):
 
         self.assertEqual(api.marketplace, "www.amazon.co.uk")
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
     def test_with_custom_throttling(self, mock_token_manager: MagicMock) -> None:
         """Test initialization with custom throttling value."""
         api = AsyncAmazonCreatorsApi(
@@ -62,7 +62,7 @@ class TestAsyncAmazonCreatorsApiInit(unittest.TestCase):
 
         self.assertEqual(api.throttling, 2.5)
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
     def test_raises_error_when_no_country_or_marketplace(
         self, mock_token_manager: MagicMock
     ) -> None:
@@ -77,7 +77,7 @@ class TestAsyncAmazonCreatorsApiInit(unittest.TestCase):
 
         self.assertIn("Either 'country' or 'marketplace'", str(context.exception))
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
     def test_raises_error_for_invalid_country(
         self, mock_token_manager: MagicMock
     ) -> None:
@@ -97,8 +97,8 @@ class TestAsyncAmazonCreatorsApiInit(unittest.TestCase):
 class TestAsyncAmazonCreatorsApiContextManager(unittest.IsolatedAsyncioTestCase):
     """Tests for AsyncAmazonCreatorsApi async context manager."""
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_context_manager_creates_and_closes_client(
         self,
         mock_http_client_class: MagicMock,
@@ -124,8 +124,8 @@ class TestAsyncAmazonCreatorsApiContextManager(unittest.IsolatedAsyncioTestCase)
 class TestAsyncAmazonCreatorsApiGetItems(unittest.IsolatedAsyncioTestCase):
     """Tests for get_items() method."""
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_get_items_success(
         self,
         mock_http_client_class: MagicMock,
@@ -166,8 +166,8 @@ class TestAsyncAmazonCreatorsApiGetItems(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(len(items), 1)
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_get_items_not_found(
         self,
         mock_http_client_class: MagicMock,
@@ -198,8 +198,8 @@ class TestAsyncAmazonCreatorsApiGetItems(unittest.IsolatedAsyncioTestCase):
             with self.assertRaises(ItemsNotFoundError):
                 await api.get_items(["B0DLFMFBJX"])
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_get_items_with_optional_params(
         self,
         mock_http_client_class: MagicMock,
@@ -242,8 +242,8 @@ class TestAsyncAmazonCreatorsApiGetItems(unittest.IsolatedAsyncioTestCase):
 class TestAsyncAmazonCreatorsApiSearchItems(unittest.IsolatedAsyncioTestCase):
     """Tests for search_items() method."""
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_search_items_success(
         self,
         mock_http_client_class: MagicMock,
@@ -284,8 +284,8 @@ class TestAsyncAmazonCreatorsApiSearchItems(unittest.IsolatedAsyncioTestCase):
 class TestAsyncAmazonCreatorsApiErrorHandling(unittest.IsolatedAsyncioTestCase):
     """Tests for error handling."""
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_handles_404_error(
         self,
         mock_http_client_class: MagicMock,
@@ -316,8 +316,8 @@ class TestAsyncAmazonCreatorsApiErrorHandling(unittest.IsolatedAsyncioTestCase):
             with self.assertRaises(ItemsNotFoundError):
                 await api.get_items(["B0DLFMFBJW"])
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_handles_429_error(
         self,
         mock_http_client_class: MagicMock,
@@ -348,8 +348,8 @@ class TestAsyncAmazonCreatorsApiErrorHandling(unittest.IsolatedAsyncioTestCase):
             with self.assertRaises(TooManyRequestsError):
                 await api.get_items(["B0DLFMFBJW"])
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_handles_invalid_associate_error(
         self,
         mock_http_client_class: MagicMock,
@@ -384,9 +384,9 @@ class TestAsyncAmazonCreatorsApiErrorHandling(unittest.IsolatedAsyncioTestCase):
 class TestAsyncAmazonCreatorsApiThrottling(unittest.IsolatedAsyncioTestCase):
     """Tests for throttling mechanism."""
 
-    @patch("amazon_creatorsapi.async_api.asyncio.sleep")
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.asyncio.sleep")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_throttling_waits_between_requests(
         self,
         mock_http_client_class: MagicMock,
@@ -429,8 +429,8 @@ class TestAsyncAmazonCreatorsApiThrottling(unittest.IsolatedAsyncioTestCase):
 class TestAsyncAmazonCreatorsApiGetVariations(unittest.IsolatedAsyncioTestCase):
     """Tests for get_variations() method."""
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_get_variations_success(
         self,
         mock_http_client_class: MagicMock,
@@ -467,8 +467,8 @@ class TestAsyncAmazonCreatorsApiGetVariations(unittest.IsolatedAsyncioTestCase):
 
         self.assertIsNotNone(result)
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_get_variations_with_params(
         self,
         mock_http_client_class: MagicMock,
@@ -512,8 +512,8 @@ class TestAsyncAmazonCreatorsApiGetVariations(unittest.IsolatedAsyncioTestCase):
 
         self.assertIsNotNone(result)
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_get_variations_not_found(
         self,
         mock_http_client_class: MagicMock,
@@ -548,8 +548,8 @@ class TestAsyncAmazonCreatorsApiGetVariations(unittest.IsolatedAsyncioTestCase):
 class TestAsyncAmazonCreatorsApiGetBrowseNodes(unittest.IsolatedAsyncioTestCase):
     """Tests for get_browse_nodes() method."""
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_get_browse_nodes_success(
         self,
         mock_http_client_class: MagicMock,
@@ -585,8 +585,8 @@ class TestAsyncAmazonCreatorsApiGetBrowseNodes(unittest.IsolatedAsyncioTestCase)
 
         self.assertEqual(len(result), 1)
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_get_browse_nodes_with_languages(
         self,
         mock_http_client_class: MagicMock,
@@ -625,8 +625,8 @@ class TestAsyncAmazonCreatorsApiGetBrowseNodes(unittest.IsolatedAsyncioTestCase)
 
         self.assertEqual(len(result), 1)
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_get_browse_nodes_not_found(
         self,
         mock_http_client_class: MagicMock,
@@ -657,8 +657,8 @@ class TestAsyncAmazonCreatorsApiGetBrowseNodes(unittest.IsolatedAsyncioTestCase)
             with self.assertRaises(ItemsNotFoundError):
                 await api.get_browse_nodes(["999999"])
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_get_browse_nodes_empty_nodes_list(
         self,
         mock_http_client_class: MagicMock,
@@ -693,8 +693,8 @@ class TestAsyncAmazonCreatorsApiGetBrowseNodes(unittest.IsolatedAsyncioTestCase)
 class TestAsyncAmazonCreatorsApiErrorHandlingExtended(unittest.IsolatedAsyncioTestCase):
     """Extended error handling tests."""
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_handles_invalid_parameter_value_error(
         self,
         mock_http_client_class: MagicMock,
@@ -725,8 +725,8 @@ class TestAsyncAmazonCreatorsApiErrorHandlingExtended(unittest.IsolatedAsyncioTe
             with self.assertRaises(InvalidArgumentError):
                 await api.get_items(["B0DLFMFBJW"])
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_handles_invalid_partner_tag_error(
         self,
         mock_http_client_class: MagicMock,
@@ -757,8 +757,8 @@ class TestAsyncAmazonCreatorsApiErrorHandlingExtended(unittest.IsolatedAsyncioTe
             with self.assertRaises(InvalidArgumentError):
                 await api.get_items(["B0DLFMFBJW"])
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_handles_generic_error(
         self,
         mock_http_client_class: MagicMock,
@@ -789,8 +789,8 @@ class TestAsyncAmazonCreatorsApiErrorHandlingExtended(unittest.IsolatedAsyncioTe
             with self.assertRaises(RequestError):
                 await api.get_items(["B0DLFMFBJW"])
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_handles_generic_error_with_empty_body(
         self,
         mock_http_client_class: MagicMock,
@@ -825,8 +825,8 @@ class TestAsyncAmazonCreatorsApiErrorHandlingExtended(unittest.IsolatedAsyncioTe
 class TestAsyncAmazonCreatorsApiSearchItemsExtended(unittest.IsolatedAsyncioTestCase):
     """Extended tests for search_items() method."""
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_search_items_with_all_params(
         self,
         mock_http_client_class: MagicMock,
@@ -881,8 +881,8 @@ class TestAsyncAmazonCreatorsApiSearchItemsExtended(unittest.IsolatedAsyncioTest
 
         self.assertIsNotNone(result)
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_search_items_not_found(
         self,
         mock_http_client_class: MagicMock,
@@ -913,8 +913,8 @@ class TestAsyncAmazonCreatorsApiSearchItemsExtended(unittest.IsolatedAsyncioTest
             with self.assertRaises(ItemsNotFoundError):
                 await api.search_items(keywords="xyznonexistent123")
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_search_items_with_search_index(
         self,
         mock_http_client_class: MagicMock,
@@ -958,8 +958,8 @@ class TestAsyncAmazonCreatorsApiSearchItemsExtended(unittest.IsolatedAsyncioTest
 class TestAsyncAmazonCreatorsApiWithoutContextManager(unittest.IsolatedAsyncioTestCase):
     """Tests for usage without context manager."""
 
-    @patch("amazon_creatorsapi.async_api.AsyncOAuth2TokenManager")
-    @patch("amazon_creatorsapi.async_api.AsyncHttpClient")
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
     async def test_request_without_context_manager(
         self,
         mock_http_client_class: MagicMock,

@@ -23,8 +23,8 @@ from amazon_creatorsapi.errors import (
 )
 
 try:
-    from amazon_creatorsapi.core.async_auth import AsyncOAuth2TokenManager
-    from amazon_creatorsapi.core.async_client import AsyncHttpClient
+    from .auth import AsyncOAuth2TokenManager
+    from .client import AsyncHttpClient
 except ImportError as exc:  # pragma: no cover
     msg = (
         "httpx is required for async support. "
@@ -103,7 +103,7 @@ class AsyncAmazonCreatorsApi:
 
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         credential_id: str,
         credential_secret: str,
@@ -213,7 +213,7 @@ class AsyncAmazonCreatorsApi:
 
         return self._deserialize_items(items_result["items"])
 
-    async def search_items(  # noqa: PLR0912, PLR0913, C901
+    async def search_items(  # noqa: PLR0912, C901
         self,
         keywords: str | None = None,
         actor: str | None = None,
@@ -323,7 +323,7 @@ class AsyncAmazonCreatorsApi:
 
         return self._deserialize_search_result(search_result)
 
-    async def get_variations(  # noqa: PLR0913
+    async def get_variations(
         self,
         asin: str,
         variation_count: int | None = None,
