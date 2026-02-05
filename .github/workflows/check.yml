@@ -91,4 +91,4 @@ jobs:
             ${{ runner.os }}-uv-py${{ matrix.python-version }}-
 
       - name: Run tests
-        run: uv run --python "${{ matrix.python-version }}" pytest -rs --no-cov
+        run: uv run --python "${{ matrix.python-version }}" --extra async pytest -rs --no-cov
