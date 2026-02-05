@@ -109,14 +109,18 @@ class AsyncOAuth2TokenManager:
         """
         if self.is_token_valid():
             # Token is cached and still valid, guaranteed to be str here
-            assert self._access_token is not None  # noqa: S101
+            if self._access_token is None:
+                msg = "Token should be valid at this point"
+                raise AuthenticationError(msg)
             return self._access_token
 
         # Need to refresh - use lock to prevent concurrent refreshes
         async with self._lock:
             # Double-check after acquiring lock
             if self.is_token_valid():
-                assert self._access_token is not None  # noqa: S101
+                if self._access_token is None:
+                    msg = "Token should be valid at this point"
+                    raise AuthenticationError(msg)
                 return self._access_token
             return await self.refresh_token()
 
