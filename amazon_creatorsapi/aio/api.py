@@ -7,7 +7,8 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import TYPE_CHECKING, Any
+from enum import Enum
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from typing_extensions import Self
 
@@ -40,7 +41,6 @@ from creatorsapi_python_sdk.models.get_variations_resource import GetVariationsR
 from creatorsapi_python_sdk.models.search_items_resource import SearchItemsResource
 
 if TYPE_CHECKING:
-    from enum import Enum
     from types import TracebackType
 
     from amazon_creatorsapi.core.marketplaces import CountryCode
@@ -58,6 +58,9 @@ ENDPOINT_GET_ITEMS = "/catalog/v1/getItems"
 ENDPOINT_SEARCH_ITEMS = "/catalog/v1/searchItems"
 ENDPOINT_GET_VARIATIONS = "/catalog/v1/getVariations"
 ENDPOINT_GET_BROWSE_NODES = "/catalog/v1/getBrowseNodes"
+
+# TypeVar for generic resource handling
+ResourceT = TypeVar("ResourceT", bound=Enum)
 
 
 class AsyncAmazonCreatorsApi:
@@ -88,6 +91,13 @@ class AsyncAmazonCreatorsApi:
 
     The context manager approach is more efficient when making multiple
     requests in quick succession due to HTTP connection pooling.
+
+    Note:
+        Using without context manager creates a new HTTP connection for each
+        request, which is less efficient and may impact performance. For
+        production code making multiple API calls, always use the context
+        manager (async with) to benefit from connection pooling and reduced
+        overhead.
 
     Args:
         credential_id: Your Creators API credential ID.
@@ -524,8 +534,16 @@ class AsyncAmazonCreatorsApi:
         msg = f"Request failed with status {status_code}{body_info}"
         raise RequestError(msg)
 
-    def _get_all_resources(self, resource_class: type[Enum]) -> list[Any]:
-        """Extract all resource values from a resource enum class."""
+    def _get_all_resources(self, resource_class: type[ResourceT]) -> list[ResourceT]:
+        """Extract all resource values from a resource enum class.
+
+        Args:
+            resource_class: Enum class containing resource definitions.
+
+        Returns:
+            List of all enum members from the resource class.
+
+        """
         return list(resource_class)
 
     def _deserialize_items(self, items_data: list[dict[str, Any]]) -> list[Item]:
