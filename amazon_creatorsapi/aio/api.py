@@ -118,6 +118,7 @@ class AsyncAmazonCreatorsApi:
         self._credential_secret = credential_secret
         self._version = version
         self._last_query_time = time.time() - throttling
+        self._throttle_lock = asyncio.Lock()
         self.tag = tag
         self.throttling = float(throttling)
 
@@ -427,11 +428,16 @@ class AsyncAmazonCreatorsApi:
         return self._deserialize_browse_nodes(browse_nodes_result["browseNodes"])
 
     async def _throttle(self) -> None:
-        """Wait for the throttling interval to elapse since the last API call."""
-        wait_time = self.throttling - (time.time() - self._last_query_time)
-        if wait_time > 0:
-            await asyncio.sleep(wait_time)
-        self._last_query_time = time.time()
+        """Wait for the throttling interval to elapse since the last API call.
+
+        Uses asyncio.Lock to prevent race conditions when multiple coroutines
+        attempt to make concurrent requests.
+        """
+        async with self._throttle_lock:
+            wait_time = self.throttling - (time.time() - self._last_query_time)
+            if wait_time > 0:
+                await asyncio.sleep(wait_time)
+            self._last_query_time = time.time()
 
     async def _make_request(
         self,
