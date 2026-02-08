@@ -65,7 +65,7 @@ jobs:
 
       - name: Run all checks
         run: |
-          uv run pre-commit run --all-files
+          uv run --extra async pre-commit run --all-files
 
   test:
     runs-on: ubuntu-latest
