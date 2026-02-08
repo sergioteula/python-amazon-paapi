@@ -5,7 +5,7 @@ try:
 except ImportError as exc:  # pragma: no cover
     msg = (
         "httpx is required for async support. "
-        "Install with: pip install python-amazon-paapi[async]"
+        "Install it with: pip install python-amazon-paapi[async]"
     )
     raise ImportError(msg) from exc
 
