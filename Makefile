@@ -30,3 +30,8 @@ mypy:
 
 pre-commit:
 	@uv run pre-commit run -a
+
+docs:
+	@cd docs && uv run make html
+
+.PHONY: setup test coverage test-all-python-tags lint format mypy pre-commit docs
