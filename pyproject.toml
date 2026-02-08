@@ -1,6 +1,6 @@
 [project]
 name = "python-amazon-paapi"
-version = "6.0.0"
+version = "6.1.0"
 description = "Amazon Product Advertising API 5.0 wrapper for Python"
 readme = "README.md"
 requires-python = ">=3.9"

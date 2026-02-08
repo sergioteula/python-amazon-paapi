@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.1.0]
+
+### Added
+
+- Full async/await support with new `amazon_creatorsapi.aio` subpackage ([#143](https://github.com/sergioteula/python-amazon-paapi/pull/143))
+- `AsyncAmazonCreatorsApi` class for non-blocking API interactions
+- Async HTTP client with `httpx` integration for connection pooling
+- `AuthenticationError` exception for improved OAuth2 error handling
+- Optional `[async]` installation extra: `pip install python-amazon-paapi[async]`
+- Comprehensive async test suite with integration tests
+- Documentation for async API usage in README and usage guide
+- `make docs` command in Makefile for building documentation
+
+### Changed
+
+- GitHub Actions workflow now installs async dependencies for complete test coverage
+- Test coverage threshold lowered from 99% to 98% to accommodate async tests
+- Additional Ruff linting rules for test files (ARG002, S101, S105, S106, SIM117)
+
 ## [6.0.0] - 2026-01-29
 
 ### Added
