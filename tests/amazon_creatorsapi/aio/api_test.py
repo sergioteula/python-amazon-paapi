@@ -99,6 +99,23 @@ class TestAsyncAmazonCreatorsApiInit(unittest.TestCase):
 
         self.assertIn("Country code", str(context.exception))
 
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    def test_raises_error_for_invalid_version(
+        self, mock_token_manager: MagicMock
+    ) -> None:
+        """Test raises ValueError for unsupported API version."""
+        with self.assertRaises(ValueError) as context:
+            AsyncAmazonCreatorsApi(
+                credential_id="test_id",
+                credential_secret="test_secret",
+                version="9.9",  # Invalid version
+                tag="test-tag",
+                country="ES",
+            )
+
+        self.assertIn("Unsupported version: 9.9", str(context.exception))
+        self.assertIn("Supported versions are:", str(context.exception))
+
 
 class TestAsyncAmazonCreatorsApiContextManager(unittest.IsolatedAsyncioTestCase):
     """Tests for AsyncAmazonCreatorsApi async context manager."""

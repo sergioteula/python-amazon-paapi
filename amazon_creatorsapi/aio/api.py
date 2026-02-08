@@ -24,7 +24,7 @@ from amazon_creatorsapi.errors import (
 )
 
 try:
-    from .auth import AsyncOAuth2TokenManager
+    from .auth import VERSION_ENDPOINTS, AsyncOAuth2TokenManager
     from .client import AsyncHttpClient
 except ImportError as exc:  # pragma: no cover
     msg = (
@@ -110,6 +110,7 @@ class AsyncAmazonCreatorsApi:
 
     Raises:
         InvalidArgumentError: If neither country nor marketplace is provided.
+        ValueError: If version is not supported (valid versions: 2.1, 2.2, 2.3).
 
     """
 
@@ -124,6 +125,9 @@ class AsyncAmazonCreatorsApi:
         throttling: float = DEFAULT_THROTTLING,
     ) -> None:
         """Initialize the async Amazon Creators API client."""
+        # Validate version early to fail fast (before token manager initialization)
+        self._validate_version(version)
+
         self._credential_id = credential_id
         self._credential_secret = credential_secret
         self._version = version
@@ -152,6 +156,21 @@ class AsyncAmazonCreatorsApi:
             version=version,
         )
         self._owns_client = False
+
+    def _validate_version(self, version: str) -> None:
+        """Validate that the API version is supported.
+
+        Args:
+            version: API version to validate.
+
+        Raises:
+            ValueError: If version is not in the list of supported versions.
+
+        """
+        if version not in VERSION_ENDPOINTS:
+            supported = ", ".join(VERSION_ENDPOINTS.keys())
+            msg = f"Unsupported version: {version}. Supported versions are: {supported}"
+            raise ValueError(msg)
 
     async def __aenter__(self) -> Self:
         """Enter async context manager, creating a persistent HTTP client."""
