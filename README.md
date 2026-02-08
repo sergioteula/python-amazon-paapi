@@ -13,7 +13,8 @@ A Python wrapper for Amazon's product APIs. This package supports both the legac
 ## Features
 
 - 🎯 **Simple object-oriented interface** for easy integration
-- 🔍 **Product search** by keywords, categories, or browse nodes
+- � **Async/await support** for high-performance applications
+- �🔍 **Product search** by keywords, categories, or browse nodes
 - 📦 **Product details** via ASIN or Amazon URL
 - 🔄 **Item variations** support (size, color, etc.)
 - 💰 **OffersV2 support** for enhanced pricing and offer details
@@ -117,6 +118,40 @@ Throttling value represents the wait time in seconds between API calls, being th
 amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, throttling=4)  # Makes 1 request every 4 seconds
 amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, throttling=0)  # No wait time between requests
 ```
+
+### Async Support
+
+For async/await applications, use the async version of the API with `httpx`:
+
+```bash
+pip install python-amazon-paapi[async] --upgrade
+```
+
+The async API provides the same methods as the synchronous version, but they must be called with `await`:
+
+```python
+from amazon_creatorsapi.aio import AsyncAmazonCreatorsApi
+from amazon_creatorsapi import Country
+
+# Use as async context manager (recommended for connection pooling)
+async with AsyncAmazonCreatorsApi(
+    credential_id="your_credential_id",
+    credential_secret="your_credential_secret",
+    version="2.2",
+    tag="your-affiliate-tag",
+    country=Country.US,
+) as api:
+    items = await api.get_items(["B01N5IB20Q"])
+    results = await api.search_items(keywords="laptop")
+    variations = await api.get_variations("B01N5IB20Q")
+    nodes = await api.get_browse_nodes(["667049031"])
+
+# Or use without context manager (creates new connection per request)
+api = AsyncAmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY)
+items = await api.get_items(["B01N5IB20Q"])
+```
+
+> **Note:** All synchronous methods and parameters work identically in async mode. Use `async with` for better performance when making multiple API calls.
 
 ### Working with Models
 
