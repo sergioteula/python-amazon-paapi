@@ -28,6 +28,7 @@ API Reference
 .. toctree::
 
    amazon_creatorsapi
+   amazon_creatorsapi.aio
    amazon_creatorsapi.errors
 
 .. toctree::
