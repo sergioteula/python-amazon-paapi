@@ -67,7 +67,7 @@ class AsyncOAuth2TokenManager:
 
         self._access_token: str | None = None
         self._expires_at: float | None = None
-        self._lock = asyncio.Lock()
+        self._lock: asyncio.Lock | None = None
 
     def _determine_auth_endpoint(
         self,
@@ -97,6 +97,23 @@ class AsyncOAuth2TokenManager:
 
         return VERSION_ENDPOINTS[version]
 
+    @property
+    def lock(self) -> asyncio.Lock:
+        """Lazy initialization of the asyncio.Lock.
+
+        The lock must be created lazily to support Python 3.9, where
+        asyncio.Lock() requires an event loop to exist. By creating it
+        on first access (which happens in an async context), we ensure
+        an event loop is available.
+
+        Returns:
+            The asyncio.Lock instance.
+
+        """
+        if self._lock is None:
+            self._lock = asyncio.Lock()
+        return self._lock
+
     async def get_token(self) -> str:
         """Get a valid OAuth2 access token, refreshing if necessary.
 
@@ -115,7 +132,7 @@ class AsyncOAuth2TokenManager:
             return self._access_token
 
         # Need to refresh - use lock to prevent concurrent refreshes
-        async with self._lock:
+        async with self.lock:
             # Double-check after acquiring lock
             if self.is_token_valid():
                 if self._access_token is None:
@@ -191,6 +208,10 @@ class AsyncOAuth2TokenManager:
             msg = f"OAuth2 token request failed: {exc}"
             raise AuthenticationError(msg) from exc
 
+        # At this point, self._access_token is guaranteed to be a string
+        if self._access_token is None:
+            msg = "Token should be set at this point"
+            raise AuthenticationError(msg)
         return self._access_token
 
     def clear_token(self) -> None:
