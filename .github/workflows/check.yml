@@ -35,6 +35,9 @@ jobs:
       API_SECRET: ${{ secrets.API_SECRET }}
       AFFILIATE_TAG: ${{ secrets.AFFILIATE_TAG }}
       COUNTRY_CODE: ${{ secrets.COUNTRY_CODE }}
+      CREDENTIAL_ID: ${{ secrets.CREDENTIAL_ID }}
+      CREDENTIAL_SECRET: ${{ secrets.CREDENTIAL_SECRET }}
+      API_VERSION: ${{ secrets.API_VERSION }}
 
     steps:
       - uses: actions/checkout@v5
@@ -65,7 +68,7 @@ jobs:
 
       - name: Run all checks
         run: |
-          uv run --extra async pre-commit run --all-files
+          uv run --extra async pre-commit run --all-files --verbose
 
   test:
     runs-on: ubuntu-latest
