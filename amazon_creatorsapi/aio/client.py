@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
+from importlib.metadata import version
 from typing import TYPE_CHECKING, Any
 
 from typing_extensions import Self
@@ -26,7 +27,8 @@ except ImportError as exc:  # pragma: no cover
 
 DEFAULT_HOST = "https://creatorsapi.amazon"
 DEFAULT_TIMEOUT = 30.0
-USER_AGENT = "python-amazon-paapi/6.0.0 (async)"
+VERSION = version("python-amazon-paapi")
+USER_AGENT = f"python-amazon-paapi/{VERSION} (async)"
 
 
 @dataclass
