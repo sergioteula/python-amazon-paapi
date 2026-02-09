@@ -6,18 +6,14 @@ A Python wrapper for the Amazon Creators API.
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING, Any, NoReturn
+from typing import TYPE_CHECKING, NoReturn
 
 from amazon_creatorsapi.core.constants import DEFAULT_THROTTLING
-from amazon_creatorsapi.core.marketplaces import MARKETPLACES
+from amazon_creatorsapi.core.error_handling import handle_api_error
 from amazon_creatorsapi.core.parsers import get_asin, get_items_ids
-from amazon_creatorsapi.errors import (
-    AssociateValidationError,
-    InvalidArgumentError,
-    ItemsNotFoundError,
-    RequestError,
-    TooManyRequestsError,
-)
+from amazon_creatorsapi.core.resources import get_all_resources
+from amazon_creatorsapi.core.validation import validate_and_get_marketplace
+from amazon_creatorsapi.errors import ItemsNotFoundError
 from creatorsapi_python_sdk.api.default_api import DefaultApi
 from creatorsapi_python_sdk.api_client import ApiClient
 from creatorsapi_python_sdk.exceptions import ApiException
@@ -41,8 +37,6 @@ from creatorsapi_python_sdk.models.search_items_request_content import (
 from creatorsapi_python_sdk.models.search_items_resource import SearchItemsResource
 
 if TYPE_CHECKING:
-    from enum import Enum
-
     from amazon_creatorsapi.core.marketplaces import CountryCode
     from creatorsapi_python_sdk.models.browse_node import BrowseNode
     from creatorsapi_python_sdk.models.condition import Condition
@@ -98,16 +92,7 @@ class AmazonCreatorsApi:
         self.throttling = float(throttling)
 
         # Determine marketplace from country or direct value
-        if marketplace:
-            self.marketplace = marketplace
-        elif country:
-            if country not in MARKETPLACES:
-                msg = f"Country code '{country}' is not valid"
-                raise InvalidArgumentError(msg)
-            self.marketplace = MARKETPLACES[country]
-        else:
-            msg = "Either 'country' or 'marketplace' must be provided"
-            raise InvalidArgumentError(msg)
+        self.marketplace = validate_and_get_marketplace(country, marketplace)
 
         self._api_client = ApiClient(
             credential_id=credential_id,
@@ -143,7 +128,7 @@ class AmazonCreatorsApi:
 
         """
         if resources is None:
-            resources = self._get_all_resources(GetItemsResource)
+            resources = get_all_resources(GetItemsResource)
 
         item_ids = get_items_ids(items)
 
@@ -228,7 +213,7 @@ class AmazonCreatorsApi:
 
         """
         if resources is None:
-            resources = self._get_all_resources(SearchItemsResource)
+            resources = get_all_resources(SearchItemsResource)
 
         request = SearchItemsRequestContent(
             partnerTag=self.tag,
@@ -298,7 +283,7 @@ class AmazonCreatorsApi:
 
         """
         if resources is None:
-            resources = self._get_all_resources(GetVariationsResource)
+            resources = get_all_resources(GetVariationsResource)
 
         asin = get_asin(asin)
 
@@ -350,7 +335,7 @@ class AmazonCreatorsApi:
 
         """
         if resources is None:
-            resources = self._get_all_resources(GetBrowseNodesResource)
+            resources = get_all_resources(GetBrowseNodesResource)
 
         request = GetBrowseNodesRequestContent(
             partnerTag=self.tag,
@@ -385,39 +370,11 @@ class AmazonCreatorsApi:
             time.sleep(wait_time)
         self._last_query_time = time.time()
 
-    def _get_all_resources(self, resource_class: type[Enum]) -> list[Any]:
-        """Extract all resource values from a resource enum class."""
-        return [member.value for member in resource_class]
-
     def _handle_api_exception(self, error: ApiException) -> NoReturn:
         """Handle API exceptions and raise appropriate custom exceptions."""
-        http_not_found = 404
-        http_too_many_requests = 429
-
-        if error.status == http_not_found:
-            msg = "No items found for the request"
-            raise ItemsNotFoundError(msg) from error
-
-        if error.status == http_too_many_requests:
-            msg = "Rate limit exceeded, try increasing throttling"
-            raise TooManyRequestsError(msg) from error
-
         error_body = str(error.body) if error.body else ""
-
-        if "InvalidParameterValue" in error_body:
-            msg = "Invalid parameter value provided in the request"
-            raise InvalidArgumentError(msg) from error
-
-        if "InvalidPartnerTag" in error_body:
-            msg = "The partner tag is invalid or not present"
-            raise InvalidArgumentError(msg) from error
-
-        if "InvalidAssociate" in error_body:
-            msg = "Credentials are not valid for the selected marketplace"
-            raise AssociateValidationError(msg) from error
-
-        # Include error body in message for debugging
-        reason = error.reason or "Unknown error"
-        body_info = f" - {error_body[:200]}" if error_body else ""
-        msg = f"Request failed: {reason}{body_info}"
-        raise RequestError(msg) from error
+        try:
+            handle_api_error(error.status, error_body)
+        except Exception as exc:
+            # Re-raise with original exception as cause for better stack traces
+            raise exc from error

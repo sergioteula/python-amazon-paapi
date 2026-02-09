@@ -13,15 +13,11 @@ from typing import TYPE_CHECKING, Any, TypeVar
 from typing_extensions import Self
 
 from amazon_creatorsapi.core.constants import DEFAULT_THROTTLING
-from amazon_creatorsapi.core.marketplaces import MARKETPLACES
+from amazon_creatorsapi.core.error_handling import handle_api_error
 from amazon_creatorsapi.core.parsers import get_asin, get_items_ids
-from amazon_creatorsapi.errors import (
-    AssociateValidationError,
-    InvalidArgumentError,
-    ItemsNotFoundError,
-    RequestError,
-    TooManyRequestsError,
-)
+from amazon_creatorsapi.core.resources import get_all_resources
+from amazon_creatorsapi.core.validation import validate_and_get_marketplace
+from amazon_creatorsapi.errors import ItemsNotFoundError
 
 try:
     from .auth import VERSION_ENDPOINTS, AsyncOAuth2TokenManager
@@ -132,21 +128,12 @@ class AsyncAmazonCreatorsApi:
         self._credential_secret = credential_secret
         self._version = version
         self._last_query_time = time.time() - throttling
-        self._throttle_lock = asyncio.Lock()
+        self._throttle_lock: asyncio.Lock | None = None
         self.tag = tag
         self.throttling = float(throttling)
 
         # Determine marketplace from country or direct value
-        if marketplace:
-            self.marketplace = marketplace
-        elif country:
-            if country not in MARKETPLACES:
-                msg = f"Country code '{country}' is not valid"
-                raise InvalidArgumentError(msg)
-            self.marketplace = MARKETPLACES[country]
-        else:
-            msg = "Either 'country' or 'marketplace' must be provided"
-            raise InvalidArgumentError(msg)
+        self.marketplace = validate_and_get_marketplace(country, marketplace)
 
         # HTTP client and token manager (initialized lazily or via context manager)
         self._http_client: AsyncHttpClient | None = None
@@ -218,7 +205,7 @@ class AsyncAmazonCreatorsApi:
 
         """
         if resources is None:
-            resources = self._get_all_resources(GetItemsResource)
+            resources = get_all_resources(GetItemsResource)
 
         item_ids = get_items_ids(items)
 
@@ -299,7 +286,7 @@ class AsyncAmazonCreatorsApi:
 
         """
         if resources is None:
-            resources = self._get_all_resources(SearchItemsResource)
+            resources = get_all_resources(SearchItemsResource)
 
         request_body: dict[str, Any] = {
             "partnerTag": self.tag,
@@ -382,7 +369,7 @@ class AsyncAmazonCreatorsApi:
 
         """
         if resources is None:
-            resources = self._get_all_resources(GetVariationsResource)
+            resources = get_all_resources(GetVariationsResource)
 
         asin = get_asin(asin)
 
@@ -433,7 +420,7 @@ class AsyncAmazonCreatorsApi:
 
         """
         if resources is None:
-            resources = self._get_all_resources(GetBrowseNodesResource)
+            resources = get_all_resources(GetBrowseNodesResource)
 
         request_body: dict[str, Any] = {
             "partnerTag": self.tag,
@@ -462,6 +449,10 @@ class AsyncAmazonCreatorsApi:
         Uses asyncio.Lock to prevent race conditions when multiple coroutines
         attempt to make concurrent requests.
         """
+        # Lazy initialization of the lock (ensures event loop is active)
+        if self._throttle_lock is None:
+            self._throttle_lock = asyncio.Lock()
+
         async with self._throttle_lock:
             wait_time = self.throttling - (time.time() - self._last_query_time)
             if wait_time > 0:
@@ -525,45 +516,7 @@ class AsyncAmazonCreatorsApi:
             RequestError: For other errors.
 
         """
-        http_not_found = 404
-        http_too_many_requests = 429
-
-        if status_code == http_not_found:
-            msg = "No items found for the request"
-            raise ItemsNotFoundError(msg)
-
-        if status_code == http_too_many_requests:
-            msg = "Rate limit exceeded, try increasing throttling"
-            raise TooManyRequestsError(msg)
-
-        if "InvalidParameterValue" in body:
-            msg = "Invalid parameter value provided in the request"
-            raise InvalidArgumentError(msg)
-
-        if "InvalidPartnerTag" in body:
-            msg = "The partner tag is invalid or not present"
-            raise InvalidArgumentError(msg)
-
-        if "InvalidAssociate" in body:
-            msg = "Credentials are not valid for the selected marketplace"
-            raise AssociateValidationError(msg)
-
-        # Generic error
-        body_info = f" - {body[:200]}" if body else ""
-        msg = f"Request failed with status {status_code}{body_info}"
-        raise RequestError(msg)
-
-    def _get_all_resources(self, resource_class: type[ResourceT]) -> list[ResourceT]:
-        """Extract all resource values from a resource enum class.
-
-        Args:
-            resource_class: Enum class containing resource definitions.
-
-        Returns:
-            List of all enum members from the resource class.
-
-        """
-        return list(resource_class)
+        handle_api_error(status_code, body)
 
     def _deserialize_items(self, items_data: list[dict[str, Any]]) -> list[Item]:
         """Deserialize item data from API response to Item models."""
