@@ -100,6 +100,41 @@ api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, throttling=4)  # Make
 api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, throttling=0)  # No wait time between requests
 ```
 
+## Async Support
+
+For async/await applications, install with async support:
+
+```bash
+pip install python-amazon-paapi[async] --upgrade
+```
+
+The async API provides the same methods as the synchronous version:
+
+```python
+from amazon_creatorsapi.aio import AsyncAmazonCreatorsApi
+from amazon_creatorsapi import Country
+
+# Use as async context manager (recommended for connection pooling)
+async with AsyncAmazonCreatorsApi(
+    credential_id="your_credential_id",
+    credential_secret="your_credential_secret",
+    version="2.2",
+    tag="your-affiliate-tag",
+    country=Country.US,
+) as api:
+    # All methods work identically, just use await
+    items = await api.get_items(["B01N5IB20Q"])
+    results = await api.search_items(keywords="laptop")
+    variations = await api.get_variations("B01N5IB20Q")
+    nodes = await api.get_browse_nodes(["667049031"])
+
+# Or use without context manager (creates new connection per request)
+api = AsyncAmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY)
+items = await api.get_items(["B01N5IB20Q"])
+```
+
+> **Note:** All methods and parameters work identically in async mode. Use `async with` for better performance when making multiple requests.
+
 ## Working with Models
 
 All SDK models are re-exported through `amazon_creatorsapi.models` for convenient access:
