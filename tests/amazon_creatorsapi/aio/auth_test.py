@@ -7,8 +7,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import httpx
 
 from amazon_creatorsapi.aio.auth import (
+    COGNITO_SCOPE,
     GRANT_TYPE,
-    SCOPE,
+    LWA_SCOPE,
     TOKEN_EXPIRATION_BUFFER,
     VERSION_ENDPOINTS,
     AsyncOAuth2TokenManager,
@@ -52,6 +53,18 @@ class TestAsyncOAuth2TokenManagerInit(unittest.TestCase):
 
         self.assertEqual(manager._auth_endpoint, VERSION_ENDPOINTS["2.3"])
 
+    def test_with_version_31(self) -> None:
+        """Test initialization with version 3.1."""
+        manager = AsyncOAuth2TokenManager(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="3.1",
+        )
+
+        self.assertEqual(manager._version, "3.1")
+        self.assertEqual(manager._auth_endpoint, VERSION_ENDPOINTS["3.1"])
+        self.assertTrue(manager.is_lwa())
+
     def test_with_custom_endpoint(self) -> None:
         """Test initialization with custom auth endpoint."""
         custom_endpoint = "https://custom.auth.endpoint/token"
@@ -74,6 +87,18 @@ class TestAsyncOAuth2TokenManagerInit(unittest.TestCase):
             )
 
         self.assertIn("Unsupported version", str(context.exception))
+
+    def test_returns_cognito_scope_for_v2(self) -> None:
+        """Test v2 versions use the Cognito scope."""
+        manager = AsyncOAuth2TokenManager("id", "secret", "2.2")
+
+        self.assertEqual(manager.get_scope(), COGNITO_SCOPE)
+
+    def test_returns_lwa_scope_for_v3(self) -> None:
+        """Test v3 versions use the LWA scope."""
+        manager = AsyncOAuth2TokenManager("id", "secret", "3.1")
+
+        self.assertEqual(manager.get_scope(), LWA_SCOPE)
 
 
 class TestAsyncOAuth2TokenManagerIsTokenValid(unittest.TestCase):
@@ -226,9 +251,43 @@ class TestAsyncOAuth2TokenManagerRefreshToken(unittest.IsolatedAsyncioTestCase):
         )
 
         # Verify correct request was made
-        call_args = mock_client.post.call_args
-        self.assertIn(GRANT_TYPE, str(call_args))
-        self.assertIn(SCOPE, str(call_args))
+        call_kwargs = mock_client.post.call_args.kwargs
+        self.assertEqual(call_kwargs["data"]["grant_type"], GRANT_TYPE)
+        self.assertEqual(call_kwargs["data"]["scope"], COGNITO_SCOPE)
+        self.assertEqual(
+            call_kwargs["headers"]["Content-Type"],
+            "application/x-www-form-urlencoded",
+        )
+        self.assertNotIn("json", call_kwargs)
+
+    @patch("amazon_creatorsapi.aio.auth.httpx.AsyncClient")
+    async def test_successful_token_refresh_for_lwa(
+        self,
+        mock_async_client_class: MagicMock,
+    ) -> None:
+        """Test LWA token refresh uses JSON payload and LWA scope."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "access_token": "fresh_token",
+            "expires_in": 7200,
+        }
+
+        mock_client = AsyncMock()
+        mock_client.post.return_value = mock_response
+        mock_client.__aenter__.return_value = mock_client
+        mock_async_client_class.return_value = mock_client
+
+        manager = AsyncOAuth2TokenManager("test_id", "test_secret", "3.1")
+
+        token = await manager.refresh_token()
+
+        self.assertEqual(token, "fresh_token")
+        call_kwargs = mock_client.post.call_args.kwargs
+        self.assertEqual(call_kwargs["json"]["grant_type"], GRANT_TYPE)
+        self.assertEqual(call_kwargs["json"]["scope"], LWA_SCOPE)
+        self.assertEqual(call_kwargs["headers"]["Content-Type"], "application/json")
+        self.assertNotIn("data", call_kwargs)
 
     @patch("amazon_creatorsapi.aio.auth.httpx.AsyncClient")
     async def test_raises_error_on_non_200_response(

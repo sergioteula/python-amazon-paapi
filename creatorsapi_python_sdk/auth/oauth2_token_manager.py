@@ -67,22 +67,35 @@ class OAuth2TokenManager:
         :raises Exception: If token refresh fails
         """
         try:
-            request_data = {
-                'grant_type': self.config.get_grant_type(),
-                'client_id': self.config.get_credential_id(),
-                'client_secret': self.config.get_credential_secret(),
-                'scope': self.config.get_scope()
-            }
+            if self.config.is_lwa():
+                # LWA (v3.x) uses JSON body
+                request_data = {
+                    'grant_type': self.config.get_grant_type(),
+                    'client_id': self.config.get_credential_id(),
+                    'client_secret': self.config.get_credential_secret(),
+                    'scope': self.config.get_scope()
+                }
+                headers = {'Content-Type': 'application/json'}
+                response = requests.post(
+                    self.config.get_cognito_endpoint(),
+                    json=request_data,
+                    headers=headers
+                )
+            else:
+                # Cognito (v2.x) uses form-encoded
+                request_data = {
+                    'grant_type': self.config.get_grant_type(),
+                    'client_id': self.config.get_credential_id(),
+                    'client_secret': self.config.get_credential_secret(),
+                    'scope': self.config.get_scope()
+                }
+                headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+                response = requests.post(
+                    self.config.get_cognito_endpoint(),
+                    data=request_data,
+                    headers=headers
+                )
 
-            headers = {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-
-            response = requests.post(
-                self.config.get_cognito_endpoint(),
-                data=request_data,
-                headers=headers
-            )
             if response.status_code != 200:
                 raise Exception("OAuth2 token request failed with status {}: {}".format(response.status_code, response.text))
 

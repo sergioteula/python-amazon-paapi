@@ -24,7 +24,8 @@ class OAuth2Config:
     """OAuth2 configuration class that manages version-specific cognito endpoints"""
     
     # Constants
-    SCOPE = "creatorsapi/default"
+    COGNITO_SCOPE = "creatorsapi/default"
+    LWA_SCOPE = "creatorsapi::default"
     GRANT_TYPE = "client_credentials"
 
     def __init__(self, credential_id, credential_secret, version, auth_endpoint):
@@ -54,15 +55,30 @@ class OAuth2Config:
         if auth_endpoint and auth_endpoint.strip():
             return auth_endpoint
         
-        # Fall back to version-based defaults
+        # Cognito endpoints (v2.x)
         if version == "2.1":
             return "https://creatorsapi.auth.us-east-1.amazoncognito.com/oauth2/token"
         elif version == "2.2":
             return "https://creatorsapi.auth.eu-south-2.amazoncognito.com/oauth2/token"
         elif version == "2.3":
             return "https://creatorsapi.auth.us-west-2.amazoncognito.com/oauth2/token"
+        # LWA endpoints (v3.x)
+        elif version == "3.1":
+            return "https://api.amazon.com/auth/o2/token"
+        elif version == "3.2":
+            return "https://api.amazon.co.uk/auth/o2/token"
+        elif version == "3.3":
+            return "https://api.amazon.co.jp/auth/o2/token"
         else:
-            raise ValueError("Unsupported version: {}. Supported versions are: 2.1, 2.2, 2.3".format(version))
+            raise ValueError("Unsupported version: {}. Supported versions are: 2.1, 2.2, 2.3, 3.1, 3.2, 3.3".format(version))
+
+    def is_lwa(self):
+        """
+        Checks if this is an LWA (v3.x) configuration
+        
+        :return: True if using LWA authentication
+        """
+        return self.version.startswith("3.")
 
     def get_token_endpoint(self, version):
         """
@@ -112,7 +128,7 @@ class OAuth2Config:
         
         :return: The OAuth2 scope
         """
-        return OAuth2Config.SCOPE
+        return OAuth2Config.LWA_SCOPE if self.is_lwa() else OAuth2Config.COGNITO_SCOPE
 
     def get_grant_type(self):
         """

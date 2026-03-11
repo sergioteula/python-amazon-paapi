@@ -123,5 +123,6 @@ from creatorsapi_python_sdk.models.validation_exception_response_content import 
 from creatorsapi_python_sdk.models.variation_attribute import VariationAttribute
 from creatorsapi_python_sdk.models.variation_dimension import VariationDimension
 from creatorsapi_python_sdk.models.variation_summary import VariationSummary
+from creatorsapi_python_sdk.models.variation_summary_price import VariationSummaryPrice
 from creatorsapi_python_sdk.models.variations_result import VariationsResult
 from creatorsapi_python_sdk.models.website_sales_rank import WebsiteSalesRank

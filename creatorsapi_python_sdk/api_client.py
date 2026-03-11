@@ -107,7 +107,7 @@ class ApiClient:
             self.default_headers[header_name] = header_value
         self.cookie = cookie
         # Set default User-Agent.
-        self.user_agent = 'creatorsapi-python-sdk/1.1.2'
+        self.user_agent = 'creatorsapi-python-sdk/1.2.0'
         self.client_side_validation = configuration.client_side_validation
         
         # OAuth2 properties
@@ -387,8 +387,11 @@ class ApiClient:
                         self._token_manager = OAuth2TokenManager(config)
             # Get token (will use cached token if valid)
             token = self._token_manager.get_token()
-            # Add Authorization headers
-            header_params['Authorization'] = 'Bearer {}, Version {}'.format(token, self.version)
+            # Add Authorization headers - Version only for v2.x
+            if self.version.startswith("3."):
+                header_params['Authorization'] = 'Bearer {}'.format(token)
+            else:
+                header_params['Authorization'] = 'Bearer {}, Version {}'.format(token, self.version)
         except Exception as error:
             raise error
 
