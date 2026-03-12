@@ -106,7 +106,8 @@ class AsyncAmazonCreatorsApi:
 
     Raises:
         InvalidArgumentError: If neither country nor marketplace is provided.
-        ValueError: If version is not supported (valid versions: 2.1, 2.2, 2.3).
+        ValueError: If version is not supported (valid versions: 2.1, 2.2, 2.3,
+            3.1, 3.2, 3.3).
 
     """
 
@@ -483,7 +484,7 @@ class AsyncAmazonCreatorsApi:
         token = await self._token_manager.get_token()
 
         headers = {
-            "Authorization": f"Bearer {token}, Version {self._version}",
+            "Authorization": self._build_authorization_header(token),
             "Content-Type": "application/json; charset=utf-8",
             "x-marketplace": self.marketplace,
         }
@@ -500,6 +501,12 @@ class AsyncAmazonCreatorsApi:
             self._handle_error_response(response.status_code, response.text)
 
         return response.json()
+
+    def _build_authorization_header(self, token: str) -> str:
+        """Build the version-appropriate Authorization header."""
+        if self._version.startswith("3."):
+            return f"Bearer {token}"
+        return f"Bearer {token}, Version {self._version}"
 
     def _handle_error_response(self, status_code: int, body: str) -> None:
         """Handle API error responses and raise appropriate exceptions.

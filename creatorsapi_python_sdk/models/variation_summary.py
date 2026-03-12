@@ -26,6 +26,7 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from creatorsapi_python_sdk.models.variation_dimension import VariationDimension
+from creatorsapi_python_sdk.models.variation_summary_price import VariationSummaryPrice
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -34,9 +35,10 @@ class VariationSummary(BaseModel):
     The container for Variations Summary response. It consists of metadata of variations response like page numbers, number of variations, Price range and Variation Dimensions.
     """ # noqa: E501
     page_count: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Number of pages in the variation result set.", alias="pageCount")
+    price: Optional[VariationSummaryPrice] = None
     variation_count: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Total number of variations available for the product. This represents the complete count of all child ASINs across all pages. Use this value along with pageCount to understand the full scope of available variations.", alias="variationCount")
     variation_dimensions: Optional[List[VariationDimension]] = Field(default=None, description="List of variation dimensions associated with the product. Variation dimensions define the attributes on which products vary (e.g., size, color). Each dimension includes: - Display name and locale for presentation - Dimension name (internal identifier) - List of all possible values for that dimension  For example, a clothing item might have two dimensions: 'Size' with values ['S', 'M', 'L'] and 'Color' with values ['Red', 'Blue', 'Green']. These dimensions help users understand how variations differ from each other.", alias="variationDimensions")
-    __properties: ClassVar[List[str]] = ["pageCount", "variationCount", "variationDimensions"]
+    __properties: ClassVar[List[str]] = ["pageCount", "price", "variationCount", "variationDimensions"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -76,6 +78,9 @@ class VariationSummary(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of price
+        if self.price:
+            _dict['price'] = self.price.to_dict()
         # override the default output from pydantic by calling `to_dict()` of each item in variation_dimensions (list)
         _items = []
         if self.variation_dimensions:
@@ -96,6 +101,7 @@ class VariationSummary(BaseModel):
 
         _obj = cls.model_validate({
             "pageCount": obj.get("pageCount"),
+            "price": VariationSummaryPrice.from_dict(obj["price"]) if obj.get("price") is not None else None,
             "variationCount": obj.get("variationCount"),
             "variationDimensions": [VariationDimension.from_dict(_item) for _item in obj["variationDimensions"]] if obj.get("variationDimensions") is not None else None
         })

@@ -424,6 +424,7 @@ class DefaultApi:
             '401': "UnauthorizedExceptionResponseContent",
             '403': "AccessDeniedExceptionResponseContent",
             '404': "ResourceNotFoundExceptionResponseContent",
+            '429': "ThrottleExceptionResponseContent",
             '500': "InternalServerExceptionResponseContent",
         }
         response_data = self.api_client.call_api(
@@ -500,6 +501,7 @@ class DefaultApi:
             '401': "UnauthorizedExceptionResponseContent",
             '403': "AccessDeniedExceptionResponseContent",
             '404': "ResourceNotFoundExceptionResponseContent",
+            '429': "ThrottleExceptionResponseContent",
             '500': "InternalServerExceptionResponseContent",
         }
         response_data = self.api_client.call_api(
@@ -576,6 +578,7 @@ class DefaultApi:
             '401': "UnauthorizedExceptionResponseContent",
             '403': "AccessDeniedExceptionResponseContent",
             '404': "ResourceNotFoundExceptionResponseContent",
+            '429': "ThrottleExceptionResponseContent",
             '500': "InternalServerExceptionResponseContent",
         }
         response_data = self.api_client.call_api(
@@ -1026,6 +1029,7 @@ class DefaultApi:
             '401': "UnauthorizedExceptionResponseContent",
             '403': "AccessDeniedExceptionResponseContent",
             '404': "ResourceNotFoundExceptionResponseContent",
+            '429': "ThrottleExceptionResponseContent",
             '500': "InternalServerExceptionResponseContent",
         }
         response_data = self.api_client.call_api(
@@ -1102,6 +1106,7 @@ class DefaultApi:
             '401': "UnauthorizedExceptionResponseContent",
             '403': "AccessDeniedExceptionResponseContent",
             '404': "ResourceNotFoundExceptionResponseContent",
+            '429': "ThrottleExceptionResponseContent",
             '500': "InternalServerExceptionResponseContent",
         }
         response_data = self.api_client.call_api(
@@ -1178,6 +1183,7 @@ class DefaultApi:
             '401': "UnauthorizedExceptionResponseContent",
             '403': "AccessDeniedExceptionResponseContent",
             '404': "ResourceNotFoundExceptionResponseContent",
+            '429': "ThrottleExceptionResponseContent",
             '500': "InternalServerExceptionResponseContent",
         }
         response_data = self.api_client.call_api(
@@ -1627,6 +1633,7 @@ class DefaultApi:
             '401': "UnauthorizedExceptionResponseContent",
             '403': "AccessDeniedExceptionResponseContent",
             '404': "ResourceNotFoundExceptionResponseContent",
+            '429': "ThrottleExceptionResponseContent",
             '500': "InternalServerExceptionResponseContent",
         }
         response_data = self.api_client.call_api(
@@ -1699,6 +1706,7 @@ class DefaultApi:
             '401': "UnauthorizedExceptionResponseContent",
             '403': "AccessDeniedExceptionResponseContent",
             '404': "ResourceNotFoundExceptionResponseContent",
+            '429': "ThrottleExceptionResponseContent",
             '500': "InternalServerExceptionResponseContent",
         }
         response_data = self.api_client.call_api(
@@ -1771,6 +1779,7 @@ class DefaultApi:
             '401': "UnauthorizedExceptionResponseContent",
             '403': "AccessDeniedExceptionResponseContent",
             '404': "ResourceNotFoundExceptionResponseContent",
+            '429': "ThrottleExceptionResponseContent",
             '500': "InternalServerExceptionResponseContent",
         }
         response_data = self.api_client.call_api(
@@ -1899,6 +1908,8 @@ class DefaultApi:
             '400': "ValidationExceptionResponseContent",
             '401': "UnauthorizedExceptionResponseContent",
             '403': "AccessDeniedExceptionResponseContent",
+            '404': "ResourceNotFoundExceptionResponseContent",
+            '429': "ThrottleExceptionResponseContent",
             '500': "InternalServerExceptionResponseContent",
         }
         response_data = self.api_client.call_api(
@@ -1970,6 +1981,8 @@ class DefaultApi:
             '400': "ValidationExceptionResponseContent",
             '401': "UnauthorizedExceptionResponseContent",
             '403': "AccessDeniedExceptionResponseContent",
+            '404': "ResourceNotFoundExceptionResponseContent",
+            '429': "ThrottleExceptionResponseContent",
             '500': "InternalServerExceptionResponseContent",
         }
         response_data = self.api_client.call_api(
@@ -2041,6 +2054,8 @@ class DefaultApi:
             '400': "ValidationExceptionResponseContent",
             '401': "UnauthorizedExceptionResponseContent",
             '403': "AccessDeniedExceptionResponseContent",
+            '404': "ResourceNotFoundExceptionResponseContent",
+            '429': "ThrottleExceptionResponseContent",
             '500': "InternalServerExceptionResponseContent",
         }
         response_data = self.api_client.call_api(

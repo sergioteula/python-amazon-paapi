@@ -69,6 +69,19 @@ class TestAsyncAmazonCreatorsApiInit(unittest.TestCase):
         self.assertEqual(api.throttling, 2.5)
 
     @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    def test_accepts_lwa_version(self, mock_token_manager: MagicMock) -> None:
+        """Test initialization accepts an LWA-backed 3.x version."""
+        api = AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="3.1",
+            tag="test-tag",
+            country="US",
+        )
+
+        self.assertEqual(api.marketplace, "www.amazon.com")
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
     def test_raises_error_when_no_country_or_marketplace(
         self, mock_token_manager: MagicMock
     ) -> None:
@@ -1203,6 +1216,80 @@ class TestAsyncAmazonCreatorsApiWithoutContextManager(unittest.IsolatedAsyncioTe
         items = await api.get_items(["B0DLFMFBJW"])
 
         self.assertEqual(len(items), 1)
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_request_uses_v2_authorization_header(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test v2 requests include the version suffix in Authorization."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "itemsResult": {"items": [{"ASIN": "B0DLFMFBJW"}]}
+        }
+
+        mock_client = AsyncMock()
+        mock_client.post.return_value = mock_response
+        mock_client.__aenter__.return_value = mock_client
+        mock_http_client_class.return_value = mock_client
+
+        mock_token_manager = AsyncMock()
+        mock_token_manager.get_token.return_value = "test_token"
+        mock_token_manager_class.return_value = mock_token_manager
+
+        api = AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+            throttling=0,
+        )
+
+        await api.get_items(["B0DLFMFBJW"])
+
+        headers = mock_client.post.call_args.args[1]
+        self.assertEqual(headers["Authorization"], "Bearer test_token, Version 2.2")
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_request_uses_lwa_authorization_header(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test v3 requests omit the version suffix in Authorization."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "itemsResult": {"items": [{"ASIN": "B0DLFMFBJW"}]}
+        }
+
+        mock_client = AsyncMock()
+        mock_client.post.return_value = mock_response
+        mock_client.__aenter__.return_value = mock_client
+        mock_http_client_class.return_value = mock_client
+
+        mock_token_manager = AsyncMock()
+        mock_token_manager.get_token.return_value = "test_token"
+        mock_token_manager_class.return_value = mock_token_manager
+
+        api = AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="3.1",
+            tag="test-tag",
+            country="US",
+            throttling=0,
+        )
+
+        await api.get_items(["B0DLFMFBJW"])
+
+        headers = mock_client.post.call_args.args[1]
+        self.assertEqual(headers["Authorization"], "Bearer test_token")
 
 
 if __name__ == "__main__":
