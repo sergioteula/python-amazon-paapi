@@ -17,6 +17,7 @@ from amazon_creatorsapi.errors import (
     TooManyRequestsError,
 )
 from creatorsapi_python_sdk.exceptions import ApiException
+from creatorsapi_python_sdk.models.delivery_flag import DeliveryFlag
 from creatorsapi_python_sdk.models.get_browse_nodes_resource import (
     GetBrowseNodesResource,
 )
@@ -182,6 +183,41 @@ class TestAmazonCreatorsApi(unittest.TestCase):
         result = api.search_items(keywords="laptop")
         self.assertIsNotNone(result)
         mock_api.search_items.assert_called_once()
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_search_items_with_delivery_flags(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test search_items forwards delivery flags to the SDK request."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_response = MagicMock()
+        mock_response.search_result = MagicMock()
+        mock_api.search_items.return_value = mock_response
+
+        api = AmazonCreatorsApi(
+            credential_id=self.credential_id,
+            credential_secret=self.credential_secret,
+            version=self.version,
+            tag=self.tag,
+            country=self.country,
+            throttling=0,
+        )
+
+        result = api.search_items(
+            keywords="laptop",
+            delivery_flags=[DeliveryFlag.PRIME, DeliveryFlag.FREESHIPPING],
+        )
+
+        self.assertIsNotNone(result)
+        request = mock_api.search_items.call_args.kwargs["search_items_request_content"]
+        self.assertEqual(
+            request.delivery_flags,
+            [DeliveryFlag.PRIME, DeliveryFlag.FREESHIPPING],
+        )
 
     @mock.patch("amazon_creatorsapi.api.DefaultApi")
     @mock.patch("amazon_creatorsapi.api.ApiClient")

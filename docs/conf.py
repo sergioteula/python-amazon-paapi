@@ -23,7 +23,7 @@ copyright = "2026, Sergio Abad"
 author = "Sergio Abad"
 
 # The full version, including alpha/beta/rc tags
-release = "6.2.0"
+release = "6.3.0"
 
 
 # -- General configuration ---------------------------------------------------

@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     from amazon_creatorsapi.core.marketplaces import CountryCode
     from creatorsapi_python_sdk.models.browse_node import BrowseNode
     from creatorsapi_python_sdk.models.condition import Condition
+    from creatorsapi_python_sdk.models.delivery_flag import DeliveryFlag
     from creatorsapi_python_sdk.models.item import Item
     from creatorsapi_python_sdk.models.search_result import SearchResult
     from creatorsapi_python_sdk.models.sort_by import SortBy
@@ -171,6 +172,7 @@ class AmazonCreatorsApi:
         item_page: int | None = None,
         condition: Condition | None = None,
         currency_of_preference: str | None = None,
+        delivery_flags: list[DeliveryFlag] | None = None,
         languages_of_preference: list[str] | None = None,
         max_price: int | None = None,
         min_price: int | None = None,
@@ -197,6 +199,7 @@ class AmazonCreatorsApi:
             item_page: Page of items to return (1-10). Defaults to 1.
             condition: Filter offers by condition type.
             currency_of_preference: ISO 4217 currency code for prices.
+            delivery_flags: Delivery programs to filter search results by.
             languages_of_preference: Languages in order of preference.
             max_price: Max price in lowest currency denomination.
             min_price: Min price in lowest currency denomination.
@@ -229,6 +232,7 @@ class AmazonCreatorsApi:
             itemPage=item_page,
             condition=condition,
             currencyOfPreference=currency_of_preference,
+            deliveryFlags=delivery_flags,
             languagesOfPreference=languages_of_preference,
             maxPrice=max_price,
             minPrice=min_price,

@@ -14,6 +14,7 @@ from amazon_creatorsapi.errors import (
     TooManyRequestsError,
 )
 from creatorsapi_python_sdk.models.condition import Condition
+from creatorsapi_python_sdk.models.delivery_flag import DeliveryFlag
 from creatorsapi_python_sdk.models.get_browse_nodes_resource import (
     GetBrowseNodesResource,
 )
@@ -288,6 +289,53 @@ class TestAsyncAmazonCreatorsApiGetItems(unittest.IsolatedAsyncioTestCase):
         ) as api:
             with self.assertRaises(ItemsNotFoundError):
                 await api.get_items(["B0DLFMFBJX"])
+
+
+class TestAsyncAmazonCreatorsApiSearchItemsDeliveryFlags(
+    unittest.IsolatedAsyncioTestCase,
+):
+    """Focused tests for delivery_flags in search_items()."""
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_search_items_with_delivery_flags(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test search_items includes delivery flags in the request body."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "searchResult": {"items": [{"asin": "B0DLFMFBJW"}]}
+        }
+
+        mock_client = AsyncMock()
+        mock_client.post.return_value = mock_response
+        mock_client.__aenter__.return_value = mock_client
+        mock_http_client_class.return_value = mock_client
+
+        mock_token_manager = AsyncMock()
+        mock_token_manager.get_token.return_value = "test_token"
+        mock_token_manager_class.return_value = mock_token_manager
+
+        async with AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+            throttling=0,
+        ) as api:
+            await api.search_items(
+                keywords="laptop",
+                delivery_flags=[DeliveryFlag.PRIME, DeliveryFlag.FREESHIPPING],
+            )
+
+        call_args = mock_client.post.call_args
+        self.assertIn("deliveryFlags", str(call_args))
+        self.assertIn("Prime", str(call_args))
+        self.assertIn("FreeShipping", str(call_args))
 
     @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
     @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")

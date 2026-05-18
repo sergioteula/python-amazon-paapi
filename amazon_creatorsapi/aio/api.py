@@ -29,6 +29,7 @@ except ImportError as exc:  # pragma: no cover
     )
     raise ImportError(msg) from exc
 
+from creatorsapi_python_sdk.models.delivery_flag import DeliveryFlag
 from creatorsapi_python_sdk.models.get_browse_nodes_resource import (
     GetBrowseNodesResource,
 )
@@ -245,6 +246,7 @@ class AsyncAmazonCreatorsApi:
         item_page: int | None = None,
         condition: Condition | None = None,
         currency_of_preference: str | None = None,
+        delivery_flags: list[DeliveryFlag] | None = None,
         languages_of_preference: list[str] | None = None,
         max_price: int | None = None,
         min_price: int | None = None,
@@ -271,6 +273,7 @@ class AsyncAmazonCreatorsApi:
             item_page: Page of items to return (1-10). Defaults to 1.
             condition: Filter offers by condition type.
             currency_of_preference: ISO 4217 currency code for prices.
+            delivery_flags: Delivery programs to filter search results by.
             languages_of_preference: Languages in order of preference.
             max_price: Max price in lowest currency denomination.
             min_price: Min price in lowest currency denomination.
@@ -319,6 +322,8 @@ class AsyncAmazonCreatorsApi:
             request_body["condition"] = condition.value
         if currency_of_preference is not None:
             request_body["currencyOfPreference"] = currency_of_preference
+        if delivery_flags is not None:
+            request_body["deliveryFlags"] = [flag.value for flag in delivery_flags]
         if languages_of_preference is not None:
             request_body["languagesOfPreference"] = languages_of_preference
         if max_price is not None:
