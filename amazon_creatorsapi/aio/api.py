@@ -29,7 +29,6 @@ except ImportError as exc:  # pragma: no cover
     )
     raise ImportError(msg) from exc
 
-from creatorsapi_python_sdk.models.delivery_flag import DeliveryFlag
 from creatorsapi_python_sdk.models.get_browse_nodes_resource import (
     GetBrowseNodesResource,
 )
@@ -42,6 +41,7 @@ if TYPE_CHECKING:
 
     from amazon_creatorsapi.core.marketplaces import CountryCode
     from creatorsapi_python_sdk.models.condition import Condition
+    from creatorsapi_python_sdk.models.delivery_flag import DeliveryFlag
     from creatorsapi_python_sdk.models.sort_by import SortBy
 
 from creatorsapi_python_sdk.models.browse_node import BrowseNode
