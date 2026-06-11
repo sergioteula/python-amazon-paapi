@@ -384,7 +384,9 @@ class ApiClient:
                             self.credential_id, self.credential_secret,
                             self.version, self.auth_endpoint
                         )
-                        self._token_manager = OAuth2TokenManager(config)
+                        proxy = self.configuration.proxy
+                        proxies = {"http": proxy, "https": proxy} if proxy else None
+                        self._token_manager = OAuth2TokenManager(config, proxies=proxies)
             # Get token (will use cached token if valid)
             token = self._token_manager.get_token()
             # Add Authorization headers - Version only for v2.x

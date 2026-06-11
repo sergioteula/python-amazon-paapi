@@ -30,13 +30,15 @@ import json
 class OAuth2TokenManager:
     """Manages OAuth2 token lifecycle including acquisition, caching, and automatic refresh"""
 
-    def __init__(self, config):
+    def __init__(self, config, proxies=None):
         """
         Creates an OAuth2TokenManager instance
-        
+
         :param config: The OAuth2Config instance
+        :param proxies: Optional dict of proxy URLs, e.g. {"http": "http://proxy:3128", "https": "http://proxy:3128"}
         """
         self.config = config
+        self.proxies = proxies
         self.access_token = None
         self.expires_at = None
 
@@ -67,6 +69,10 @@ class OAuth2TokenManager:
         :raises Exception: If token refresh fails
         """
         try:
+            session = requests.Session()
+            if self.proxies:
+                session.proxies.update(self.proxies)
+
             if self.config.is_lwa():
                 # LWA (v3.x) uses JSON body
                 request_data = {
@@ -76,7 +82,7 @@ class OAuth2TokenManager:
                     'scope': self.config.get_scope()
                 }
                 headers = {'Content-Type': 'application/json'}
-                response = requests.post(
+                response = session.post(
                     self.config.get_cognito_endpoint(),
                     json=request_data,
                     headers=headers
@@ -90,7 +96,7 @@ class OAuth2TokenManager:
                     'scope': self.config.get_scope()
                 }
                 headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-                response = requests.post(
+                response = session.post(
                     self.config.get_cognito_endpoint(),
                     data=request_data,
                     headers=headers

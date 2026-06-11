@@ -100,6 +100,34 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             )
 
     @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_init_with_proxy(self, mock_client: MagicMock) -> None:
+        """Test that proxy URL is passed through to ApiClient configuration."""
+        proxy_url = "http://user:pass@proxy.example.com:3128"
+        AmazonCreatorsApi(
+            credential_id=self.credential_id,
+            credential_secret=self.credential_secret,
+            version=self.version,
+            tag=self.tag,
+            country=self.country,
+            proxy=proxy_url,
+        )
+        call_kwargs = mock_client.call_args.kwargs
+        self.assertEqual(call_kwargs["configuration"].proxy, proxy_url)
+
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_init_without_proxy(self, mock_client: MagicMock) -> None:
+        """Test that configuration.proxy is None when no proxy is provided."""
+        AmazonCreatorsApi(
+            credential_id=self.credential_id,
+            credential_secret=self.credential_secret,
+            version=self.version,
+            tag=self.tag,
+            country=self.country,
+        )
+        call_kwargs = mock_client.call_args.kwargs
+        self.assertIsNone(call_kwargs["configuration"].proxy)
+
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
     def test_throttling_disabled(self, _mock_client: MagicMock) -> None:
         """Test that API call is not delayed when throttling is 0."""
         api = AmazonCreatorsApi(
