@@ -14,6 +14,7 @@ from amazon_creatorsapi.aio.auth import (
     VERSION_ENDPOINTS,
     AsyncOAuth2TokenManager,
 )
+from amazon_creatorsapi.core.constants import DEFAULT_TIMEOUT
 from amazon_creatorsapi.errors import AuthenticationError
 
 
@@ -351,6 +352,68 @@ class TestAsyncOAuth2TokenManagerRefreshToken(unittest.IsolatedAsyncioTestCase):
             await manager.refresh_token()
 
         self.assertIn("token request failed", str(context.exception))
+
+
+class TestAsyncOAuth2TokenManagerTimeout(unittest.IsolatedAsyncioTestCase):
+    """Tests for the timeout applied to token refresh requests."""
+
+    def _mock_client(self, mock_client_class: MagicMock) -> None:
+        """Wire the httpx client mock to return a valid token response."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "access_token": "test_token",
+            "expires_in": 3600,
+        }
+
+        mock_client = AsyncMock()
+        mock_client.post.return_value = mock_response
+        mock_client.__aenter__.return_value = mock_client
+        mock_client_class.return_value = mock_client
+
+    def test_default_timeout(self) -> None:
+        """Test the manager keeps the default timeout."""
+        manager = AsyncOAuth2TokenManager(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+        )
+
+        self.assertEqual(manager._timeout, DEFAULT_TIMEOUT)
+
+    @patch("amazon_creatorsapi.aio.auth.httpx.AsyncClient")
+    async def test_refresh_token_uses_custom_timeout(
+        self, mock_client_class: MagicMock
+    ) -> None:
+        """Test token refresh creates the client with the given timeout."""
+        self._mock_client(mock_client_class)
+        manager = AsyncOAuth2TokenManager(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            timeout=5.0,
+        )
+
+        await manager.refresh_token()
+
+        mock_client_class.assert_called_once_with(timeout=5.0)
+
+    @patch("amazon_creatorsapi.aio.auth.httpx.AsyncClient")
+    async def test_refresh_token_with_timeout_disabled(
+        self, mock_client_class: MagicMock
+    ) -> None:
+        """Test token refresh can wait indefinitely when the timeout is None."""
+        self._mock_client(mock_client_class)
+        manager = AsyncOAuth2TokenManager(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            timeout=None,
+        )
+
+        await manager.refresh_token()
+
+        mock_client_class.assert_called_once_with(timeout=None)
 
 
 if __name__ == "__main__":

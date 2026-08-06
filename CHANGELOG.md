@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.1.0] - 2026-09-03
+
+### Added
+
+- `timeout` parameter in `AmazonCreatorsApi` and `AsyncAmazonCreatorsApi` to set the request timeout in seconds, or `None` to wait indefinitely
+
+### Changed
+
+- `AmazonCreatorsApi` API requests now time out after 30 seconds instead of waiting indefinitely, matching the timeout already used by `AsyncAmazonCreatorsApi`. Pass `timeout=None` to restore the previous behavior
+- `AsyncAmazonCreatorsApi` now applies `timeout` to the OAuth2 token refresh as well, which previously always used the 5 second default from `httpx`
+
 ## [7.0.0] - 2026-09-03
 
 ### Removed

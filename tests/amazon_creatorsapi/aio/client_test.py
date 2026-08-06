@@ -32,6 +32,11 @@ class TestAsyncHttpClient(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(client._host, host)
         self.assertEqual(client._timeout, timeout)
 
+    async def test_init_timeout_disabled(self) -> None:
+        """Test the timeout can be disabled with None."""
+        client = AsyncHttpClient(timeout=None)
+        self.assertIsNone(client._timeout)
+
     @patch("amazon_creatorsapi.aio.client.httpx.AsyncClient")
     async def test_context_manager(self, mock_client_cls: MagicMock) -> None:
         """Test context manager creates and closes client."""
