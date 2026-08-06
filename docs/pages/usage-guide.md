@@ -100,6 +100,15 @@ api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, throttling=4)  # Make
 api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, throttling=0)  # No wait time between requests
 ```
 
+## Timeout
+
+Timeout value represents the number of seconds to wait for a response before failing, being the default value 30 seconds. Use `None` to wait indefinitely.
+
+```python
+api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, timeout=10)  # Fails after 10 seconds
+api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, timeout=0.5)  # Fails after half a second
+```
+
 ## Async Support
 
 For async/await applications, install with async support:

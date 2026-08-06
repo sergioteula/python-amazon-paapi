@@ -6,6 +6,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from amazon_creatorsapi.aio import (
     AsyncAmazonCreatorsApi,
 )
+from amazon_creatorsapi.aio.api import API_HOST
+from amazon_creatorsapi.core.constants import DEFAULT_TIMEOUT
 from amazon_creatorsapi.errors import (
     AssociateValidationError,
     InvalidArgumentError,
@@ -68,6 +70,33 @@ class TestAsyncAmazonCreatorsApiInit(unittest.TestCase):
         )
 
         self.assertEqual(api.throttling, 2.5)
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    def test_with_default_timeout(self, mock_token_manager: MagicMock) -> None:
+        """Test initialization uses the default timeout value."""
+        api = AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="US",
+        )
+
+        self.assertEqual(api.timeout, DEFAULT_TIMEOUT)
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    def test_with_custom_timeout(self, mock_token_manager: MagicMock) -> None:
+        """Test initialization with custom timeout value."""
+        api = AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="US",
+            timeout=5.0,
+        )
+
+        self.assertEqual(api.timeout, 5.0)
 
     @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
     def test_accepts_lwa_version(self, mock_token_manager: MagicMock) -> None:
@@ -1338,6 +1367,115 @@ class TestAsyncAmazonCreatorsApiWithoutContextManager(unittest.IsolatedAsyncioTe
 
         headers = mock_client.post.call_args.args[1]
         self.assertEqual(headers["Authorization"], "Bearer test_token")
+
+
+class TestAsyncAmazonCreatorsApiTimeout(unittest.IsolatedAsyncioTestCase):
+    """Tests for the timeout given to the underlying HTTP client."""
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_context_manager_client_uses_default_timeout(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager: MagicMock,
+    ) -> None:
+        """Test the persistent client is created with the default timeout."""
+        mock_http_client_class.return_value = AsyncMock()
+
+        async with AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+        ):
+            pass
+
+        mock_http_client_class.assert_called_once_with(
+            host=API_HOST,
+            timeout=DEFAULT_TIMEOUT,
+        )
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_context_manager_client_uses_custom_timeout(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager: MagicMock,
+    ) -> None:
+        """Test the persistent client is created with a custom timeout."""
+        mock_http_client_class.return_value = AsyncMock()
+
+        async with AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+            timeout=5.0,
+        ):
+            pass
+
+        mock_http_client_class.assert_called_once_with(host=API_HOST, timeout=5.0)
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_request_without_context_manager_uses_custom_timeout(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test the temporary client is created with a custom timeout."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "itemsResult": {"items": [{"ASIN": "B0DLFMFBJW"}]}
+        }
+
+        mock_client = AsyncMock()
+        mock_client.post.return_value = mock_response
+        mock_client.__aenter__.return_value = mock_client
+        mock_http_client_class.return_value = mock_client
+
+        mock_token_manager = AsyncMock()
+        mock_token_manager.get_token.return_value = "test_token"
+        mock_token_manager_class.return_value = mock_token_manager
+
+        api = AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+            throttling=0,
+            timeout=5.0,
+        )
+
+        await api.get_items(["B0DLFMFBJW"])
+
+        mock_http_client_class.assert_called_once_with(host=API_HOST, timeout=5.0)
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_client_receives_disabled_timeout(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager: MagicMock,
+    ) -> None:
+        """Test a None timeout is passed to the HTTP client to disable it."""
+        mock_http_client_class.return_value = AsyncMock()
+
+        async with AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+            timeout=None,
+        ):
+            pass
+
+        mock_http_client_class.assert_called_once_with(host=API_HOST, timeout=None)
 
 
 if __name__ == "__main__":

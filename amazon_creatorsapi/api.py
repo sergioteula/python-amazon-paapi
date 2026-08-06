@@ -8,7 +8,7 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING, NoReturn
 
-from amazon_creatorsapi.core.constants import DEFAULT_THROTTLING
+from amazon_creatorsapi.core.constants import DEFAULT_THROTTLING, DEFAULT_TIMEOUT
 from amazon_creatorsapi.core.error_handling import handle_api_error
 from amazon_creatorsapi.core.parsers import get_asin, get_items_ids
 from amazon_creatorsapi.core.resources import get_all_resources
@@ -58,6 +58,8 @@ class AmazonCreatorsApi:
         country: Country code (e.g., "ES", "US"). Used to determine marketplace.
         marketplace: Marketplace URL (e.g., "www.amazon.es"). Overrides country.
         throttling: Wait time in seconds between API calls. Defaults to 1 second.
+        timeout: Request timeout in seconds, or None to wait indefinitely.
+            Defaults to 30 seconds.
 
     Raises:
         InvalidArgumentError: If neither country nor marketplace is provided.
@@ -83,6 +85,7 @@ class AmazonCreatorsApi:
         country: CountryCode | None = None,
         marketplace: str | None = None,
         throttling: float = DEFAULT_THROTTLING,
+        timeout: float | None = DEFAULT_TIMEOUT,
     ) -> None:
         """Initialize the Amazon Creators API client."""
         self._credential_id = credential_id
@@ -91,6 +94,7 @@ class AmazonCreatorsApi:
         self._last_query_time = time.time() - throttling
         self.tag = tag
         self.throttling = float(throttling)
+        self.timeout = timeout
 
         # Determine marketplace from country or direct value
         self.marketplace = validate_and_get_marketplace(country, marketplace)
@@ -148,6 +152,7 @@ class AmazonCreatorsApi:
             response = self._api.get_items(
                 x_marketplace=self.marketplace,
                 get_items_request_content=request,
+                _request_timeout=self.timeout,
             )
         except ApiException as exc:
             self._handle_api_exception(exc)
@@ -248,6 +253,7 @@ class AmazonCreatorsApi:
             response = self._api.search_items(
                 x_marketplace=self.marketplace,
                 search_items_request_content=request,
+                _request_timeout=self.timeout,
             )
         except ApiException as exc:
             self._handle_api_exception(exc)
@@ -308,6 +314,7 @@ class AmazonCreatorsApi:
             response = self._api.get_variations(
                 x_marketplace=self.marketplace,
                 get_variations_request_content=request,
+                _request_timeout=self.timeout,
             )
         except ApiException as exc:
             self._handle_api_exception(exc)
@@ -354,6 +361,7 @@ class AmazonCreatorsApi:
             response = self._api.get_browse_nodes(
                 x_marketplace=self.marketplace,
                 get_browse_nodes_request_content=request,
+                _request_timeout=self.timeout,
             )
         except ApiException as exc:
             self._handle_api_exception(exc)

@@ -1,6 +1,7 @@
 """Constants for the Amazon Creators API."""
 
 DEFAULT_THROTTLING = 1
+DEFAULT_TIMEOUT = 30.0
 
 # HTTP status codes
 HTTP_NOT_FOUND = 404

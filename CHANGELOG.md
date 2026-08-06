@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.4.0] - 2026-08-06
+
+### Added
+
+- `timeout` parameter in `AmazonCreatorsApi` and `AsyncAmazonCreatorsApi` to set the request timeout in seconds, or `None` to wait indefinitely
+
+### Changed
+
+- `AmazonCreatorsApi` requests now time out after 30 seconds instead of waiting indefinitely, matching the timeout already used by `AsyncAmazonCreatorsApi`. Pass `timeout=None` to restore the previous behavior
+
 ## [6.3.0] - 2026-05-15
 
 ### Added
