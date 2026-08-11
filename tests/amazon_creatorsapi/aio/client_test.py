@@ -32,6 +32,17 @@ class TestAsyncHttpClient(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(client._host, host)
         self.assertEqual(client._timeout, timeout)
 
+    async def test_init_with_proxy(self) -> None:
+        """Test proxy is stored on the client."""
+        proxy_url = "http://user:pass@proxy.example.com:3128"
+        client = AsyncHttpClient(proxy=proxy_url)
+        self.assertEqual(client._proxy, proxy_url)
+
+    async def test_init_without_proxy(self) -> None:
+        """Test proxy is None when not provided."""
+        client = AsyncHttpClient()
+        self.assertIsNone(client._proxy)
+
     @patch("amazon_creatorsapi.aio.client.httpx.AsyncClient")
     async def test_context_manager(self, mock_client_cls: MagicMock) -> None:
         """Test context manager creates and closes client."""
@@ -46,6 +57,33 @@ class TestAsyncHttpClient(unittest.IsolatedAsyncioTestCase):
         mock_client_instance.aclose.assert_called_once()
         self.assertFalse(client._owns_client)
         self.assertIsNone(client._client)
+
+    @patch("amazon_creatorsapi.aio.client.httpx.AsyncClient")
+    async def test_context_manager_passes_proxy(
+        self, mock_client_cls: MagicMock
+    ) -> None:
+        """Test context manager passes proxy to httpx.AsyncClient."""
+        proxy_url = "http://user:pass@proxy.example.com:3128"
+        mock_client_instance = AsyncMock()
+        mock_client_cls.return_value = mock_client_instance
+
+        async with AsyncHttpClient(proxy=proxy_url) as client:
+            self.assertEqual(client._proxy, proxy_url)
+
+        call_kwargs = mock_client_cls.call_args.kwargs
+        self.assertEqual(call_kwargs["proxy"], proxy_url)
+
+    @patch("amazon_creatorsapi.aio.client.httpx.AsyncClient")
+    async def test_context_manager_no_proxy(self, mock_client_cls: MagicMock) -> None:
+        """Test context manager passes proxy=None when not provided."""
+        mock_client_instance = AsyncMock()
+        mock_client_cls.return_value = mock_client_instance
+
+        async with AsyncHttpClient() as client:
+            self.assertIsNone(client._proxy)
+
+        call_kwargs = mock_client_cls.call_args.kwargs
+        self.assertIsNone(call_kwargs["proxy"])
 
     @patch("amazon_creatorsapi.aio.client.httpx.AsyncClient")
     async def test_info_logging_context_manager(
@@ -88,6 +126,30 @@ class TestAsyncHttpClient(unittest.IsolatedAsyncioTestCase):
         mock_client_cls.assert_called()
         mock_client_instance.__aenter__.assert_called()
         mock_client_instance.__aexit__.assert_called()
+
+    @patch("amazon_creatorsapi.aio.client.httpx.AsyncClient")
+    async def test_post_without_context_manager_passes_proxy(
+        self, mock_client_cls: MagicMock
+    ) -> None:
+        """Test standalone post passes proxy to temporary httpx client."""
+        proxy_url = "http://user:pass@proxy.example.com:3128"
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.headers = {}
+        mock_response.content = b"{}"
+        mock_response.text = "{}"
+
+        mock_client_instance = AsyncMock()
+        mock_client_instance.post.return_value = mock_response
+        mock_client_instance.__aenter__.return_value = mock_client_instance
+        mock_client_instance.__aexit__.return_value = None
+        mock_client_cls.return_value = mock_client_instance
+
+        client = AsyncHttpClient(proxy=proxy_url)
+        await client.post("/test", {}, {})
+
+        call_kwargs = mock_client_cls.call_args.kwargs
+        self.assertEqual(call_kwargs["proxy"], proxy_url)
 
     @patch("amazon_creatorsapi.aio.client.httpx.AsyncClient")
     async def test_post_with_context_manager(self, mock_client_cls: MagicMock) -> None:
