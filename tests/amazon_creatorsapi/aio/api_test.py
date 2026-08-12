@@ -83,6 +83,37 @@ class TestAsyncAmazonCreatorsApiInit(unittest.TestCase):
         self.assertEqual(api.marketplace, "www.amazon.com")
 
     @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    def test_init_with_proxy(self, mock_token_manager: MagicMock) -> None:
+        """Test proxy URL is passed through to the token manager."""
+        proxy_url = "http://user:pass@proxy.example.com:3128"
+        api = AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+            proxy=proxy_url,
+        )
+
+        self.assertEqual(api._proxy, proxy_url)
+        call_kwargs = mock_token_manager.call_args.kwargs
+        self.assertEqual(call_kwargs["proxy"], proxy_url)
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    def test_init_without_proxy(self, mock_token_manager: MagicMock) -> None:
+        """Test token manager receives proxy=None when not provided."""
+        AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+        )
+
+        call_kwargs = mock_token_manager.call_args.kwargs
+        self.assertIsNone(call_kwargs["proxy"])
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
     def test_raises_error_when_no_country_or_marketplace(
         self, mock_token_manager: MagicMock
     ) -> None:
@@ -156,6 +187,31 @@ class TestAsyncAmazonCreatorsApiContextManager(unittest.IsolatedAsyncioTestCase)
             mock_client.__aenter__.assert_called_once()
 
         mock_client.__aexit__.assert_called_once()
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_context_manager_passes_proxy_to_client(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager: MagicMock,
+    ) -> None:
+        """Test context manager passes proxy to AsyncHttpClient."""
+        proxy_url = "http://user:pass@proxy.example.com:3128"
+        mock_client = AsyncMock()
+        mock_http_client_class.return_value = mock_client
+
+        async with AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+            proxy=proxy_url,
+        ) as api:
+            self.assertEqual(api._proxy, proxy_url)
+
+        call_kwargs = mock_http_client_class.call_args.kwargs
+        self.assertEqual(call_kwargs["proxy"], proxy_url)
 
     @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
     async def test_context_manager_exit_without_client(
@@ -1264,6 +1320,46 @@ class TestAsyncAmazonCreatorsApiWithoutContextManager(unittest.IsolatedAsyncioTe
         items = await api.get_items(["B0DLFMFBJW"])
 
         self.assertEqual(len(items), 1)
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_request_without_context_manager_passes_proxy(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test standalone request creates temp client with proxy."""
+        proxy_url = "http://user:pass@proxy.example.com:3128"
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "itemsResult": {"items": [{"ASIN": "B0DLFMFBJW"}]}
+        }
+
+        mock_client = AsyncMock()
+        mock_client.post.return_value = mock_response
+        mock_client.__aenter__.return_value = mock_client
+        mock_http_client_class.return_value = mock_client
+
+        mock_token_manager = AsyncMock()
+        mock_token_manager.get_token.return_value = "test_token"
+        mock_token_manager_class.return_value = mock_token_manager
+
+        api = AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+            throttling=0,
+            proxy=proxy_url,
+        )
+
+        items = await api.get_items(["B0DLFMFBJW"])
+
+        self.assertEqual(len(items), 1)
+        call_kwargs = mock_http_client_class.call_args.kwargs
+        self.assertEqual(call_kwargs["proxy"], proxy_url)
 
     @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
     @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
