@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.0.0] - 2026-09-03
+
+### Removed
+
+- The deprecated `amazon_paapi` module and its bundled Product Advertising API 5.0 SDK
+- `AmazonApi`, `amazon_paapi.errors`, `amazon_paapi.helpers`, `amazon_paapi.models` and `amazon_paapi.tools`
+- Product Advertising API documentation, including the version 6 migration guide
+- `API_KEY` and `API_SECRET` environment variables, only used by the removed module
+
+### Changed
+
+- Use `amazon_creatorsapi` instead. Replace `AmazonApi(access_key, secret_key, partner_tag, country)`
+  with `AmazonCreatorsApi(credential_id, credential_secret, version, tag, country)`, and import
+  `get_asin` from `amazon_creatorsapi`
+
 ## [6.4.0] - 2026-09-03
 
 ### Added

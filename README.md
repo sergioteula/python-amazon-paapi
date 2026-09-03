@@ -1,14 +1,11 @@
 # Python Amazon Creators API
 
-A Python wrapper for Amazon's product APIs. This package supports both the legacy [Product Advertising API 5.0](https://webservices.amazon.com/paapi5/documentation/) and the new [Amazon Creators API](https://webservices.amazon.com/creatorsapi/documentation/).
+A Python wrapper for the [Amazon Creators API](https://webservices.amazon.com/creatorsapi/documentation/).
 
 [![PyPI](https://img.shields.io/pypi/v/python-amazon-paapi?color=%231182C2&label=PyPI)](https://pypi.org/project/python-amazon-paapi/)
 [![Python](https://img.shields.io/badge/Python-≥3.9-%23FFD140)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-%23e83633)](https://github.com/sergioteula/python-amazon-paapi/blob/master/LICENSE)
 [![Downloads](https://img.shields.io/pypi/dm/python-amazon-paapi?label=Downloads)](https://pypi.org/project/python-amazon-paapi/)
-
-> [!IMPORTANT]
-> **Migration Advisory**: The `amazon_paapi` module is deprecated. Amazon is transitioning from the Product Advertising API (PAAPI) to the new **Creators API**. Please migrate to the `amazon_creatorsapi` module for new projects. See the [Migration Guide](https://python-amazon-paapi.readthedocs.io/en/latest/pages/migration-guide-6.html) for more information.
 
 ## Features
 

@@ -1,1 +1,1 @@
-"""Test suite for python-amazon-paapi."""
+"""Test suite for the Amazon Creators API wrapper."""

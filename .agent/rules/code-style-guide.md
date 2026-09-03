@@ -17,11 +17,11 @@ trigger: always_on
 # Test
 
 - Add tests following TDD practices
-- Mirror the amazon_paapi structure in the tests directory
+- Mirror the amazon_creatorsapi structure in the tests directory
 - Use unittest.TestCase with setUp() and tearDown()
 - Use unittest assertions, not native assert
 - Use @patch decorators for mocks (avoid context managers)
 
 # References
 
-- Documentation for the Product Advertising API here: https://webservices.amazon.com/paapi5/documentation/operations.html
+- Documentation for the Creators API here: https://webservices.amazon.com/creatorsapi/documentation/

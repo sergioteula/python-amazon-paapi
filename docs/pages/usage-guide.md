@@ -10,8 +10,6 @@ pip install python-amazon-paapi --upgrade
 
 The `amazon_creatorsapi` module provides access to Amazon's Creators API.
 
-> **Note:** The `amazon_paapi` module is deprecated. New projects should use the Creators API.
-
 ## Basic Usage
 
 ```python
