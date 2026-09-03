@@ -17,6 +17,7 @@ A Python wrapper for Amazon's product APIs. This package supports both the legac
 - �🔍 **Product search** by keywords, categories, or browse nodes
 - 📦 **Product details** via ASIN or Amazon URL
 - 🔄 **Item variations** support (size, color, etc.)
+- 📊 **Feeds and reports** listing and download URLs
 - 💰 **OffersV2 support** for enhanced pricing and offer details
 - 🌍 **20+ countries** supported
 - 🛡️ **Built-in throttling** to avoid API rate limits
@@ -91,6 +92,29 @@ for node in nodes:
     print(node.display_name)
 ```
 
+### Feeds and Reports
+
+Feeds and reports are listed per marketplace, and downloaded through the
+temporary URL returned by the API:
+
+```python
+from amazon_creatorsapi.models import FeedType, ReportType
+
+for feed in api.list_feeds():
+    print(feed.feed_name, feed.feed_type, feed.size)
+
+url = api.get_feed("product-feed", feed_type=FeedType.PRODUCT_FEEDS)
+
+for report in api.list_reports():
+    print(report.filename, report.report_type, report.last_modified)
+
+url = api.get_report("earnings.csv", report_type=ReportType.CREATOR_CONNECTIONS)
+```
+
+The type is only needed to disambiguate a name available in more than one
+program, such as a report present in both Creator Central and Creator
+Connections.
+
 ### Get the ASIN from URL
 
 ```python
@@ -145,6 +169,8 @@ async with AsyncAmazonCreatorsApi(
     results = await api.search_items(keywords="laptop")
     variations = await api.get_variations("B01N5IB20Q")
     nodes = await api.get_browse_nodes(["667049031"])
+    feeds = await api.list_feeds()
+    reports = await api.list_reports()
 
 # Or use without context manager (creates new connection per request)
 api = AsyncAmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY)

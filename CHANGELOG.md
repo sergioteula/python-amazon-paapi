@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `list_feeds`, `get_feed`, `list_reports` and `get_report` methods in `amazon_creatorsapi` and `amazon_creatorsapi.aio`
+- `Feed`, `FeedType`, `ReportMetadata` and `ReportType` in `amazon_creatorsapi.models`
 - `FeedType` and `ReportType` models in the bundled SDK
 - `feedType` field in `Feed` and `GetFeedRequestContent` models
 - `reportType` field in `ReportMetadata` and `GetReportRequestContent` models

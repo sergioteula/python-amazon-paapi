@@ -42,10 +42,20 @@ if TYPE_CHECKING:
     from amazon_creatorsapi.core.marketplaces import CountryCode
     from creatorsapi_python_sdk.models.condition import Condition
     from creatorsapi_python_sdk.models.delivery_flag import DeliveryFlag
+    from creatorsapi_python_sdk.models.feed_type import FeedType
+    from creatorsapi_python_sdk.models.report_type import ReportType
     from creatorsapi_python_sdk.models.sort_by import SortBy
 
 from creatorsapi_python_sdk.models.browse_node import BrowseNode
+from creatorsapi_python_sdk.models.feed import Feed
+from creatorsapi_python_sdk.models.get_feed_response_content import (
+    GetFeedResponseContent,
+)
+from creatorsapi_python_sdk.models.get_report_response_content import (
+    GetReportResponseContent,
+)
 from creatorsapi_python_sdk.models.item import Item
+from creatorsapi_python_sdk.models.report_metadata import ReportMetadata
 from creatorsapi_python_sdk.models.search_result import SearchResult
 from creatorsapi_python_sdk.models.variations_result import VariationsResult
 
@@ -55,6 +65,10 @@ ENDPOINT_GET_ITEMS = "/catalog/v1/getItems"
 ENDPOINT_SEARCH_ITEMS = "/catalog/v1/searchItems"
 ENDPOINT_GET_VARIATIONS = "/catalog/v1/getVariations"
 ENDPOINT_GET_BROWSE_NODES = "/catalog/v1/getBrowseNodes"
+ENDPOINT_LIST_FEEDS = "/catalog/v1/listFeeds"
+ENDPOINT_GET_FEED = "/catalog/v1/getFeed"
+ENDPOINT_LIST_REPORTS = "/reports/v1/listReports"
+ENDPOINT_GET_REPORT = "/reports/v1/getReport"
 
 # TypeVar for generic resource handling
 ResourceT = TypeVar("ResourceT", bound=Enum)
@@ -449,6 +463,90 @@ class AsyncAmazonCreatorsApi:
 
         return self._deserialize_browse_nodes(browse_nodes_result["browseNodes"])
 
+    async def list_feeds(self) -> list[Feed]:
+        """Return the feeds available for your account.
+
+        Returns:
+            List of Feed objects, empty if no feeds are available. Each feed
+            carries its type, so the same name can exist in more than one
+            feed program.
+
+        Raises:
+            RequestError: If the API request fails.
+
+        """
+        response = await self._make_request(ENDPOINT_LIST_FEEDS)
+
+        return self._deserialize_feeds(response.get("feeds") or [])
+
+    async def get_feed(self, feed_name: str, feed_type: FeedType | None = None) -> str:
+        """Return a temporary download URL for a feed.
+
+        Args:
+            feed_name: Name of the feed, as returned by list_feeds.
+            feed_type: Feed program the name belongs to. Needed to disambiguate
+                a name available in more than one program.
+
+        Returns:
+            URL to download the feed contents from.
+
+        Raises:
+            RequestError: If the API request fails.
+
+        """
+        request_body: dict[str, Any] = {"feedName": feed_name}
+
+        if feed_type is not None:
+            request_body["feedType"] = feed_type.value
+
+        response = await self._make_request(ENDPOINT_GET_FEED, request_body)
+
+        return GetFeedResponseContent.model_validate(response).url
+
+    async def list_reports(self) -> list[ReportMetadata]:
+        """Return the reports available for your account.
+
+        Returns:
+            List of ReportMetadata objects, empty if no reports are available.
+            Each report carries its type, telling Creator Central reports apart
+            from Creator Connections ones.
+
+        Raises:
+            RequestError: If the API request fails.
+
+        """
+        response = await self._make_request(ENDPOINT_LIST_REPORTS)
+
+        return self._deserialize_reports(response.get("reports") or [])
+
+    async def get_report(
+        self,
+        filename: str,
+        report_type: ReportType | None = None,
+    ) -> str:
+        """Return a temporary download URL for a report.
+
+        Args:
+            filename: Name of the report, as returned by list_reports.
+            report_type: Program the report belongs to. Needed to disambiguate
+                a filename available in more than one program.
+
+        Returns:
+            URL to download the report contents from.
+
+        Raises:
+            RequestError: If the API request fails.
+
+        """
+        request_body: dict[str, Any] = {"filename": filename}
+
+        if report_type is not None:
+            request_body["reportType"] = report_type.value
+
+        response = await self._make_request(ENDPOINT_GET_REPORT, request_body)
+
+        return GetReportResponseContent.model_validate(response).url
+
     async def _throttle(self) -> None:
         """Wait for the throttling interval to elapse since the last API call.
 
@@ -468,13 +566,13 @@ class AsyncAmazonCreatorsApi:
     async def _make_request(
         self,
         endpoint: str,
-        body: dict[str, Any],
+        body: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Make an API request with authentication and throttling.
 
         Args:
             endpoint: API endpoint path.
-            body: Request body.
+            body: Request body, omitted for operations that take no payload.
 
         Returns:
             Parsed JSON response.
@@ -554,3 +652,14 @@ class AsyncAmazonCreatorsApi:
     ) -> list[BrowseNode]:
         """Deserialize browse nodes data from API response to BrowseNode models."""
         return [BrowseNode.model_validate(node) for node in browse_nodes_data]
+
+    def _deserialize_feeds(self, feeds_data: list[dict[str, Any]]) -> list[Feed]:
+        """Deserialize feed data from API response to Feed models."""
+        return [Feed.model_validate(feed) for feed in feeds_data]
+
+    def _deserialize_reports(
+        self,
+        reports_data: list[dict[str, Any]],
+    ) -> list[ReportMetadata]:
+        """Deserialize report data from API response to ReportMetadata models."""
+        return [ReportMetadata.model_validate(report) for report in reports_data]
