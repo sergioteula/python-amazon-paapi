@@ -8,6 +8,7 @@ from __future__ import annotations
 import asyncio
 import time
 
+from amazon_creatorsapi.core.constants import DEFAULT_TIMEOUT
 from amazon_creatorsapi.errors import AuthenticationError
 
 try:
@@ -55,6 +56,8 @@ class AsyncOAuth2TokenManager:
         credential_secret: OAuth2 credential secret.
         version: API version (determines auth endpoint).
         auth_endpoint: Optional custom auth endpoint URL.
+        timeout: Token request timeout in seconds, or None to wait
+            indefinitely. Defaults to 30 seconds.
 
     """
 
@@ -64,12 +67,14 @@ class AsyncOAuth2TokenManager:
         credential_secret: str,
         version: str,
         auth_endpoint: str | None = None,
+        timeout: float | None = DEFAULT_TIMEOUT,
     ) -> None:
         """Initialize the async OAuth2 token manager."""
         self._credential_id = credential_id
         self._credential_secret = credential_secret
         self._version = version
         self._auth_endpoint = self._determine_auth_endpoint(version, auth_endpoint)
+        self._timeout = timeout
 
         self._access_token: str | None = None
         self._expires_at: float | None = None
@@ -186,7 +191,7 @@ class AsyncOAuth2TokenManager:
         }
 
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(timeout=self._timeout) as client:
                 if self.is_lwa():
                     response = await client.post(
                         self._auth_endpoint,

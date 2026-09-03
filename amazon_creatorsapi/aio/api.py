@@ -12,11 +12,14 @@ from typing import TYPE_CHECKING, Any, TypeVar
 
 from typing_extensions import Self
 
-from amazon_creatorsapi.core.constants import DEFAULT_THROTTLING
+from amazon_creatorsapi.core.constants import DEFAULT_THROTTLING, DEFAULT_TIMEOUT
 from amazon_creatorsapi.core.error_handling import handle_api_error
 from amazon_creatorsapi.core.parsers import get_asin, get_items_ids
 from amazon_creatorsapi.core.resources import get_all_resources
-from amazon_creatorsapi.core.validation import validate_and_get_marketplace
+from amazon_creatorsapi.core.validation import (
+    validate_and_get_marketplace,
+    validate_timeout,
+)
 from amazon_creatorsapi.errors import ItemsNotFoundError
 
 try:
@@ -118,9 +121,12 @@ class AsyncAmazonCreatorsApi:
         country: Country code (e.g., "ES", "US"). Used to determine marketplace.
         marketplace: Marketplace URL (e.g., "www.amazon.es"). Overrides country.
         throttling: Wait time in seconds between API calls. Defaults to 1 second.
+        timeout: Request timeout in seconds, or None to wait indefinitely.
+            Defaults to 30 seconds.
 
     Raises:
-        InvalidArgumentError: If neither country nor marketplace is provided.
+        InvalidArgumentError: If neither country nor marketplace is provided,
+            or if timeout is not greater than zero.
         ValueError: If version is not supported (valid versions: 2.1, 2.2, 2.3,
             3.1, 3.2, 3.3).
 
@@ -135,6 +141,7 @@ class AsyncAmazonCreatorsApi:
         country: CountryCode | None = None,
         marketplace: str | None = None,
         throttling: float = DEFAULT_THROTTLING,
+        timeout: float | None = DEFAULT_TIMEOUT,
     ) -> None:
         """Initialize the async Amazon Creators API client."""
         # Validate version early to fail fast (before token manager initialization)
@@ -147,6 +154,7 @@ class AsyncAmazonCreatorsApi:
         self._throttle_lock: asyncio.Lock | None = None
         self.tag = tag
         self.throttling = float(throttling)
+        self.timeout = validate_timeout(timeout)
 
         # Determine marketplace from country or direct value
         self.marketplace = validate_and_get_marketplace(country, marketplace)
@@ -157,6 +165,7 @@ class AsyncAmazonCreatorsApi:
             credential_id=credential_id,
             credential_secret=credential_secret,
             version=version,
+            timeout=self.timeout,
         )
         self._owns_client = False
 
@@ -177,7 +186,7 @@ class AsyncAmazonCreatorsApi:
 
     async def __aenter__(self) -> Self:
         """Enter async context manager, creating a persistent HTTP client."""
-        self._http_client = AsyncHttpClient(host=API_HOST)
+        self._http_client = AsyncHttpClient(host=API_HOST, timeout=self.timeout)
         await self._http_client.__aenter__()
         self._owns_client = True
         return self
@@ -596,7 +605,7 @@ class AsyncAmazonCreatorsApi:
         if self._http_client is not None:
             response = await self._http_client.post(endpoint, headers, body)
         else:
-            async with AsyncHttpClient(host=API_HOST) as client:
+            async with AsyncHttpClient(host=API_HOST, timeout=self.timeout) as client:
                 response = await client.post(endpoint, headers, body)
 
         # Handle errors

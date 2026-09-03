@@ -38,3 +38,24 @@ def validate_and_get_marketplace(
         return MARKETPLACES[country]
     msg = "Either 'country' or 'marketplace' must be provided"
     raise InvalidArgumentError(msg)
+
+
+def validate_timeout(timeout: float | None) -> float | None:
+    """Validate the request timeout value.
+
+    Args:
+        timeout: Request timeout in seconds, or None to wait indefinitely.
+
+    Returns:
+        The timeout as a float, or None when disabled.
+
+    Raises:
+        InvalidArgumentError: If the timeout is not greater than zero.
+
+    """
+    if timeout is None:
+        return None
+    if timeout <= 0:
+        msg = "Timeout must be greater than zero, or None to wait indefinitely"
+        raise InvalidArgumentError(msg)
+    return float(timeout)

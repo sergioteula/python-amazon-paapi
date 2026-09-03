@@ -1,6 +1,6 @@
 [project]
 name = "python-amazon-paapi"
-version = "7.0.0"
+version = "7.1.0"
 description = "Amazon Creators API wrapper for Python"
 readme = "README.md"
 requires-python = ">=3.9"
