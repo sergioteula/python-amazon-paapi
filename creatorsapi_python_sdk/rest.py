@@ -110,8 +110,28 @@ class RESTClientObject:
                 pool_args["headers"] = configuration.proxy_headers
                 self.pool_manager = SOCKSProxyManager(**pool_args)
             else:
-                pool_args["proxy_url"] = configuration.proxy
-                pool_args["proxy_headers"] = configuration.proxy_headers
+                proxy_url = configuration.proxy
+                proxy_headers = configuration.proxy_headers
+                # urllib3 ProxyManager ignores credentials embedded in the
+                # proxy URL for HTTPS CONNECT tunneling — they must be passed
+                # via proxy_headers instead.  Extract them here so callers can
+                # pass a plain "http://user:pass@host:port" URL and get correct
+                # CONNECT auth without any extra configuration.
+                if proxy_headers is None:
+                    from urllib.parse import urlparse
+                    _parsed = urlparse(proxy_url)
+                    if _parsed.username:
+                        proxy_headers = urllib3.make_headers(
+                            proxy_basic_auth=(
+                                f"{_parsed.username}:{_parsed.password}"
+                            )
+                        )
+                        proxy_url = (
+                            f"{_parsed.scheme}://"
+                            f"{_parsed.hostname}:{_parsed.port}"
+                        )
+                pool_args["proxy_url"] = proxy_url
+                pool_args["proxy_headers"] = proxy_headers
                 self.pool_manager = urllib3.ProxyManager(**pool_args)
         else:
             self.pool_manager = urllib3.PoolManager(**pool_args)

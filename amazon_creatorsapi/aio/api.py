@@ -118,6 +118,9 @@ class AsyncAmazonCreatorsApi:
         country: Country code (e.g., "ES", "US"). Used to determine marketplace.
         marketplace: Marketplace URL (e.g., "www.amazon.es"). Overrides country.
         throttling: Wait time in seconds between API calls. Defaults to 1 second.
+        proxy: Optional HTTP proxy URL, e.g. ``"http://user:pass@proxy:3128"``.
+            Applied to both API calls and OAuth2 token refresh (httpx handles
+            credentials embedded in the URL). Defaults to no proxy.
 
     Raises:
         InvalidArgumentError: If neither country nor marketplace is provided.
@@ -135,6 +138,7 @@ class AsyncAmazonCreatorsApi:
         country: CountryCode | None = None,
         marketplace: str | None = None,
         throttling: float = DEFAULT_THROTTLING,
+        proxy: str | None = None,
     ) -> None:
         """Initialize the async Amazon Creators API client."""
         # Validate version early to fail fast (before token manager initialization)
@@ -153,10 +157,13 @@ class AsyncAmazonCreatorsApi:
 
         # HTTP client and token manager (initialized lazily or via context manager)
         self._http_client: AsyncHttpClient | None = None
+        # Normalize empty string to None so httpx doesn't reject proxy="".
+        self._proxy = proxy or None
         self._token_manager = AsyncOAuth2TokenManager(
             credential_id=credential_id,
             credential_secret=credential_secret,
             version=version,
+            proxy=self._proxy,
         )
         self._owns_client = False
 
@@ -177,7 +184,7 @@ class AsyncAmazonCreatorsApi:
 
     async def __aenter__(self) -> Self:
         """Enter async context manager, creating a persistent HTTP client."""
-        self._http_client = AsyncHttpClient(host=API_HOST)
+        self._http_client = AsyncHttpClient(host=API_HOST, proxy=self._proxy)
         await self._http_client.__aenter__()
         self._owns_client = True
         return self
@@ -596,7 +603,7 @@ class AsyncAmazonCreatorsApi:
         if self._http_client is not None:
             response = await self._http_client.post(endpoint, headers, body)
         else:
-            async with AsyncHttpClient(host=API_HOST) as client:
+            async with AsyncHttpClient(host=API_HOST, proxy=self._proxy) as client:
                 response = await client.post(endpoint, headers, body)
 
         # Handle errors

@@ -65,6 +65,9 @@ class AsyncHttpClient:
     Args:
         host: Base URL for API requests. Defaults to Amazon Creators API.
         timeout: Request timeout in seconds. Defaults to 30.
+        proxy: Optional HTTP proxy URL, e.g. ``"http://user:pass@proxy:3128"``.
+            httpx applies it to every request (and handles credentials
+            embedded in the URL). Defaults to no proxy.
 
     """
 
@@ -72,10 +75,13 @@ class AsyncHttpClient:
         self,
         host: str = DEFAULT_HOST,
         timeout: float = DEFAULT_TIMEOUT,
+        proxy: str | None = None,
     ) -> None:
         """Initialize the async HTTP client."""
         self._host = host
         self._timeout = timeout
+        # Normalize empty string to None so httpx doesn't reject proxy="".
+        self._proxy = proxy or None
         self._client: httpx.AsyncClient | None = None
         self._owns_client = False
 
@@ -85,6 +91,7 @@ class AsyncHttpClient:
             base_url=self._host,
             timeout=self._timeout,
             headers={"User-Agent": USER_AGENT},
+            proxy=self._proxy,
         )
         self._owns_client = True
         return self
@@ -133,6 +140,7 @@ class AsyncHttpClient:
             async with httpx.AsyncClient(
                 base_url=self._host,
                 timeout=self._timeout,
+                proxy=self._proxy,
             ) as client:
                 response = await client.post(
                     path,

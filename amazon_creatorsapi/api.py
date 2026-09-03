@@ -16,6 +16,7 @@ from amazon_creatorsapi.core.validation import validate_and_get_marketplace
 from amazon_creatorsapi.errors import ItemsNotFoundError
 from creatorsapi_python_sdk.api.default_api import DefaultApi
 from creatorsapi_python_sdk.api_client import ApiClient
+from creatorsapi_python_sdk.configuration import Configuration
 from creatorsapi_python_sdk.exceptions import ApiException
 from creatorsapi_python_sdk.models.get_browse_nodes_request_content import (
     GetBrowseNodesRequestContent,
@@ -68,6 +69,8 @@ class AmazonCreatorsApi:
         country: Country code (e.g., "ES", "US"). Used to determine marketplace.
         marketplace: Marketplace URL (e.g., "www.amazon.es"). Overrides country.
         throttling: Wait time in seconds between API calls. Defaults to 1 second.
+        proxy: Optional HTTP proxy URL, e.g. ``"http://user:pass@proxy:3128"``.
+            Applied to both regular API calls and OAuth2 token refresh.
 
     Raises:
         InvalidArgumentError: If neither country nor marketplace is provided.
@@ -93,6 +96,7 @@ class AmazonCreatorsApi:
         country: CountryCode | None = None,
         marketplace: str | None = None,
         throttling: float = DEFAULT_THROTTLING,
+        proxy: str | None = None,
     ) -> None:
         """Initialize the Amazon Creators API client."""
         self._credential_id = credential_id
@@ -105,7 +109,11 @@ class AmazonCreatorsApi:
         # Determine marketplace from country or direct value
         self.marketplace = validate_and_get_marketplace(country, marketplace)
 
+        configuration = Configuration()
+        configuration.proxy = proxy
+
         self._api_client = ApiClient(
+            configuration=configuration,
             credential_id=credential_id,
             credential_secret=credential_secret,
             version=version,

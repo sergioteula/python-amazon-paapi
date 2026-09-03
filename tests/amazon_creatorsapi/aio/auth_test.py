@@ -213,6 +213,90 @@ class TestAsyncOAuth2TokenManagerGetToken(unittest.IsolatedAsyncioTestCase):
         self.assertIsNotNone(manager._expires_at)
 
 
+class TestAsyncOAuth2TokenManagerProxy(unittest.IsolatedAsyncioTestCase):
+    """Tests that token refresh routes through the configured proxy."""
+
+    @patch("amazon_creatorsapi.aio.auth.httpx.AsyncClient")
+    async def test_refresh_token_sets_proxy_on_client(
+        self,
+        mock_async_client_class: MagicMock,
+    ) -> None:
+        """When a proxy is provided, httpx.AsyncClient is created with it."""
+        proxy_url = "http://user:pass@proxy.example.com:3128"
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "access_token": "tok123",
+            "expires_in": 3600,
+        }
+
+        mock_client = AsyncMock()
+        mock_client.post.return_value = mock_response
+        mock_client.__aenter__.return_value = mock_client
+        mock_async_client_class.return_value = mock_client
+
+        manager = AsyncOAuth2TokenManager(
+            "test_id", "test_secret", "2.2", proxy=proxy_url
+        )
+
+        await manager.refresh_token()
+
+        call_kwargs = mock_async_client_class.call_args.kwargs
+        self.assertEqual(call_kwargs["proxy"], proxy_url)
+
+    @patch("amazon_creatorsapi.aio.auth.httpx.AsyncClient")
+    async def test_refresh_token_no_proxy(
+        self, mock_async_client_class: MagicMock
+    ) -> None:
+        """When no proxy is configured, httpx.AsyncClient gets proxy=None."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "access_token": "tok123",
+            "expires_in": 3600,
+        }
+
+        mock_client = AsyncMock()
+        mock_client.post.return_value = mock_response
+        mock_client.__aenter__.return_value = mock_client
+        mock_async_client_class.return_value = mock_client
+
+        manager = AsyncOAuth2TokenManager("test_id", "test_secret", "2.2")
+
+        await manager.refresh_token()
+
+        call_kwargs = mock_async_client_class.call_args.kwargs
+        self.assertIsNone(call_kwargs["proxy"])
+
+    @patch("amazon_creatorsapi.aio.auth.httpx.AsyncClient")
+    async def test_refresh_token_lwa_sets_proxy_on_client(
+        self,
+        mock_async_client_class: MagicMock,
+    ) -> None:
+        """Proxy is also applied for LWA (v3.x) token refresh."""
+        proxy_url = "http://proxy.example.com:3128"
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "access_token": "tok123",
+            "expires_in": 3600,
+        }
+
+        mock_client = AsyncMock()
+        mock_client.post.return_value = mock_response
+        mock_client.__aenter__.return_value = mock_client
+        mock_async_client_class.return_value = mock_client
+
+        manager = AsyncOAuth2TokenManager(
+            "test_id", "test_secret", "3.1", proxy=proxy_url
+        )
+
+        await manager.refresh_token()
+
+        call_kwargs = mock_async_client_class.call_args.kwargs
+        self.assertEqual(call_kwargs["proxy"], proxy_url)
+
+
 class TestAsyncOAuth2TokenManagerRefreshToken(unittest.IsolatedAsyncioTestCase):
     """Tests for refresh_token() method."""
 

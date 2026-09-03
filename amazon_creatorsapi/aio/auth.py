@@ -55,6 +55,9 @@ class AsyncOAuth2TokenManager:
         credential_secret: OAuth2 credential secret.
         version: API version (determines auth endpoint).
         auth_endpoint: Optional custom auth endpoint URL.
+        proxy: Optional HTTP proxy URL, e.g. ``"http://user:pass@proxy:3128"``.
+            Applied to token refresh requests (httpx handles credentials
+            embedded in the URL). Defaults to no proxy.
 
     """
 
@@ -64,12 +67,15 @@ class AsyncOAuth2TokenManager:
         credential_secret: str,
         version: str,
         auth_endpoint: str | None = None,
+        proxy: str | None = None,
     ) -> None:
         """Initialize the async OAuth2 token manager."""
         self._credential_id = credential_id
         self._credential_secret = credential_secret
         self._version = version
         self._auth_endpoint = self._determine_auth_endpoint(version, auth_endpoint)
+        # Normalize empty string to None so httpx doesn't reject proxy="".
+        self._proxy = proxy or None
 
         self._access_token: str | None = None
         self._expires_at: float | None = None
@@ -186,7 +192,7 @@ class AsyncOAuth2TokenManager:
         }
 
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(proxy=self._proxy) as client:
                 if self.is_lwa():
                     response = await client.post(
                         self._auth_endpoint,
