@@ -206,10 +206,11 @@ class AsyncIntegrationTest(IsolatedAsyncioTestCase):
         self.browse_nodes_result: list[BrowseNode] = _cached_data["browse_nodes_result"]  # type: ignore[assignment]
 
     async def test_search_items_returns_expected_count(self) -> None:
-        """Test that search returns the default number of items."""
+        """Test that search returns no more items than the default page size."""
+        # API defaults to a page size of 10, but may return fewer items
         items = self.search_result.items
         if items:
-            self.assertEqual(10, len(items))
+            self.assertLessEqual(len(items), 10)
 
     async def test_search_items_includes_affiliate_tag(self) -> None:
         """Test that search results include the affiliate tag in URLs."""

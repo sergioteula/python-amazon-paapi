@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Bumped `creatorsapi-python-sdk` from `1.2.0` to `1.3.0`
 - `partnerTag` is now a required field in `SearchItemsRequestContent`
+- Pinned `ruff` to the version run by pre-commit, so `make lint` matches CI
+
+### Fixed
+
+- Search integration tests no longer assume Amazon always returns a full page of items
 
 ## [6.3.0] - 2026-05-15
 

@@ -52,7 +52,7 @@ dev = [
     "pytest>=7.4.4",
     "pytest-cov>=4.1.0",
     "python-dotenv>=1.2.1",
-    "ruff>=0.14.11",
+    "ruff==0.14.11", # Keep in sync with the ruff rev in .pre-commit-config.yaml
     "types-requests>=2.32.4.20260107",
 ]
 
