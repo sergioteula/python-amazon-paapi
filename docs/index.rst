@@ -9,11 +9,6 @@ Welcome to Python Amazon Creators API's documentation!
 A simple Python wrapper for the Amazon Creators API.
 This module allows interacting with Amazon using the official APIs in an easier way.
 
-.. note::
-
-   The ``amazon_paapi`` module is deprecated. New projects should use the ``amazon_creatorsapi``
-   module instead. See the :doc:`./pages/migration-guide-6` for migration instructions.
-
 Introduction
 ---------------
 
@@ -44,7 +39,8 @@ API Reference
 Migration guide
 ---------------
 
-If you are still using version 5.x or lower, it is recommended upgrading to the latest version.
+If you are still using the removed ``amazon_paapi`` module, follow this guide to move to
+``amazon_creatorsapi``.
 
 .. toctree::
    :maxdepth: 1

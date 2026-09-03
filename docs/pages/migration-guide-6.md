@@ -1,13 +1,13 @@
 # Creators API migration guide
 
-This guide explains how to migrate from the deprecated `amazon_paapi` module to the new
+This guide explains how to migrate from the `amazon_paapi` module to the
 `amazon_creatorsapi` module, which uses Amazon's Creators API.
 
 ## Why migrate?
 
-Version 6.0.0 introduces support for Amazon's new **Creators API**, which replaces the
-Product Advertising API (PAAPI). The old `amazon_paapi` module is now deprecated and will
-not receive new features.
+Version 6.0.0 introduced support for Amazon's new **Creators API**, which replaces the
+Product Advertising API (PAAPI). The old `amazon_paapi` module was deprecated in that
+release and removed in 7.0.0, so importing it now raises `ModuleNotFoundError`.
 
 Key benefits of the Creators API:
 
@@ -18,7 +18,7 @@ Key benefits of the Creators API:
 ## Changelog summary
 
 - New `amazon_creatorsapi` module for the Creators API
-- The `amazon_paapi` module is deprecated (shows a warning when imported)
+- The `amazon_paapi` module is deprecated in 6.0.0 and removed in 7.0.0
 - Different authentication credentials required
 
 ## How to upgrade?

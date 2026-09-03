@@ -11,7 +11,7 @@ test:
 	@uv run --env-file .env pytest -rs
 
 coverage:
-	@uv run pytest -rs --cov=amazon_paapi --cov=amazon_creatorsapi --cov-report=html --cov-report=term --cov-report=xml
+	@uv run pytest -rs --cov=amazon_creatorsapi --cov-report=html --cov-report=term --cov-report=xml
 
 test-all-python-tags:
 	@touch .env
