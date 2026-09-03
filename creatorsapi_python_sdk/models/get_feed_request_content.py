@@ -24,8 +24,9 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing_extensions import Annotated
+from creatorsapi_python_sdk.models.feed_type import FeedType
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -34,7 +35,8 @@ class GetFeedRequestContent(BaseModel):
     GetFeedRequestContent
     """ # noqa: E501
     feed_name: Annotated[str, Field(min_length=1, strict=True)] = Field(alias="feedName")
-    __properties: ClassVar[List[str]] = ["feedName"]
+    feed_type: Optional[FeedType] = Field(default=None, alias="feedType")
+    __properties: ClassVar[List[str]] = ["feedName", "feedType"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -86,7 +88,8 @@ class GetFeedRequestContent(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "feedName": obj.get("feedName")
+            "feedName": obj.get("feedName"),
+            "feedType": obj.get("feedType")
         })
         return _obj
 

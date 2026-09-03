@@ -40,6 +40,7 @@ from creatorsapi_python_sdk.models.dimension_based_attribute import DimensionBas
 from creatorsapi_python_sdk.models.error_data import ErrorData
 from creatorsapi_python_sdk.models.external_ids import ExternalIds
 from creatorsapi_python_sdk.models.feed import Feed
+from creatorsapi_python_sdk.models.feed_type import FeedType
 from creatorsapi_python_sdk.models.get_browse_nodes_request_content import GetBrowseNodesRequestContent
 from creatorsapi_python_sdk.models.get_browse_nodes_resource import GetBrowseNodesResource
 from creatorsapi_python_sdk.models.get_browse_nodes_response_content import GetBrowseNodesResponseContent
@@ -82,6 +83,7 @@ from creatorsapi_python_sdk.models.rating import Rating
 from creatorsapi_python_sdk.models.refinement import Refinement
 from creatorsapi_python_sdk.models.refinement_bin import RefinementBin
 from creatorsapi_python_sdk.models.report_metadata import ReportMetadata
+from creatorsapi_python_sdk.models.report_type import ReportType
 from creatorsapi_python_sdk.models.resource_not_found_exception_response_content import ResourceNotFoundExceptionResponseContent
 from creatorsapi_python_sdk.models.saving_basis_type import SavingBasisType
 from creatorsapi_python_sdk.models.search_items_request_content import SearchItemsRequestContent

@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.4.0] - 2026-09-03
+
+### Added
+
+- `list_feeds`, `get_feed`, `list_reports` and `get_report` methods in `amazon_creatorsapi` and `amazon_creatorsapi.aio`
+- `Feed`, `FeedType`, `ReportMetadata` and `ReportType` in `amazon_creatorsapi.models`
+- `FeedType` and `ReportType` models in the bundled SDK
+- `feedType` field in `Feed` and `GetFeedRequestContent` models
+- `reportType` field in `ReportMetadata` and `GetReportRequestContent` models
+
+### Changed
+
+- Bumped `creatorsapi-python-sdk` from `1.2.0` to `1.3.0`
+- `partnerTag` is now a required field in `SearchItemsRequestContent`
+- Pinned `ruff` to the version run by pre-commit, so `make lint` matches CI
+
+### Fixed
+
+- Search integration tests no longer assume Amazon always returns a full page of items
+
 ## [6.3.0] - 2026-05-15
 
 ### Added

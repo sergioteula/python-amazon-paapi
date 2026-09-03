@@ -18,11 +18,13 @@ from amazon_creatorsapi.errors import (
 )
 from creatorsapi_python_sdk.exceptions import ApiException
 from creatorsapi_python_sdk.models.delivery_flag import DeliveryFlag
+from creatorsapi_python_sdk.models.feed_type import FeedType
 from creatorsapi_python_sdk.models.get_browse_nodes_resource import (
     GetBrowseNodesResource,
 )
 from creatorsapi_python_sdk.models.get_items_resource import GetItemsResource
 from creatorsapi_python_sdk.models.get_variations_resource import GetVariationsResource
+from creatorsapi_python_sdk.models.report_type import ReportType
 from creatorsapi_python_sdk.models.search_items_resource import SearchItemsResource
 
 if TYPE_CHECKING:
@@ -829,3 +831,199 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             resources=[GetBrowseNodesResource.BROWSE_NODES_DOT_ANCESTOR],
         )
         self.assertIsInstance(result, list)
+
+    def _build_api(self) -> AmazonCreatorsApi:
+        """Build an API instance with throttling disabled."""
+        return AmazonCreatorsApi(
+            credential_id=self.credential_id,
+            credential_secret=self.credential_secret,
+            version=self.version,
+            tag=self.tag,
+            country=self.country,
+            throttling=0,
+        )
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_list_feeds(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test list_feeds method returns the available feeds."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        feed = MagicMock()
+        mock_api.list_feeds.return_value = MagicMock(feeds=[feed])
+
+        result = self._build_api().list_feeds()
+
+        self.assertEqual([feed], result)
+        mock_api.list_feeds.assert_called_once_with(x_marketplace="www.amazon.es")
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_list_feeds_without_feeds(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test list_feeds returns an empty list when no feeds are available."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.list_feeds.return_value = MagicMock(feeds=None)
+
+        self.assertEqual([], self._build_api().list_feeds())
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_list_feeds_api_exception(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test list_feeds raises a wrapped error on API failure."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.list_feeds.side_effect = ApiException(status=500)
+
+        with self.assertRaises(RequestError):
+            self._build_api().list_feeds()
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_feed(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test get_feed method returns the download URL."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_feed.return_value = MagicMock(url="https://feed.example/file")
+
+        result = self._build_api().get_feed("feed-name")
+
+        self.assertEqual("https://feed.example/file", result)
+        request = mock_api.get_feed.call_args.kwargs["get_feed_request_content"]
+        self.assertEqual("feed-name", request.feed_name)
+        self.assertIsNone(request.feed_type)
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_feed_with_feed_type(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test get_feed forwards the feed type to the SDK request."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_feed.return_value = MagicMock(url="https://feed.example/file")
+
+        self._build_api().get_feed("feed-name", feed_type=FeedType.DEALS_FEEDS)
+
+        request = mock_api.get_feed.call_args.kwargs["get_feed_request_content"]
+        self.assertEqual(FeedType.DEALS_FEEDS, request.feed_type)
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_feed_api_exception(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test get_feed raises a wrapped error on API failure."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_feed.side_effect = ApiException(status=404)
+
+        with self.assertRaises(ItemsNotFoundError):
+            self._build_api().get_feed("missing-feed")
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_list_reports(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test list_reports method returns the available reports."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        report = MagicMock()
+        mock_api.list_reports.return_value = MagicMock(reports=[report])
+
+        result = self._build_api().list_reports()
+
+        self.assertEqual([report], result)
+        mock_api.list_reports.assert_called_once_with(x_marketplace="www.amazon.es")
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_list_reports_api_exception(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test list_reports raises a wrapped error on API failure."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.list_reports.side_effect = ApiException(status=429)
+
+        with self.assertRaises(TooManyRequestsError):
+            self._build_api().list_reports()
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_report(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test get_report method returns the download URL."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_report.return_value = MagicMock(url="https://report.example/file")
+
+        result = self._build_api().get_report("report.csv")
+
+        self.assertEqual("https://report.example/file", result)
+        request = mock_api.get_report.call_args.kwargs["get_report_request_content"]
+        self.assertEqual("report.csv", request.filename)
+        self.assertIsNone(request.report_type)
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_report_with_report_type(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test get_report forwards the report type to the SDK request."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_report.return_value = MagicMock(url="https://report.example/file")
+
+        self._build_api().get_report(
+            "report.csv",
+            report_type=ReportType.CREATOR_CONNECTIONS,
+        )
+
+        request = mock_api.get_report.call_args.kwargs["get_report_request_content"]
+        self.assertEqual(ReportType.CREATOR_CONNECTIONS, request.report_type)
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_report_api_exception(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test get_report raises a wrapped error on API failure."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_report.side_effect = ApiException(status=500)
+
+        with self.assertRaises(RequestError):
+            self._build_api().get_report("report.csv")

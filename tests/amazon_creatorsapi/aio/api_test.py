@@ -15,11 +15,13 @@ from amazon_creatorsapi.errors import (
 )
 from creatorsapi_python_sdk.models.condition import Condition
 from creatorsapi_python_sdk.models.delivery_flag import DeliveryFlag
+from creatorsapi_python_sdk.models.feed_type import FeedType
 from creatorsapi_python_sdk.models.get_browse_nodes_resource import (
     GetBrowseNodesResource,
 )
 from creatorsapi_python_sdk.models.get_items_resource import GetItemsResource
 from creatorsapi_python_sdk.models.get_variations_resource import GetVariationsResource
+from creatorsapi_python_sdk.models.report_type import ReportType
 from creatorsapi_python_sdk.models.search_items_resource import SearchItemsResource
 from creatorsapi_python_sdk.models.sort_by import SortBy
 
@@ -1338,6 +1340,263 @@ class TestAsyncAmazonCreatorsApiWithoutContextManager(unittest.IsolatedAsyncioTe
 
         headers = mock_client.post.call_args.args[1]
         self.assertEqual(headers["Authorization"], "Bearer test_token")
+
+
+class TestAsyncAmazonCreatorsApiFeeds(unittest.IsolatedAsyncioTestCase):
+    """Tests for AsyncAmazonCreatorsApi feed operations."""
+
+    def _mock_transport(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+        payload: dict,
+    ) -> AsyncMock:
+        """Wire the HTTP client and token manager mocks to return a payload."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = payload
+
+        mock_client = AsyncMock()
+        mock_client.post.return_value = mock_response
+        mock_client.__aenter__.return_value = mock_client
+        mock_http_client_class.return_value = mock_client
+
+        mock_token_manager = AsyncMock()
+        mock_token_manager.get_token.return_value = "test_token"
+        mock_token_manager_class.return_value = mock_token_manager
+
+        return mock_client
+
+    def _build_api(self) -> AsyncAmazonCreatorsApi:
+        """Build an API instance with throttling disabled."""
+        return AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+            throttling=0,
+        )
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_list_feeds_success(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test list_feeds returns deserialized feeds."""
+        mock_client = self._mock_transport(
+            mock_http_client_class,
+            mock_token_manager_class,
+            {
+                "feeds": [
+                    {
+                        "feedName": "product-feed",
+                        "size": 1024,
+                        "md5": "abc123",
+                        "lastUpdated": "2026-09-01T00:00:00Z",
+                        "feedType": "PRODUCT_FEEDS",
+                    }
+                ]
+            },
+        )
+
+        async with self._build_api() as api:
+            feeds = await api.list_feeds()
+
+        self.assertEqual(1, len(feeds))
+        self.assertEqual("product-feed", feeds[0].feed_name)
+        self.assertEqual(FeedType.PRODUCT_FEEDS, feeds[0].feed_type)
+        self.assertEqual("/catalog/v1/listFeeds", mock_client.post.call_args.args[0])
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_list_feeds_without_feeds(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test list_feeds returns an empty list when no feeds are available."""
+        self._mock_transport(mock_http_client_class, mock_token_manager_class, {})
+
+        async with self._build_api() as api:
+            self.assertEqual([], await api.list_feeds())
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_get_feed_success(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test get_feed returns the download URL without a feed type."""
+        mock_client = self._mock_transport(
+            mock_http_client_class,
+            mock_token_manager_class,
+            {"url": "https://feed.example/file"},
+        )
+
+        async with self._build_api() as api:
+            url = await api.get_feed("product-feed")
+
+        self.assertEqual("https://feed.example/file", url)
+        self.assertEqual(
+            {"feedName": "product-feed"},
+            mock_client.post.call_args.args[2],
+        )
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_get_feed_with_feed_type(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test get_feed sends the feed type in the request body."""
+        mock_client = self._mock_transport(
+            mock_http_client_class,
+            mock_token_manager_class,
+            {"url": "https://feed.example/file"},
+        )
+
+        async with self._build_api() as api:
+            await api.get_feed("deals-feed", feed_type=FeedType.DEALS_FEEDS)
+
+        self.assertEqual(
+            {"feedName": "deals-feed", "feedType": "DEALS_FEEDS"},
+            mock_client.post.call_args.args[2],
+        )
+
+
+class TestAsyncAmazonCreatorsApiReports(unittest.IsolatedAsyncioTestCase):
+    """Tests for AsyncAmazonCreatorsApi report operations."""
+
+    def _mock_transport(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+        payload: dict,
+    ) -> AsyncMock:
+        """Wire the HTTP client and token manager mocks to return a payload."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = payload
+
+        mock_client = AsyncMock()
+        mock_client.post.return_value = mock_response
+        mock_client.__aenter__.return_value = mock_client
+        mock_http_client_class.return_value = mock_client
+
+        mock_token_manager = AsyncMock()
+        mock_token_manager.get_token.return_value = "test_token"
+        mock_token_manager_class.return_value = mock_token_manager
+
+        return mock_client
+
+    def _build_api(self) -> AsyncAmazonCreatorsApi:
+        """Build an API instance with throttling disabled."""
+        return AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+            throttling=0,
+        )
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_list_reports_success(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test list_reports returns deserialized reports."""
+        mock_client = self._mock_transport(
+            mock_http_client_class,
+            mock_token_manager_class,
+            {
+                "reports": [
+                    {
+                        "filename": "earnings.csv",
+                        "md5": "abc123",
+                        "size": 2048,
+                        "lastModified": "2026-09-01T00:00:00Z",
+                        "reportType": "CREATOR_CONNECTIONS",
+                    }
+                ]
+            },
+        )
+
+        async with self._build_api() as api:
+            reports = await api.list_reports()
+
+        self.assertEqual(1, len(reports))
+        self.assertEqual("earnings.csv", reports[0].filename)
+        self.assertEqual(ReportType.CREATOR_CONNECTIONS, reports[0].report_type)
+        self.assertEqual("/reports/v1/listReports", mock_client.post.call_args.args[0])
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_list_reports_without_reports(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test list_reports returns an empty list when no reports exist."""
+        self._mock_transport(mock_http_client_class, mock_token_manager_class, {})
+
+        async with self._build_api() as api:
+            self.assertEqual([], await api.list_reports())
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_get_report_success(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test get_report returns the download URL without a report type."""
+        mock_client = self._mock_transport(
+            mock_http_client_class,
+            mock_token_manager_class,
+            {"url": "https://report.example/file"},
+        )
+
+        async with self._build_api() as api:
+            url = await api.get_report("earnings.csv")
+
+        self.assertEqual("https://report.example/file", url)
+        self.assertEqual(
+            {"filename": "earnings.csv"},
+            mock_client.post.call_args.args[2],
+        )
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_get_report_with_report_type(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test get_report sends the report type in the request body."""
+        mock_client = self._mock_transport(
+            mock_http_client_class,
+            mock_token_manager_class,
+            {"url": "https://report.example/file"},
+        )
+
+        async with self._build_api() as api:
+            await api.get_report(
+                "earnings.csv",
+                report_type=ReportType.CREATOR_CENTRAL,
+            )
+
+        self.assertEqual(
+            {"filename": "earnings.csv", "reportType": "CREATOR_CENTRAL"},
+            mock_client.post.call_args.args[2],
+        )
 
 
 if __name__ == "__main__":

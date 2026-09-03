@@ -105,14 +105,15 @@ class AsyncHttpClient:
         self,
         path: str,
         headers: dict[str, str],
-        body: dict[str, Any],
+        body: dict[str, Any] | None = None,
     ) -> AsyncHttpResponse:
         """Make a POST request to the API.
 
         Args:
             path: API endpoint path (e.g., "/catalog/v1/getItems").
             headers: Request headers.
-            body: Request body as a dictionary.
+            body: Request body as a dictionary. When omitted, the request is
+                sent without a payload, as operations like listFeeds expect.
 
         Returns:
             AsyncHttpResponse with status, headers, and body.

@@ -23,10 +23,16 @@ from creatorsapi_python_sdk.models.get_browse_nodes_request_content import (
 from creatorsapi_python_sdk.models.get_browse_nodes_resource import (
     GetBrowseNodesResource,
 )
+from creatorsapi_python_sdk.models.get_feed_request_content import (
+    GetFeedRequestContent,
+)
 from creatorsapi_python_sdk.models.get_items_request_content import (
     GetItemsRequestContent,
 )
 from creatorsapi_python_sdk.models.get_items_resource import GetItemsResource
+from creatorsapi_python_sdk.models.get_report_request_content import (
+    GetReportRequestContent,
+)
 from creatorsapi_python_sdk.models.get_variations_request_content import (
     GetVariationsRequestContent,
 )
@@ -41,7 +47,11 @@ if TYPE_CHECKING:
     from creatorsapi_python_sdk.models.browse_node import BrowseNode
     from creatorsapi_python_sdk.models.condition import Condition
     from creatorsapi_python_sdk.models.delivery_flag import DeliveryFlag
+    from creatorsapi_python_sdk.models.feed import Feed
+    from creatorsapi_python_sdk.models.feed_type import FeedType
     from creatorsapi_python_sdk.models.item import Item
+    from creatorsapi_python_sdk.models.report_metadata import ReportMetadata
+    from creatorsapi_python_sdk.models.report_type import ReportType
     from creatorsapi_python_sdk.models.search_result import SearchResult
     from creatorsapi_python_sdk.models.sort_by import SortBy
     from creatorsapi_python_sdk.models.variations_result import VariationsResult
@@ -366,6 +376,106 @@ class AmazonCreatorsApi:
             raise ItemsNotFoundError(msg)
 
         return response.browse_nodes_result.browse_nodes
+
+    def list_feeds(self) -> list[Feed]:
+        """Return the feeds available for your account.
+
+        Returns:
+            List of Feed objects, empty if no feeds are available. Each feed
+            carries its type, so the same name can exist in more than one
+            feed program.
+
+        Raises:
+            RequestError: If the API request fails.
+
+        """
+        self._throttle()
+
+        try:
+            response = self._api.list_feeds(x_marketplace=self.marketplace)
+        except ApiException as exc:
+            self._handle_api_exception(exc)
+
+        return response.feeds or []
+
+    def get_feed(self, feed_name: str, feed_type: FeedType | None = None) -> str:
+        """Return a temporary download URL for a feed.
+
+        Args:
+            feed_name: Name of the feed, as returned by list_feeds.
+            feed_type: Feed program the name belongs to. Needed to disambiguate
+                a name available in more than one program.
+
+        Returns:
+            URL to download the feed contents from.
+
+        Raises:
+            RequestError: If the API request fails.
+
+        """
+        request = GetFeedRequestContent(feedName=feed_name, feedType=feed_type)
+
+        self._throttle()
+
+        try:
+            response = self._api.get_feed(
+                x_marketplace=self.marketplace,
+                get_feed_request_content=request,
+            )
+        except ApiException as exc:
+            self._handle_api_exception(exc)
+
+        return response.url
+
+    def list_reports(self) -> list[ReportMetadata]:
+        """Return the reports available for your account.
+
+        Returns:
+            List of ReportMetadata objects, empty if no reports are available.
+            Each report carries its type, telling Creator Central reports apart
+            from Creator Connections ones.
+
+        Raises:
+            RequestError: If the API request fails.
+
+        """
+        self._throttle()
+
+        try:
+            response = self._api.list_reports(x_marketplace=self.marketplace)
+        except ApiException as exc:
+            self._handle_api_exception(exc)
+
+        return response.reports
+
+    def get_report(self, filename: str, report_type: ReportType | None = None) -> str:
+        """Return a temporary download URL for a report.
+
+        Args:
+            filename: Name of the report, as returned by list_reports.
+            report_type: Program the report belongs to. Needed to disambiguate
+                a filename available in more than one program.
+
+        Returns:
+            URL to download the report contents from.
+
+        Raises:
+            RequestError: If the API request fails.
+
+        """
+        request = GetReportRequestContent(filename=filename, reportType=report_type)
+
+        self._throttle()
+
+        try:
+            response = self._api.get_report(
+                x_marketplace=self.marketplace,
+                get_report_request_content=request,
+            )
+        except ApiException as exc:
+            self._handle_api_exception(exc)
+
+        return response.url
 
     def _throttle(self) -> None:
         """Wait for the throttling interval to elapse since the last API call."""
