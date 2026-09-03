@@ -24,7 +24,8 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Union
+from typing import Any, ClassVar, Dict, List, Optional, Union
+from creatorsapi_python_sdk.models.report_type import ReportType
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -36,7 +37,8 @@ class ReportMetadata(BaseModel):
     md5: StrictStr
     size: Union[StrictFloat, StrictInt]
     last_modified: StrictStr = Field(alias="lastModified")
-    __properties: ClassVar[List[str]] = ["filename", "md5", "size", "lastModified"]
+    report_type: Optional[ReportType] = Field(default=None, alias="reportType")
+    __properties: ClassVar[List[str]] = ["filename", "md5", "size", "lastModified", "reportType"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -91,7 +93,8 @@ class ReportMetadata(BaseModel):
             "filename": obj.get("filename"),
             "md5": obj.get("md5"),
             "size": obj.get("size"),
-            "lastModified": obj.get("lastModified")
+            "lastModified": obj.get("lastModified"),
+            "reportType": obj.get("reportType")
         })
         return _obj
 

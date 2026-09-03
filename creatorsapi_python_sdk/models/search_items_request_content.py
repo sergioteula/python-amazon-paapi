@@ -55,7 +55,7 @@ class SearchItemsRequestContent(BaseModel):
     min_price: Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]] = Field(default=None, description="The MinPrice parameter filters search results to items with at least one offer price above the specified value.", alias="minPrice")
     min_reviews_rating: Optional[Union[Annotated[float, Field(le=4, strict=True, ge=1)], Annotated[int, Field(le=4, strict=True, ge=1)]]] = Field(default=None, description="The MinReviewsRating parameter filters search results to items with customer review ratings above specified value.", alias="minReviewsRating")
     min_saving_percent: Optional[Union[Annotated[float, Field(le=99, strict=True, ge=1)], Annotated[int, Field(le=99, strict=True, ge=1)]]] = Field(default=None, description="The MinSavingPercent parameter filters search results to items with at least one offer having saving percentage above the specified value.", alias="minSavingPercent")
-    partner_tag: Optional[Annotated[str, Field(strict=True, max_length=64)]] = Field(default=None, description="An alphanumeric token that uniquely identifies a partner. If the value of PartnerType is Associates, enter your Store Id or tracking ID.", alias="partnerTag")
+    partner_tag: Annotated[str, Field(strict=True, max_length=64)] = Field(description="Unique Id for a partner. This is used to identify the associate tag for tracking affiliate commissions. Example: 'xyz-20'", alias="partnerTag")
     properties: Optional[Dict[str, Annotated[str, Field(strict=True)]]] = Field(default=None, description="Reserved parameter for specifying key-value pairs. This is a flexible mechanism for passing additional context or metadata to the API.")
     resources: Optional[Annotated[List[SearchItemsResource], Field(max_length=100)]] = Field(default=None, description="List of resources for SearchItems operation which specify the values to return.")
     search_index: Optional[Annotated[str, Field(strict=True, max_length=1000)]] = Field(default=None, description="Indicates the product category to search. SearchIndex values differ by marketplace.", alias="searchIndex")
@@ -136,9 +136,6 @@ class SearchItemsRequestContent(BaseModel):
     @field_validator('partner_tag')
     def partner_tag_validate_regular_expression(cls, value):
         """Validates the regular expression"""
-        if value is None:
-            return value
-
         if not re.match(r".*\S.*", value):
             raise ValueError(r"must validate the regular expression /.*\S.*/")
         return value

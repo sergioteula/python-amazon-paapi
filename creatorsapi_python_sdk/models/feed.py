@@ -24,7 +24,8 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Union
+from typing import Any, ClassVar, Dict, List, Optional, Union
+from creatorsapi_python_sdk.models.feed_type import FeedType
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -36,7 +37,8 @@ class Feed(BaseModel):
     size: Union[StrictFloat, StrictInt]
     md5: StrictStr
     last_updated: StrictStr = Field(alias="lastUpdated")
-    __properties: ClassVar[List[str]] = ["feedName", "size", "md5", "lastUpdated"]
+    feed_type: Optional[FeedType] = Field(default=None, alias="feedType")
+    __properties: ClassVar[List[str]] = ["feedName", "size", "md5", "lastUpdated", "feedType"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -91,7 +93,8 @@ class Feed(BaseModel):
             "feedName": obj.get("feedName"),
             "size": obj.get("size"),
             "md5": obj.get("md5"),
-            "lastUpdated": obj.get("lastUpdated")
+            "lastUpdated": obj.get("lastUpdated"),
+            "feedType": obj.get("feedType")
         })
         return _obj
 

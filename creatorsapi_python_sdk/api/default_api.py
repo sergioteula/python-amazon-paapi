@@ -22,7 +22,6 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
 from pydantic import Field, field_validator
-from typing import Optional
 from typing_extensions import Annotated
 from creatorsapi_python_sdk.models.get_browse_nodes_request_content import GetBrowseNodesRequestContent
 from creatorsapi_python_sdk.models.get_browse_nodes_response_content import GetBrowseNodesResponseContent
@@ -2130,7 +2129,7 @@ class DefaultApi:
     def search_items(
         self,
         x_marketplace: Annotated[str, Field(strict=True, max_length=1000, description="Target Amazon Locale.")],
-        search_items_request_content: Optional[SearchItemsRequestContent] = None,
+        search_items_request_content: SearchItemsRequestContent,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2149,7 +2148,7 @@ class DefaultApi:
 
         :param x_marketplace: Target Amazon Locale. (required)
         :type x_marketplace: str
-        :param search_items_request_content:
+        :param search_items_request_content: (required)
         :type search_items_request_content: SearchItemsRequestContent
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2206,7 +2205,7 @@ class DefaultApi:
     def search_items_with_http_info(
         self,
         x_marketplace: Annotated[str, Field(strict=True, max_length=1000, description="Target Amazon Locale.")],
-        search_items_request_content: Optional[SearchItemsRequestContent] = None,
+        search_items_request_content: SearchItemsRequestContent,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2225,7 +2224,7 @@ class DefaultApi:
 
         :param x_marketplace: Target Amazon Locale. (required)
         :type x_marketplace: str
-        :param search_items_request_content:
+        :param search_items_request_content: (required)
         :type search_items_request_content: SearchItemsRequestContent
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2282,7 +2281,7 @@ class DefaultApi:
     def search_items_without_preload_content(
         self,
         x_marketplace: Annotated[str, Field(strict=True, max_length=1000, description="Target Amazon Locale.")],
-        search_items_request_content: Optional[SearchItemsRequestContent] = None,
+        search_items_request_content: SearchItemsRequestContent,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2301,7 +2300,7 @@ class DefaultApi:
 
         :param x_marketplace: Target Amazon Locale. (required)
         :type x_marketplace: str
-        :param search_items_request_content:
+        :param search_items_request_content: (required)
         :type search_items_request_content: SearchItemsRequestContent
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request

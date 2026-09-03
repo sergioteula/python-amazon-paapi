@@ -24,8 +24,9 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing_extensions import Annotated
+from creatorsapi_python_sdk.models.report_type import ReportType
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -34,7 +35,8 @@ class GetReportRequestContent(BaseModel):
     GetReportRequestContent
     """ # noqa: E501
     filename: Annotated[str, Field(min_length=1, strict=True)]
-    __properties: ClassVar[List[str]] = ["filename"]
+    report_type: Optional[ReportType] = Field(default=None, alias="reportType")
+    __properties: ClassVar[List[str]] = ["filename", "reportType"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -86,7 +88,8 @@ class GetReportRequestContent(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "filename": obj.get("filename")
+            "filename": obj.get("filename"),
+            "reportType": obj.get("reportType")
         })
         return _obj
 
