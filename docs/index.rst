@@ -36,6 +36,17 @@ API Reference
 
    amazon_creatorsapi.models
 
+Migration guide
+---------------
+
+If you are still using the removed ``amazon_paapi`` module, follow this guide to move to
+``amazon_creatorsapi``.
+
+.. toctree::
+   :maxdepth: 1
+
+   ./pages/migration-guide-6.md
+
 Changelog
 ---------
 

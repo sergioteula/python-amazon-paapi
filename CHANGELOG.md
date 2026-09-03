@@ -11,14 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The deprecated `amazon_paapi` module and its bundled Product Advertising API 5.0 SDK
 - `AmazonApi`, `amazon_paapi.errors`, `amazon_paapi.helpers`, `amazon_paapi.models` and `amazon_paapi.tools`
-- Product Advertising API documentation, including the version 6 migration guide
+- Product Advertising API documentation and deprecation notices in the README and docs
 - `API_KEY` and `API_SECRET` environment variables, only used by the removed module
 
 ### Changed
 
-- Use `amazon_creatorsapi` instead. Replace `AmazonApi(access_key, secret_key, partner_tag, country)`
-  with `AmazonCreatorsApi(credential_id, credential_secret, version, tag, country)`, and import
-  `get_asin` from `amazon_creatorsapi`
+- Use `amazon_creatorsapi` instead. See the
+  [migration guide](https://python-amazon-paapi.readthedocs.io/en/latest/pages/migration-guide-6.html)
+  for the credential, method and exception mapping
 
 ## [6.4.0] - 2026-09-03
 
