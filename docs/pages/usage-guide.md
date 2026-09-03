@@ -39,6 +39,29 @@ for item in items:
     print(item.images.primary.large.url)
 ```
 
+Items come back in the order they were requested, duplicates are asked for
+only once, and requests with more items than the API accepts at once are
+split into as many calls as needed, so any amount of items can be requested:
+
+```python
+items = api.get_items(asins)  # Any amount of items, split into several calls
+```
+
+Amazon can answer with only some of the requested items, describing the
+missing ones as partial errors. Those errors are available in the returned
+list, and unavailable items can be included as an item holding only the ASIN:
+
+```python
+items = api.get_items(["B01N5IB20Q", "0000000000"], include_unavailable=True)
+
+for error in items.errors:
+    print(error.code, error.message)
+
+for item in items:
+    if item.item_info is None:
+        print(f"{item.asin} is not available")
+```
+
 ## Search Products
 
 ```python
@@ -130,7 +153,7 @@ api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, timeout=10)  # Fails 
 api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, timeout=0.5)  # Fails after half a second
 ```
 
-It applies to every API request. In `AmazonCreatorsApi` the OAuth2 token refresh is handled by the bundled SDK and is not covered by this value, while `AsyncAmazonCreatorsApi` applies it to the token refresh as well.
+It applies to every API request, including the OAuth2 token refresh.
 
 ## Async Support
 

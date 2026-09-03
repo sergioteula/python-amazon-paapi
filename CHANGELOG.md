@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.2.0] - 2026-09-03
+
+### Added
+
+- `get_items` splits a request with more items than the API accepts into as many calls as needed, so any amount of items can be requested at once
+- `include_unavailable` parameter in `get_items` to get an item holding only the ASIN for every requested item missing from the response
+- Partial errors of a response are available in the `errors` attribute of the lists returned by `get_items` and `get_browse_nodes`, and are reported in the message of `ItemsNotFoundError`
+- `ErrorData` and `ResultList` available in `amazon_creatorsapi.models`
+
+### Changed
+
+- `get_items` returns the items in the order they were requested, and asks for duplicated items only once
+- `AmazonCreatorsApi` applies the timeout to the OAuth2 token refresh as well, which previously waited indefinitely, and reports its failures as `AuthenticationError`
+- `AmazonCreatorsApi` validates the version when it is created, as `AsyncAmazonCreatorsApi` already did, instead of failing on the first request
+- Values rejected by the API constraints raise `InvalidArgumentError` instead of a `pydantic.ValidationError`
+- `get_items` raises `ItemsNotFoundError` when the response holds no items, as documented, instead of returning an empty list
+
 ## [7.1.0] - 2026-09-03
 
 ### Added

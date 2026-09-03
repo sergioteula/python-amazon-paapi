@@ -9,6 +9,7 @@ from unittest import mock
 from unittest.mock import MagicMock
 
 from amazon_creatorsapi import AmazonCreatorsApi
+from amazon_creatorsapi.core.auth import TimeoutOAuth2TokenManager
 from amazon_creatorsapi.core.constants import DEFAULT_TIMEOUT
 from amazon_creatorsapi.errors import (
     AssociateValidationError,
@@ -18,13 +19,24 @@ from amazon_creatorsapi.errors import (
     TooManyRequestsError,
 )
 from creatorsapi_python_sdk.exceptions import ApiException
+from creatorsapi_python_sdk.models.browse_node import BrowseNode
+from creatorsapi_python_sdk.models.browse_nodes_result import BrowseNodesResult
 from creatorsapi_python_sdk.models.delivery_flag import DeliveryFlag
+from creatorsapi_python_sdk.models.error_data import ErrorData
 from creatorsapi_python_sdk.models.feed_type import FeedType
 from creatorsapi_python_sdk.models.get_browse_nodes_resource import (
     GetBrowseNodesResource,
 )
+from creatorsapi_python_sdk.models.get_browse_nodes_response_content import (
+    GetBrowseNodesResponseContent,
+)
 from creatorsapi_python_sdk.models.get_items_resource import GetItemsResource
+from creatorsapi_python_sdk.models.get_items_response_content import (
+    GetItemsResponseContent,
+)
 from creatorsapi_python_sdk.models.get_variations_resource import GetVariationsResource
+from creatorsapi_python_sdk.models.item import Item
+from creatorsapi_python_sdk.models.items_result import ItemsResult
 from creatorsapi_python_sdk.models.report_type import ReportType
 from creatorsapi_python_sdk.models.search_items_resource import SearchItemsResource
 
@@ -1258,3 +1270,234 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             mock_api.get_report,
         ):
             self.assertEqual(call.call_args.kwargs["_request_timeout"], 9.0)
+
+
+class TestAmazonCreatorsApiItems(unittest.TestCase):
+    """Tests for the items returned by AmazonCreatorsApi."""
+
+    def setUp(self) -> None:
+        self.credential_id = "test_credential_id"
+        self.credential_secret = "test_credential_secret"
+        self.version = "2.2"
+        self.tag = "test-tag"
+        self.country: CountryCode = "ES"
+
+    def build_api(self, mock_api_class: MagicMock) -> AmazonCreatorsApi:
+        """Build an API client with a mocked SDK."""
+        return AmazonCreatorsApi(
+            credential_id=self.credential_id,
+            credential_secret=self.credential_secret,
+            version=self.version,
+            tag=self.tag,
+            country=self.country,
+            throttling=0,
+        )
+
+    def build_response(
+        self,
+        asins: list[str],
+        errors: list[ErrorData] | None = None,
+    ) -> GetItemsResponseContent:
+        """Build a get items response holding the given items and errors."""
+        return GetItemsResponseContent(
+            itemsResult=ItemsResult(items=[Item(asin=asin) for asin in asins]),
+            errors=errors,
+        )
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_items_keeps_requested_order(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that items are returned in the order they were requested."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.return_value = self.build_response(
+            ["B000000002", "B000000001"],
+        )
+
+        api = self.build_api(mock_api_class)
+        result = api.get_items(["B000000001", "B000000002"])
+
+        self.assertEqual([item.asin for item in result], ["B000000001", "B000000002"])
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_items_splits_requests_over_the_limit(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that more items than the limit are split into several calls."""
+        item_ids = [f"B0000000{index:02d}" for index in range(12)]
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.side_effect = [
+            self.build_response(item_ids[:10]),
+            self.build_response(item_ids[10:]),
+        ]
+
+        api = self.build_api(mock_api_class)
+        result = api.get_items(item_ids)
+
+        self.assertEqual(mock_api.get_items.call_count, 2)
+        self.assertEqual([item.asin for item in result], item_ids)
+        requests = [
+            call.kwargs["get_items_request_content"].item_ids
+            for call in mock_api.get_items.call_args_list
+        ]
+        self.assertEqual([len(request) for request in requests], [10, 2])
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_items_removes_duplicates(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that duplicated items are requested and returned only once."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.return_value = self.build_response(["B000000001"])
+
+        api = self.build_api(mock_api_class)
+        result = api.get_items(["B000000001", "B000000001"])
+
+        request = mock_api.get_items.call_args.kwargs["get_items_request_content"]
+        self.assertEqual(request.item_ids, ["B000000001"])
+        self.assertEqual([item.asin for item in result], ["B000000001"])
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_items_exposes_partial_errors(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that the partial errors of the response are available."""
+        error = ErrorData(code="ItemNotFound", message="Item not found")
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.return_value = self.build_response(
+            ["B000000001"],
+            errors=[error],
+        )
+
+        api = self.build_api(mock_api_class)
+        result = api.get_items(["B000000001", "B000000002"])
+
+        self.assertEqual(result.errors, [error])
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_items_include_unavailable(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that missing items are returned when they are requested."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.return_value = self.build_response(["B000000001"])
+
+        api = self.build_api(mock_api_class)
+        result = api.get_items(
+            ["B000000001", "B000000002"],
+            include_unavailable=True,
+        )
+
+        self.assertEqual([item.asin for item in result], ["B000000001", "B000000002"])
+        self.assertIsNone(result[1].item_info)
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_items_not_found_reports_partial_errors(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that partial errors are reported when nothing is found."""
+        error = ErrorData(code="InvalidItemId", message="Item id is invalid")
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.return_value = GetItemsResponseContent(errors=[error])
+
+        api = self.build_api(mock_api_class)
+
+        with self.assertRaises(ItemsNotFoundError) as context:
+            api.get_items(["B000000001"])
+
+        self.assertIn("InvalidItemId", str(context.exception))
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_items_invalid_parameter_raises_library_error(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that a value rejected by the API raises a library error."""
+        api = self.build_api(mock_api_class)
+
+        with self.assertRaises(InvalidArgumentError):
+            api.get_items(["B000000001"], languages_of_preference=["es_ES", "en_US"])
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_browse_nodes_exposes_partial_errors(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that browse nodes expose the partial errors of the response."""
+        error = ErrorData(code="InvalidBrowseNodeId", message="Invalid browse node")
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_browse_nodes.return_value = GetBrowseNodesResponseContent(
+            browseNodesResult=BrowseNodesResult(browseNodes=[BrowseNode(id="123")]),
+            errors=[error],
+        )
+
+        api = self.build_api(mock_api_class)
+        result = api.get_browse_nodes(["123", "456"])
+
+        self.assertEqual([node.id for node in result], ["123"])
+        self.assertEqual(result.errors, [error])
+
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_token_manager_receives_the_timeout(
+        self,
+        mock_client_class: MagicMock,
+    ) -> None:
+        """Test that the token manager is replaced by one with a timeout."""
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+
+        api = AmazonCreatorsApi(
+            credential_id=self.credential_id,
+            credential_secret=self.credential_secret,
+            version=self.version,
+            tag=self.tag,
+            country=self.country,
+            timeout=12.0,
+        )
+
+        token_manager = mock_client._token_manager
+        self.assertIsInstance(token_manager, TimeoutOAuth2TokenManager)
+        self.assertEqual(token_manager._timeout, 12.0)
+        self.assertEqual(api.timeout, 12.0)
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_items_without_items_raises_library_error(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that requesting no items raises an invalid argument error."""
+        api = self.build_api(mock_api_class)
+
+        with self.assertRaises(InvalidArgumentError):
+            api.get_items([])

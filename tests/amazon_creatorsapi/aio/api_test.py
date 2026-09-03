@@ -1,5 +1,7 @@
 """Unit tests for AsyncAmazonCreatorsApi class."""
 
+from __future__ import annotations
+
 import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -266,8 +268,8 @@ class TestAsyncAmazonCreatorsApiGetItems(unittest.IsolatedAsyncioTestCase):
             "itemsResult": {
                 "items": [
                     {
-                        "ASIN": "B0DLFMFBJW",
-                        "ItemInfo": {"Title": {"DisplayValue": "Test"}},
+                        "asin": "B0DLFMFBJW",
+                        "itemInfo": {"title": {"displayValue": "Test"}},
                     }
                 ]
             }
@@ -305,7 +307,7 @@ class TestAsyncAmazonCreatorsApiGetItems(unittest.IsolatedAsyncioTestCase):
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
-            "itemsResult": {"items": [{"ASIN": "B0DLFMFBJW"}]}
+            "itemsResult": {"items": [{"asin": "B0DLFMFBJW"}]}
         }
 
         mock_client = AsyncMock()
@@ -423,7 +425,7 @@ class TestAsyncAmazonCreatorsApiSearchItemsDeliveryFlags(
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
-            "itemsResult": {"items": [{"ASIN": "B0DLFMFBJW"}]}
+            "itemsResult": {"items": [{"asin": "B0DLFMFBJW"}]}
         }
 
         mock_client = AsyncMock()
@@ -468,8 +470,8 @@ class TestAsyncAmazonCreatorsApiSearchItems(unittest.IsolatedAsyncioTestCase):
         mock_response.status_code = 200
         mock_response.json.return_value = {
             "searchResult": {
-                "TotalResultCount": 1,
-                "items": [{"ASIN": "B0DLFMFBJY"}],
+                "totalResultCount": 1,
+                "items": [{"asin": "B0DLFMFBJY"}],
             }
         }
 
@@ -505,7 +507,7 @@ class TestAsyncAmazonCreatorsApiSearchItems(unittest.IsolatedAsyncioTestCase):
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
-            "searchResult": {"items": [{"ASIN": "B0DLFMFBJY"}]}
+            "searchResult": {"items": [{"asin": "B0DLFMFBJY"}]}
         }
         mock_client = AsyncMock()
         mock_client.post.return_value = mock_response
@@ -537,7 +539,7 @@ class TestAsyncAmazonCreatorsApiSearchItems(unittest.IsolatedAsyncioTestCase):
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
-            "searchResult": {"items": [{"ASIN": "B0DLFMFBJY"}]}
+            "searchResult": {"items": [{"asin": "B0DLFMFBJY"}]}
         }
         mock_client = AsyncMock()
         mock_client.post.return_value = mock_response
@@ -677,7 +679,7 @@ class TestAsyncAmazonCreatorsApiThrottling(unittest.IsolatedAsyncioTestCase):
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
-            "itemsResult": {"items": [{"ASIN": "B0DLFMFBJZ"}]}
+            "itemsResult": {"items": [{"asin": "B0DLFMFBJZ"}]}
         }
 
         mock_client = AsyncMock()
@@ -721,8 +723,8 @@ class TestAsyncAmazonCreatorsApiGetVariations(unittest.IsolatedAsyncioTestCase):
         mock_response.status_code = 200
         mock_response.json.return_value = {
             "variationsResult": {
-                "VariationSummary": {"PageCount": 1},
-                "items": [{"ASIN": "B0DLFMFBJV"}],
+                "variationSummary": {"pageCount": 1},
+                "items": [{"asin": "B0DLFMFBJV"}],
             }
         }
 
@@ -758,7 +760,7 @@ class TestAsyncAmazonCreatorsApiGetVariations(unittest.IsolatedAsyncioTestCase):
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
-            "variationsResult": {"items": [{"ASIN": "B0DLFMFBJV"}]}
+            "variationsResult": {"items": [{"asin": "B0DLFMFBJV"}]}
         }
         mock_client = AsyncMock()
         mock_client.post.return_value = mock_response
@@ -791,8 +793,8 @@ class TestAsyncAmazonCreatorsApiGetVariations(unittest.IsolatedAsyncioTestCase):
         mock_response.status_code = 200
         mock_response.json.return_value = {
             "variationsResult": {
-                "VariationSummary": {"PageCount": 2},
-                "items": [{"ASIN": "B0DLFMFBJV"}],
+                "variationSummary": {"pageCount": 2},
+                "items": [{"asin": "B0DLFMFBJV"}],
             }
         }
 
@@ -872,7 +874,7 @@ class TestAsyncAmazonCreatorsApiGetBrowseNodes(unittest.IsolatedAsyncioTestCase)
         mock_response.status_code = 200
         mock_response.json.return_value = {
             "browseNodesResult": {
-                "browseNodes": [{"Id": "123456", "DisplayName": "Electronics"}]
+                "browseNodes": [{"id": "123456", "displayName": "Electronics"}]
             }
         }
 
@@ -909,7 +911,7 @@ class TestAsyncAmazonCreatorsApiGetBrowseNodes(unittest.IsolatedAsyncioTestCase)
         mock_response.status_code = 200
         mock_response.json.return_value = {
             "browseNodesResult": {
-                "browseNodes": [{"Id": "123456", "DisplayName": "Electronics"}]
+                "browseNodes": [{"id": "123456", "displayName": "Electronics"}]
             }
         }
         mock_client = AsyncMock()
@@ -943,7 +945,7 @@ class TestAsyncAmazonCreatorsApiGetBrowseNodes(unittest.IsolatedAsyncioTestCase)
         mock_response.status_code = 200
         mock_response.json.return_value = {
             "browseNodesResult": {
-                "browseNodes": [{"Id": "123456", "DisplayName": "Electrónica"}]
+                "browseNodes": [{"id": "123456", "displayName": "Electrónica"}]
             }
         }
 
@@ -1183,8 +1185,8 @@ class TestAsyncAmazonCreatorsApiSearchItemsExtended(unittest.IsolatedAsyncioTest
         mock_response.status_code = 200
         mock_response.json.return_value = {
             "searchResult": {
-                "TotalResultCount": 10,
-                "items": [{"ASIN": "B0DLFMFBJY"}],
+                "totalResultCount": 10,
+                "items": [{"asin": "B0DLFMFBJY"}],
             }
         }
 
@@ -1271,8 +1273,8 @@ class TestAsyncAmazonCreatorsApiSearchItemsExtended(unittest.IsolatedAsyncioTest
         mock_response.status_code = 200
         mock_response.json.return_value = {
             "searchResult": {
-                "TotalResultCount": 1,
-                "items": [{"ASIN": "B0DLFMFBJY"}],
+                "totalResultCount": 1,
+                "items": [{"asin": "B0DLFMFBJY"}],
             }
         }
 
@@ -1315,7 +1317,7 @@ class TestAsyncAmazonCreatorsApiWithoutContextManager(unittest.IsolatedAsyncioTe
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
-            "itemsResult": {"items": [{"ASIN": "B0DLFMFBJW"}]}
+            "itemsResult": {"items": [{"asin": "B0DLFMFBJW"}]}
         }
 
         mock_client = AsyncMock()
@@ -1351,7 +1353,7 @@ class TestAsyncAmazonCreatorsApiWithoutContextManager(unittest.IsolatedAsyncioTe
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
-            "itemsResult": {"items": [{"ASIN": "B0DLFMFBJW"}]}
+            "itemsResult": {"items": [{"asin": "B0DLFMFBJW"}]}
         }
 
         mock_client = AsyncMock()
@@ -1388,7 +1390,7 @@ class TestAsyncAmazonCreatorsApiWithoutContextManager(unittest.IsolatedAsyncioTe
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
-            "itemsResult": {"items": [{"ASIN": "B0DLFMFBJW"}]}
+            "itemsResult": {"items": [{"asin": "B0DLFMFBJW"}]}
         }
 
         mock_client = AsyncMock()
@@ -1732,7 +1734,7 @@ class TestAsyncAmazonCreatorsApiTimeout(unittest.IsolatedAsyncioTestCase):
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
-            "itemsResult": {"items": [{"ASIN": "B0DLFMFBJW"}]}
+            "itemsResult": {"items": [{"asin": "B0DLFMFBJW"}]}
         }
 
         mock_client = AsyncMock()
@@ -1779,6 +1781,222 @@ class TestAsyncAmazonCreatorsApiTimeout(unittest.IsolatedAsyncioTestCase):
             pass
 
         mock_http_client_class.assert_called_once_with(host=API_HOST, timeout=None)
+
+
+class TestAsyncAmazonCreatorsApiItems(unittest.IsolatedAsyncioTestCase):
+    """Tests for the items returned by AsyncAmazonCreatorsApi."""
+
+    def build_client(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+        payloads: list[dict],
+    ) -> AsyncMock:
+        """Prepare the mocked HTTP client with the given response payloads."""
+        responses = []
+        for payload in payloads:
+            response = MagicMock()
+            response.status_code = 200
+            response.json.return_value = payload
+            responses.append(response)
+
+        mock_client = AsyncMock()
+        mock_client.post.side_effect = responses
+        mock_client.__aenter__.return_value = mock_client
+        mock_http_client_class.return_value = mock_client
+
+        mock_token_manager = AsyncMock()
+        mock_token_manager.get_token.return_value = "test_token"
+        mock_token_manager_class.return_value = mock_token_manager
+
+        return mock_client
+
+    def build_api(self) -> AsyncAmazonCreatorsApi:
+        """Build an async API client for the tests."""
+        return AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+            throttling=0,
+        )
+
+    def build_payload(
+        self,
+        asins: list[str],
+        errors: list[dict] | None = None,
+    ) -> dict:
+        """Build a get items response payload."""
+        payload: dict = {"itemsResult": {"items": [{"asin": asin} for asin in asins]}}
+        if errors is not None:
+            payload["errors"] = errors
+        return payload
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_get_items_keeps_requested_order(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test that items are returned in the order they were requested."""
+        self.build_client(
+            mock_http_client_class,
+            mock_token_manager_class,
+            [self.build_payload(["B000000002", "B000000001"])],
+        )
+
+        result = await self.build_api().get_items(["B000000001", "B000000002"])
+
+        self.assertEqual([item.asin for item in result], ["B000000001", "B000000002"])
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_get_items_splits_requests_over_the_limit(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test that more items than the limit are split into several calls."""
+        item_ids = [f"B0000000{index:02d}" for index in range(12)]
+        mock_client = self.build_client(
+            mock_http_client_class,
+            mock_token_manager_class,
+            [
+                self.build_payload(item_ids[:10]),
+                self.build_payload(item_ids[10:]),
+            ],
+        )
+
+        result = await self.build_api().get_items(item_ids)
+
+        self.assertEqual(mock_client.post.await_count, 2)
+        self.assertEqual([item.asin for item in result], item_ids)
+        sent = [call.args[2]["itemIds"] for call in mock_client.post.await_args_list]
+        self.assertEqual([len(chunk) for chunk in sent], [10, 2])
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_get_items_removes_duplicates(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test that duplicated items are requested and returned only once."""
+        mock_client = self.build_client(
+            mock_http_client_class,
+            mock_token_manager_class,
+            [self.build_payload(["B000000001"])],
+        )
+
+        result = await self.build_api().get_items(["B000000001", "B000000001"])
+
+        self.assertEqual(mock_client.post.await_args.args[2]["itemIds"], ["B000000001"])
+        self.assertEqual([item.asin for item in result], ["B000000001"])
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_get_items_exposes_partial_errors(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test that the partial errors of the response are available."""
+        self.build_client(
+            mock_http_client_class,
+            mock_token_manager_class,
+            [
+                self.build_payload(
+                    ["B000000001"],
+                    errors=[{"code": "ItemNotFound", "message": "Item not found"}],
+                )
+            ],
+        )
+
+        result = await self.build_api().get_items(["B000000001", "B000000002"])
+
+        self.assertEqual([error.code for error in result.errors], ["ItemNotFound"])
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_get_items_include_unavailable(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test that missing items are returned when they are requested."""
+        self.build_client(
+            mock_http_client_class,
+            mock_token_manager_class,
+            [self.build_payload(["B000000001"])],
+        )
+
+        result = await self.build_api().get_items(
+            ["B000000001", "B000000002"],
+            include_unavailable=True,
+        )
+
+        self.assertEqual([item.asin for item in result], ["B000000001", "B000000002"])
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_get_items_not_found_reports_partial_errors(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test that partial errors are reported when nothing is found."""
+        self.build_client(
+            mock_http_client_class,
+            mock_token_manager_class,
+            [{"errors": [{"code": "InvalidItemId", "message": "Invalid item"}]}],
+        )
+
+        with self.assertRaises(ItemsNotFoundError) as context:
+            await self.build_api().get_items(["B000000001"])
+
+        self.assertIn("InvalidItemId", str(context.exception))
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_get_browse_nodes_exposes_partial_errors(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test that browse nodes expose the partial errors of the response."""
+        self.build_client(
+            mock_http_client_class,
+            mock_token_manager_class,
+            [
+                {
+                    "browseNodesResult": {"browseNodes": [{"id": "123"}]},
+                    "errors": [{"code": "InvalidBrowseNodeId", "message": "Invalid"}],
+                }
+            ],
+        )
+
+        result = await self.build_api().get_browse_nodes(["123", "456"])
+
+        self.assertEqual([node.id for node in result], ["123"])
+        self.assertEqual(
+            [error.code for error in result.errors],
+            ["InvalidBrowseNodeId"],
+        )
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_get_items_without_items_raises_library_error(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test that requesting no items raises an invalid argument error."""
+        self.build_client(mock_http_client_class, mock_token_manager_class, [])
+
+        with self.assertRaises(InvalidArgumentError):
+            await self.build_api().get_items([])
 
 
 if __name__ == "__main__":

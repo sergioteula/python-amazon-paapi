@@ -13,14 +13,20 @@ from typing import TYPE_CHECKING, Any, TypeVar
 from typing_extensions import Self
 
 from amazon_creatorsapi.core.constants import DEFAULT_THROTTLING, DEFAULT_TIMEOUT
-from amazon_creatorsapi.core.error_handling import handle_api_error
+from amazon_creatorsapi.core.error_handling import format_errors, handle_api_error
+from amazon_creatorsapi.core.items import (
+    get_item_chunks,
+    get_unique_items,
+    sort_items,
+)
 from amazon_creatorsapi.core.parsers import get_asin, get_items_ids
 from amazon_creatorsapi.core.resources import get_all_resources
+from amazon_creatorsapi.core.results import ResultList
 from amazon_creatorsapi.core.validation import (
     validate_and_get_marketplace,
     validate_timeout,
 )
-from amazon_creatorsapi.errors import ItemsNotFoundError
+from amazon_creatorsapi.errors import InvalidArgumentError, ItemsNotFoundError
 
 try:
     from .auth import VERSION_ENDPOINTS, AsyncOAuth2TokenManager
@@ -50,6 +56,7 @@ if TYPE_CHECKING:
     from creatorsapi_python_sdk.models.sort_by import SortBy
 
 from creatorsapi_python_sdk.models.browse_node import BrowseNode
+from creatorsapi_python_sdk.models.error_data import ErrorData
 from creatorsapi_python_sdk.models.feed import Feed
 from creatorsapi_python_sdk.models.get_feed_response_content import (
     GetFeedResponseContent,
@@ -210,8 +217,14 @@ class AsyncAmazonCreatorsApi:
         currency_of_preference: str | None = None,
         languages_of_preference: list[str] | None = None,
         resources: list[GetItemsResource] | None = None,
-    ) -> list[Item]:
+        *,
+        include_unavailable: bool = False,
+    ) -> ResultList[Item]:
         """Get items information from Amazon.
+
+        Duplicated items are requested only once, and the request is split into
+        as many API calls as needed when it goes over the limit of items that
+        Amazon accepts at once.
 
         Args:
             items: One or more items, using ASIN or Amazon product URL.
@@ -220,9 +233,13 @@ class AsyncAmazonCreatorsApi:
             currency_of_preference: ISO 4217 currency code for prices.
             languages_of_preference: Languages in order of preference.
             resources: List of resources to retrieve. Defaults to all.
+            include_unavailable: Add an item holding only the ASIN for every
+                requested item missing from the response. Defaults to False.
 
         Returns:
-            List of Item objects with Amazon information.
+            List of Item objects with Amazon information, in the order of the
+            requested items, exposing the partial errors of the response in
+            its errors attribute.
 
         Raises:
             ItemsNotFoundError: If no items are found.
@@ -232,28 +249,44 @@ class AsyncAmazonCreatorsApi:
         if resources is None:
             resources = get_all_resources(GetItemsResource)
 
-        item_ids = get_items_ids(items)
+        item_ids = get_unique_items(get_items_ids(items))
 
-        request_body = {
-            "partnerTag": self.tag,
-            "itemIds": item_ids,
-            "resources": [r.value for r in resources],
-        }
-        if condition is not None:
-            request_body["condition"] = condition.value
-        if currency_of_preference is not None:
-            request_body["currencyOfPreference"] = currency_of_preference
-        if languages_of_preference is not None:
-            request_body["languagesOfPreference"] = languages_of_preference
+        if not item_ids:
+            msg = "At least one item is required"
+            raise InvalidArgumentError(msg)
 
-        response = await self._make_request(ENDPOINT_GET_ITEMS, request_body)
+        found_items: list[Item] = []
+        errors: list[ErrorData] = []
 
-        items_result = response.get("itemsResult")
-        if items_result is None or items_result.get("items") is None:
-            msg = "No items have been found"
+        for chunk in get_item_chunks(item_ids):
+            request_body: dict[str, Any] = {
+                "partnerTag": self.tag,
+                "itemIds": chunk,
+                "resources": [r.value for r in resources],
+            }
+            if condition is not None:
+                request_body["condition"] = condition.value
+            if currency_of_preference is not None:
+                request_body["currencyOfPreference"] = currency_of_preference
+            if languages_of_preference is not None:
+                request_body["languagesOfPreference"] = languages_of_preference
+
+            response = await self._make_request(ENDPOINT_GET_ITEMS, request_body)
+
+            errors.extend(self._deserialize_errors(response))
+
+            items_result = response.get("itemsResult") or {}
+            if items_result.get("items"):
+                found_items.extend(self._deserialize_items(items_result["items"]))
+
+        if not found_items and not include_unavailable:
+            msg = f"No items have been found{format_errors(errors)}"
             raise ItemsNotFoundError(msg)
 
-        return self._deserialize_items(items_result["items"])
+        return ResultList(
+            sort_items(found_items, item_ids, include_unavailable=include_unavailable),
+            errors=errors,
+        )
 
     async def search_items(  # noqa: PLR0912, C901
         self,
@@ -364,7 +397,8 @@ class AsyncAmazonCreatorsApi:
 
         search_result = response.get("searchResult")
         if search_result is None:
-            msg = "No items have been found"
+            errors = self._deserialize_errors(response)
+            msg = f"No items have been found{format_errors(errors)}"
             raise ItemsNotFoundError(msg)
 
         return self._deserialize_search_result(search_result)
@@ -423,7 +457,8 @@ class AsyncAmazonCreatorsApi:
 
         variations_result = response.get("variationsResult")
         if variations_result is None:
-            msg = "No variations have been found"
+            errors = self._deserialize_errors(response)
+            msg = f"No variations have been found{format_errors(errors)}"
             raise ItemsNotFoundError(msg)
 
         return self._deserialize_variations_result(variations_result)
@@ -433,7 +468,7 @@ class AsyncAmazonCreatorsApi:
         browse_node_ids: list[str],
         languages_of_preference: list[str] | None = None,
         resources: list[GetBrowseNodesResource] | None = None,
-    ) -> list[BrowseNode]:
+    ) -> ResultList[BrowseNode]:
         """Return browse node information including name, children, and ancestors.
 
         Args:
@@ -442,7 +477,8 @@ class AsyncAmazonCreatorsApi:
             resources: List of resources to retrieve. Defaults to all.
 
         Returns:
-            List of BrowseNode objects.
+            List of BrowseNode objects, exposing the partial errors of the
+            response in its errors attribute.
 
         Raises:
             ItemsNotFoundError: If no browse nodes are found.
@@ -462,15 +498,19 @@ class AsyncAmazonCreatorsApi:
 
         response = await self._make_request(ENDPOINT_GET_BROWSE_NODES, request_body)
 
+        errors = self._deserialize_errors(response)
         browse_nodes_result = response.get("browseNodesResult")
         if (
             browse_nodes_result is None
             or browse_nodes_result.get("browseNodes") is None
         ):
-            msg = "No browse nodes have been found"
+            msg = f"No browse nodes have been found{format_errors(errors)}"
             raise ItemsNotFoundError(msg)
 
-        return self._deserialize_browse_nodes(browse_nodes_result["browseNodes"])
+        return ResultList(
+            self._deserialize_browse_nodes(browse_nodes_result["browseNodes"]),
+            errors=errors,
+        )
 
     async def list_feeds(self) -> list[Feed]:
         """Return the feeds available for your account.
@@ -636,6 +676,12 @@ class AsyncAmazonCreatorsApi:
 
         """
         handle_api_error(status_code, body)
+
+    def _deserialize_errors(self, response: dict[str, Any]) -> list[ErrorData]:
+        """Deserialize the partial errors of a response to ErrorData models."""
+        return [
+            ErrorData.model_validate(error) for error in response.get("errors") or []
+        ]
 
     def _deserialize_items(self, items_data: list[dict[str, Any]]) -> list[Item]:
         """Deserialize item data from API response to Item models."""

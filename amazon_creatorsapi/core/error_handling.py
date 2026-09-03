@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import NoReturn
+from typing import TYPE_CHECKING, NoReturn
 
 from amazon_creatorsapi.core.constants import HTTP_NOT_FOUND, HTTP_TOO_MANY_REQUESTS
 from amazon_creatorsapi.errors import (
@@ -12,6 +12,9 @@ from amazon_creatorsapi.errors import (
     RequestError,
     TooManyRequestsError,
 )
+
+if TYPE_CHECKING:
+    from creatorsapi_python_sdk.models.error_data import ErrorData
 
 
 def handle_api_error(status_code: int, body: str) -> NoReturn:
@@ -53,3 +56,19 @@ def handle_api_error(status_code: int, body: str) -> NoReturn:
     body_info = f" - {body[:200]}" if body else ""
     msg = f"Request failed with status {status_code}{body_info}"
     raise RequestError(msg)
+
+
+def format_errors(errors: list[ErrorData] | None) -> str:
+    """Return a readable summary of the partial errors of a response.
+
+    Args:
+        errors: Partial errors returned by the API, if any.
+
+    Returns:
+        The errors as text, or an empty string when there are none.
+
+    """
+    if not errors:
+        return ""
+    details = "; ".join(f"{error.code}: {error.message}" for error in errors)
+    return f" ({details})"
