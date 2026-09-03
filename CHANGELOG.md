@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.3.0] - 2026-09-03
+
+### Added
+
+- `retries` parameter in `AmazonCreatorsApi` and `AsyncAmazonCreatorsApi` to retry the throttled and failed requests that Amazon asks to retry, waiting longer before every attempt and honouring the `Retry-After` header
+- `AccessDeniedError`, raised when the credentials cannot perform the requested operation
+- `ResourceNotFoundError`, raised when a feed or report does not exist, telling it apart from missing items
+
+### Changed
+
+- Errors are mapped from the response of the Creators API instead of the codes of the old Product Advertising API, so the reason and the fields that failed are part of the message
+- A rejected request raises `InvalidArgumentError`, missing or expired credentials raise `AuthenticationError` and a forbidden request raises `AccessDeniedError`, instead of a generic `RequestError`
+- An expired token is refreshed once and the request is sent again instead of failing
+- Connection failures and unparseable responses raise `RequestError` instead of leaking the errors of the HTTP client
+
 ## [7.2.0] - 2026-09-03
 
 ### Added

@@ -5,6 +5,8 @@ from __future__ import annotations
 import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import httpx
+
 from amazon_creatorsapi.aio import (
     AsyncAmazonCreatorsApi,
 )
@@ -12,9 +14,11 @@ from amazon_creatorsapi.aio.api import API_HOST
 from amazon_creatorsapi.core.constants import DEFAULT_TIMEOUT
 from amazon_creatorsapi.errors import (
     AssociateValidationError,
+    AuthenticationError,
     InvalidArgumentError,
     ItemsNotFoundError,
     RequestError,
+    ResourceNotFoundError,
     TooManyRequestsError,
 )
 from creatorsapi_python_sdk.models.condition import Condition
@@ -363,6 +367,7 @@ class TestAsyncAmazonCreatorsApiGetItems(unittest.IsolatedAsyncioTestCase):
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         ) as api:
             with self.assertRaises(ItemsNotFoundError):
                 await api.get_items(["B0DLFMFBJX"])
@@ -403,6 +408,7 @@ class TestAsyncAmazonCreatorsApiSearchItemsDeliveryFlags(
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         ) as api:
             await api.search_items(
                 keywords="laptop",
@@ -444,6 +450,7 @@ class TestAsyncAmazonCreatorsApiSearchItemsDeliveryFlags(
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         ) as api:
             items = await api.get_items(
                 items=["B0DLFMFBJW"],
@@ -491,6 +498,7 @@ class TestAsyncAmazonCreatorsApiSearchItems(unittest.IsolatedAsyncioTestCase):
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         ) as api:
             result = await api.search_items(keywords="test")
 
@@ -594,6 +602,7 @@ class TestAsyncAmazonCreatorsApiErrorHandling(unittest.IsolatedAsyncioTestCase):
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         ) as api:
             with self.assertRaises(ItemsNotFoundError):
                 await api.get_items(["B0DLFMFBJW"])
@@ -626,6 +635,7 @@ class TestAsyncAmazonCreatorsApiErrorHandling(unittest.IsolatedAsyncioTestCase):
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         ) as api:
             with self.assertRaises(TooManyRequestsError):
                 await api.get_items(["B0DLFMFBJW"])
@@ -658,6 +668,7 @@ class TestAsyncAmazonCreatorsApiErrorHandling(unittest.IsolatedAsyncioTestCase):
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         ) as api:
             with self.assertRaises(AssociateValidationError):
                 await api.get_items(["B0DLFMFBJW"])
@@ -744,6 +755,7 @@ class TestAsyncAmazonCreatorsApiGetVariations(unittest.IsolatedAsyncioTestCase):
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         ) as api:
             result = await api.get_variations("B0DLFMFBJV")
 
@@ -814,6 +826,7 @@ class TestAsyncAmazonCreatorsApiGetVariations(unittest.IsolatedAsyncioTestCase):
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         ) as api:
             result = await api.get_variations(
                 asin="B0DLFMFBJV",
@@ -854,6 +867,7 @@ class TestAsyncAmazonCreatorsApiGetVariations(unittest.IsolatedAsyncioTestCase):
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         ) as api:
             with self.assertRaises(ItemsNotFoundError):
                 await api.get_variations("B0DLFMFBJV")
@@ -894,6 +908,7 @@ class TestAsyncAmazonCreatorsApiGetBrowseNodes(unittest.IsolatedAsyncioTestCase)
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         ) as api:
             result = await api.get_browse_nodes(["123456"])
 
@@ -965,6 +980,7 @@ class TestAsyncAmazonCreatorsApiGetBrowseNodes(unittest.IsolatedAsyncioTestCase)
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         ) as api:
             result = await api.get_browse_nodes(
                 browse_node_ids=["123456"],
@@ -1001,6 +1017,7 @@ class TestAsyncAmazonCreatorsApiGetBrowseNodes(unittest.IsolatedAsyncioTestCase)
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         ) as api:
             with self.assertRaises(ItemsNotFoundError):
                 await api.get_browse_nodes(["999999"])
@@ -1033,6 +1050,7 @@ class TestAsyncAmazonCreatorsApiGetBrowseNodes(unittest.IsolatedAsyncioTestCase)
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         ) as api:
             with self.assertRaises(ItemsNotFoundError):
                 await api.get_browse_nodes(["123456"])
@@ -1069,6 +1087,7 @@ class TestAsyncAmazonCreatorsApiErrorHandlingExtended(unittest.IsolatedAsyncioTe
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         ) as api:
             with self.assertRaises(InvalidArgumentError):
                 await api.get_items(["B0DLFMFBJW"])
@@ -1101,6 +1120,7 @@ class TestAsyncAmazonCreatorsApiErrorHandlingExtended(unittest.IsolatedAsyncioTe
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         ) as api:
             with self.assertRaises(InvalidArgumentError):
                 await api.get_items(["B0DLFMFBJW"])
@@ -1133,6 +1153,7 @@ class TestAsyncAmazonCreatorsApiErrorHandlingExtended(unittest.IsolatedAsyncioTe
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         ) as api:
             with self.assertRaises(RequestError):
                 await api.get_items(["B0DLFMFBJW"])
@@ -1165,6 +1186,7 @@ class TestAsyncAmazonCreatorsApiErrorHandlingExtended(unittest.IsolatedAsyncioTe
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         ) as api:
             with self.assertRaises(RequestError):
                 await api.get_items(["B0DLFMFBJW"])
@@ -1206,6 +1228,7 @@ class TestAsyncAmazonCreatorsApiSearchItemsExtended(unittest.IsolatedAsyncioTest
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         ) as api:
             result = await api.search_items(
                 keywords="laptop",
@@ -1257,6 +1280,7 @@ class TestAsyncAmazonCreatorsApiSearchItemsExtended(unittest.IsolatedAsyncioTest
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         ) as api:
             with self.assertRaises(ItemsNotFoundError):
                 await api.search_items(keywords="xyznonexistent123")
@@ -1294,6 +1318,7 @@ class TestAsyncAmazonCreatorsApiSearchItemsExtended(unittest.IsolatedAsyncioTest
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         ) as api:
             result = await api.search_items(
                 keywords="laptop",
@@ -1336,6 +1361,7 @@ class TestAsyncAmazonCreatorsApiWithoutContextManager(unittest.IsolatedAsyncioTe
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         )
 
         items = await api.get_items(["B0DLFMFBJW"])
@@ -1372,6 +1398,7 @@ class TestAsyncAmazonCreatorsApiWithoutContextManager(unittest.IsolatedAsyncioTe
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         )
 
         await api.get_items(["B0DLFMFBJW"])
@@ -1409,6 +1436,7 @@ class TestAsyncAmazonCreatorsApiWithoutContextManager(unittest.IsolatedAsyncioTe
             tag="test-tag",
             country="US",
             throttling=0,
+            retries=0,
         )
 
         await api.get_items(["B0DLFMFBJW"])
@@ -1451,6 +1479,7 @@ class TestAsyncAmazonCreatorsApiFeeds(unittest.IsolatedAsyncioTestCase):
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         )
 
     @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
@@ -1578,6 +1607,7 @@ class TestAsyncAmazonCreatorsApiReports(unittest.IsolatedAsyncioTestCase):
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         )
 
     @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
@@ -1753,6 +1783,7 @@ class TestAsyncAmazonCreatorsApiTimeout(unittest.IsolatedAsyncioTestCase):
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
             timeout=5.0,
         )
 
@@ -1820,6 +1851,7 @@ class TestAsyncAmazonCreatorsApiItems(unittest.IsolatedAsyncioTestCase):
             tag="test-tag",
             country="ES",
             throttling=0,
+            retries=0,
         )
 
     def build_payload(
@@ -1997,6 +2029,218 @@ class TestAsyncAmazonCreatorsApiItems(unittest.IsolatedAsyncioTestCase):
 
         with self.assertRaises(InvalidArgumentError):
             await self.build_api().get_items([])
+
+
+class TestAsyncAmazonCreatorsApiRetries(unittest.IsolatedAsyncioTestCase):
+    """Tests for the retries of AsyncAmazonCreatorsApi."""
+
+    def build_client(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+        responses: list[MagicMock | Exception],
+    ) -> tuple[AsyncMock, AsyncMock]:
+        """Prepare the mocked HTTP client with the given responses."""
+        mock_client = AsyncMock()
+        mock_client.post.side_effect = responses
+        mock_client.__aenter__.return_value = mock_client
+        mock_http_client_class.return_value = mock_client
+
+        mock_token_manager = AsyncMock()
+        mock_token_manager.get_token.return_value = "test_token"
+        # clear_token is not a coroutine in the token manager
+        mock_token_manager.clear_token = MagicMock()
+        mock_token_manager_class.return_value = mock_token_manager
+
+        return mock_client, mock_token_manager
+
+    def build_response(
+        self,
+        status_code: int = 200,
+        headers: dict[str, str] | None = None,
+    ) -> MagicMock:
+        """Build a response of the API with the given status."""
+        response = MagicMock()
+        response.status_code = status_code
+        response.headers = headers or {}
+        response.text = '{"message": "error"}'
+        response.json.return_value = {
+            "itemsResult": {"items": [{"asin": "B000000001"}]}
+        }
+        return response
+
+    def build_api(self, retries: int = 2) -> AsyncAmazonCreatorsApi:
+        """Build an async API client with the given amount of retries."""
+        return AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+            throttling=0,
+            retries=retries,
+        )
+
+    @patch("amazon_creatorsapi.aio.api.get_retry_delay", return_value=0)
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_retries_server_errors(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+        _mock_delay: MagicMock,
+    ) -> None:
+        """Test that a server error is retried until it succeeds."""
+        mock_client, _ = self.build_client(
+            mock_http_client_class,
+            mock_token_manager_class,
+            [self.build_response(500), self.build_response()],
+        )
+
+        result = await self.build_api().get_items(["B000000001"])
+
+        self.assertEqual(mock_client.post.await_count, 2)
+        self.assertEqual([item.asin for item in result], ["B000000001"])
+
+    @patch("amazon_creatorsapi.aio.api.get_retry_delay", return_value=0)
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_stops_after_the_configured_retries(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+        _mock_delay: MagicMock,
+    ) -> None:
+        """Test that the error is raised once the retries are exhausted."""
+        mock_client, _ = self.build_client(
+            mock_http_client_class,
+            mock_token_manager_class,
+            [self.build_response(429) for _ in range(3)],
+        )
+
+        with self.assertRaises(TooManyRequestsError):
+            await self.build_api(retries=2).get_items(["B000000001"])
+
+        self.assertEqual(mock_client.post.await_count, 3)
+
+    @patch("amazon_creatorsapi.aio.api.get_retry_delay", return_value=0)
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_honours_the_retry_after_header(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+        mock_delay: MagicMock,
+    ) -> None:
+        """Test that the headers of the response reach the delay."""
+        self.build_client(
+            mock_http_client_class,
+            mock_token_manager_class,
+            [
+                self.build_response(503, headers={"retry-after": "5"}),
+                self.build_response(),
+            ],
+        )
+
+        await self.build_api().get_items(["B000000001"])
+
+        mock_delay.assert_called_once_with(0, {"retry-after": "5"})
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_refreshes_the_token_once(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test that an expired token is refreshed and the request repeated."""
+        _, mock_token_manager = self.build_client(
+            mock_http_client_class,
+            mock_token_manager_class,
+            [self.build_response(401), self.build_response()],
+        )
+
+        result = await self.build_api(retries=0).get_items(["B000000001"])
+
+        mock_token_manager.clear_token.assert_called_once()
+        self.assertEqual([item.asin for item in result], ["B000000001"])
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_unauthorized_twice_raises_authentication_error(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test that a token that stays invalid raises an authentication error."""
+        mock_client, _ = self.build_client(
+            mock_http_client_class,
+            mock_token_manager_class,
+            [self.build_response(401), self.build_response(401)],
+        )
+
+        with self.assertRaises(AuthenticationError):
+            await self.build_api(retries=0).get_items(["B000000001"])
+
+        self.assertEqual(mock_client.post.await_count, 2)
+
+    @patch("amazon_creatorsapi.aio.api.get_retry_delay", return_value=0)
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_connection_errors_are_wrapped(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+        _mock_delay: MagicMock,
+    ) -> None:
+        """Test that a connection failure raises a request error."""
+        mock_client, _ = self.build_client(
+            mock_http_client_class,
+            mock_token_manager_class,
+            [httpx.ConnectTimeout("timed out"), httpx.ConnectTimeout("timed out")],
+        )
+
+        with self.assertRaises(RequestError):
+            await self.build_api(retries=1).get_items(["B000000001"])
+
+        self.assertEqual(mock_client.post.await_count, 2)
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_invalid_json_is_wrapped(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test that a response that is not JSON raises a request error."""
+        response = self.build_response()
+        response.json.side_effect = ValueError("no json")
+        self.build_client(mock_http_client_class, mock_token_manager_class, [response])
+
+        with self.assertRaises(RequestError):
+            await self.build_api(retries=0).get_items(["B000000001"])
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_missing_report_raises_resource_not_found(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test that a missing report is told apart from missing items."""
+        self.build_client(
+            mock_http_client_class,
+            mock_token_manager_class,
+            [self.build_response(404)],
+        )
+
+        with self.assertRaises(ResourceNotFoundError):
+            await self.build_api(retries=0).get_report("missing.csv")
+
+    def test_negative_retries_are_rejected(self) -> None:
+        """Test that a negative amount of retries is rejected."""
+        with self.assertRaises(InvalidArgumentError):
+            self.build_api(retries=-1)
 
 
 if __name__ == "__main__":

@@ -88,3 +88,22 @@ def build_request(request_class: type[RequestT], **fields: Any) -> RequestT:
         )
         msg = f"Invalid parameters for the request: {details}"
         raise InvalidArgumentError(msg) from error
+
+
+def validate_retries(retries: int) -> int:
+    """Validate the amount of retries for a failed request.
+
+    Args:
+        retries: Amount of extra attempts for a failure that can be retried.
+
+    Returns:
+        The amount of retries as an integer.
+
+    Raises:
+        InvalidArgumentError: If the amount of retries is negative.
+
+    """
+    if retries < 0:
+        msg = "Retries must be zero or greater"
+        raise InvalidArgumentError(msg)
+    return int(retries)

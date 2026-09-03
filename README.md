@@ -174,6 +174,41 @@ amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, timeout=0.5)  # Fa
 
 It applies to every API request, including the OAuth2 token refresh.
 
+### Retries
+
+Amazon asks clients to back off and try again when it throttles a request or fails to serve it. The client does that on its own, waiting longer before every attempt and honouring the `Retry-After` header when the API sends it. An expired token is refreshed once and the request is sent again.
+
+```python
+amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, retries=5)  # Up to 5 extra attempts
+amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, retries=0)  # Fail on the first error
+```
+
+### Error Handling
+
+Every error raised by the library inherits from `AmazonCreatorsApiError`, so a single `except` covers them all:
+
+| Exception | Raised when |
+| --- | --- |
+| `InvalidArgumentError` | An argument is not valid or the request is rejected by Amazon |
+| `AssociateValidationError` | The credentials are not valid for the selected marketplace |
+| `AuthenticationError` | The credentials are missing, invalid or expired |
+| `AccessDeniedError` | The credentials cannot perform the requested operation |
+| `ItemsNotFoundError` | No items are found for the request |
+| `ResourceNotFoundError` | The requested feed or report does not exist |
+| `TooManyRequestsError` | The rate limit is exceeded and the retries are exhausted |
+| `RequestError` | The request fails for any other reason |
+
+```python
+from amazon_creatorsapi.errors import AmazonCreatorsApiError, ItemsNotFoundError
+
+try:
+    items = api.get_items(["B01N5IB20Q"])
+except ItemsNotFoundError:
+    print("The item is not available")
+except AmazonCreatorsApiError as error:
+    print(error)
+```
+
 ### Async Support
 
 For async/await applications, use the async version of the API with `httpx`:

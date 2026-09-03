@@ -4,7 +4,11 @@ from __future__ import annotations
 
 import unittest
 
-from amazon_creatorsapi.core.validation import build_request, validate_timeout
+from amazon_creatorsapi.core.validation import (
+    build_request,
+    validate_retries,
+    validate_timeout,
+)
 from amazon_creatorsapi.errors import InvalidArgumentError
 from creatorsapi_python_sdk.models.get_items_request_content import (
     GetItemsRequestContent,
@@ -54,3 +58,20 @@ class TestValidateTimeout(unittest.TestCase):
         """Test that a timeout of zero is rejected."""
         with self.assertRaises(InvalidArgumentError):
             validate_timeout(0)
+
+
+class TestValidateRetries(unittest.TestCase):
+    """Tests for validate_retries function."""
+
+    def test_returns_the_amount(self) -> None:
+        """Test that a valid amount of retries is returned."""
+        self.assertEqual(validate_retries(2), 2)
+
+    def test_zero_disables_retries(self) -> None:
+        """Test that no retries is a valid value."""
+        self.assertEqual(validate_retries(0), 0)
+
+    def test_negative_is_rejected(self) -> None:
+        """Test that a negative amount of retries is rejected."""
+        with self.assertRaises(InvalidArgumentError):
+            validate_retries(-1)

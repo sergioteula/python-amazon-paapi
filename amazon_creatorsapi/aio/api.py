@@ -12,7 +12,12 @@ from typing import TYPE_CHECKING, Any, TypeVar
 
 from typing_extensions import Self
 
-from amazon_creatorsapi.core.constants import DEFAULT_THROTTLING, DEFAULT_TIMEOUT
+from amazon_creatorsapi.core.constants import (
+    DEFAULT_THROTTLING,
+    DEFAULT_TIMEOUT,
+    HTTP_OK,
+    HTTP_UNAUTHORIZED,
+)
 from amazon_creatorsapi.core.error_handling import format_errors, handle_api_error
 from amazon_creatorsapi.core.items import (
     get_item_chunks,
@@ -22,15 +27,25 @@ from amazon_creatorsapi.core.items import (
 from amazon_creatorsapi.core.parsers import get_asin, get_items_ids
 from amazon_creatorsapi.core.resources import get_all_resources
 from amazon_creatorsapi.core.results import ResultList
+from amazon_creatorsapi.core.retry import DEFAULT_RETRIES, get_retry_delay, is_retryable
 from amazon_creatorsapi.core.validation import (
     validate_and_get_marketplace,
+    validate_retries,
     validate_timeout,
 )
-from amazon_creatorsapi.errors import InvalidArgumentError, ItemsNotFoundError
+from amazon_creatorsapi.errors import (
+    AmazonCreatorsApiError,
+    InvalidArgumentError,
+    ItemsNotFoundError,
+    RequestError,
+    ResourceNotFoundError,
+)
 
 try:
+    import httpx
+
     from .auth import VERSION_ENDPOINTS, AsyncOAuth2TokenManager
-    from .client import AsyncHttpClient
+    from .client import AsyncHttpClient, AsyncHttpResponse
 except ImportError as exc:  # pragma: no cover
     msg = (
         "httpx is required for async support. "
@@ -130,10 +145,12 @@ class AsyncAmazonCreatorsApi:
         throttling: Wait time in seconds between API calls. Defaults to 1 second.
         timeout: Request timeout in seconds, or None to wait indefinitely.
             Defaults to 30 seconds.
+        retries: Extra attempts for the failures that Amazon asks to retry,
+            waiting longer before every attempt. Defaults to 3.
 
     Raises:
         InvalidArgumentError: If neither country nor marketplace is provided,
-            or if timeout is not greater than zero.
+            if timeout is not greater than zero, or if retries is negative.
         ValueError: If version is not supported (valid versions: 2.1, 2.2, 2.3,
             3.1, 3.2, 3.3).
 
@@ -149,6 +166,7 @@ class AsyncAmazonCreatorsApi:
         marketplace: str | None = None,
         throttling: float = DEFAULT_THROTTLING,
         timeout: float | None = DEFAULT_TIMEOUT,
+        retries: int = DEFAULT_RETRIES,
     ) -> None:
         """Initialize the async Amazon Creators API client."""
         # Validate version early to fail fast (before token manager initialization)
@@ -162,6 +180,7 @@ class AsyncAmazonCreatorsApi:
         self.tag = tag
         self.throttling = float(throttling)
         self.timeout = validate_timeout(timeout)
+        self.retries = validate_retries(retries)
 
         # Determine marketplace from country or direct value
         self.marketplace = validate_and_get_marketplace(country, marketplace)
@@ -524,7 +543,10 @@ class AsyncAmazonCreatorsApi:
             RequestError: If the API request fails.
 
         """
-        response = await self._make_request(ENDPOINT_LIST_FEEDS)
+        response = await self._make_request(
+            ENDPOINT_LIST_FEEDS,
+            not_found_error=ResourceNotFoundError,
+        )
 
         return self._deserialize_feeds(response.get("feeds") or [])
 
@@ -548,7 +570,11 @@ class AsyncAmazonCreatorsApi:
         if feed_type is not None:
             request_body["feedType"] = feed_type.value
 
-        response = await self._make_request(ENDPOINT_GET_FEED, request_body)
+        response = await self._make_request(
+            ENDPOINT_GET_FEED,
+            request_body,
+            not_found_error=ResourceNotFoundError,
+        )
 
         return GetFeedResponseContent.model_validate(response).url
 
@@ -564,7 +590,10 @@ class AsyncAmazonCreatorsApi:
             RequestError: If the API request fails.
 
         """
-        response = await self._make_request(ENDPOINT_LIST_REPORTS)
+        response = await self._make_request(
+            ENDPOINT_LIST_REPORTS,
+            not_found_error=ResourceNotFoundError,
+        )
 
         return self._deserialize_reports(response.get("reports") or [])
 
@@ -592,7 +621,11 @@ class AsyncAmazonCreatorsApi:
         if report_type is not None:
             request_body["reportType"] = report_type.value
 
-        response = await self._make_request(ENDPOINT_GET_REPORT, request_body)
+        response = await self._make_request(
+            ENDPOINT_GET_REPORT,
+            request_body,
+            not_found_error=ResourceNotFoundError,
+        )
 
         return GetReportResponseContent.model_validate(response).url
 
@@ -616,23 +649,71 @@ class AsyncAmazonCreatorsApi:
         self,
         endpoint: str,
         body: dict[str, Any] | None = None,
+        not_found_error: type[AmazonCreatorsApiError] = ItemsNotFoundError,
     ) -> dict[str, Any]:
-        """Make an API request with authentication and throttling.
+        """Make an API request with authentication, throttling and retries.
+
+        Throttled and server errors are retried waiting longer before every
+        attempt, honouring the Retry-After header when the API sends it. An
+        expired token is refreshed once and the request is sent again.
+
+        Args:
+            endpoint: API endpoint path.
+            body: Request body, omitted for operations that take no payload.
+            not_found_error: Exception raised when the resource is missing.
+
+        Returns:
+            Parsed JSON response.
+
+        Raises:
+            RequestError: If the request cannot be completed.
+
+        """
+        attempt = 0
+        token_refreshed = False
+
+        while True:
+            await self._throttle()
+
+            try:
+                response = await self._post(endpoint, body)
+            except httpx.HTTPError as error:
+                if attempt >= self.retries:
+                    msg = f"Request failed: {error}"
+                    raise RequestError(msg) from error
+                await asyncio.sleep(get_retry_delay(attempt))
+                attempt += 1
+                continue
+
+            if response.status_code == HTTP_OK:
+                return self._parse_response(response)
+
+            if response.status_code == HTTP_UNAUTHORIZED and not token_refreshed:
+                token_refreshed = True
+                self._token_manager.clear_token()
+                continue
+
+            if not is_retryable(response.status_code) or attempt >= self.retries:
+                handle_api_error(response.status_code, response.text, not_found_error)
+
+            await asyncio.sleep(get_retry_delay(attempt, response.headers))
+            attempt += 1
+
+    async def _post(
+        self,
+        endpoint: str,
+        body: dict[str, Any] | None,
+    ) -> AsyncHttpResponse:
+        """Send an authenticated request to the API.
 
         Args:
             endpoint: API endpoint path.
             body: Request body, omitted for operations that take no payload.
 
         Returns:
-            Parsed JSON response.
-
-        Raises:
-            Various exceptions based on API errors.
+            The response of the API.
 
         """
-        await self._throttle()
-
-        # Get auth token
         token = await self._token_manager.get_token()
 
         headers = {
@@ -643,39 +724,35 @@ class AsyncAmazonCreatorsApi:
 
         # Use persistent client if available, otherwise create a new one
         if self._http_client is not None:
-            response = await self._http_client.post(endpoint, headers, body)
-        else:
-            async with AsyncHttpClient(host=API_HOST, timeout=self.timeout) as client:
-                response = await client.post(endpoint, headers, body)
+            return await self._http_client.post(endpoint, headers, body)
 
-        # Handle errors
-        if response.status_code != 200:  # noqa: PLR2004
-            self._handle_error_response(response.status_code, response.text)
+        async with AsyncHttpClient(host=API_HOST, timeout=self.timeout) as client:
+            return await client.post(endpoint, headers, body)
 
-        return response.json()
+    def _parse_response(self, response: AsyncHttpResponse) -> dict[str, Any]:
+        """Parse a successful response as JSON.
+
+        Args:
+            response: Response of the API.
+
+        Returns:
+            The parsed response body.
+
+        Raises:
+            RequestError: If the response is not valid JSON.
+
+        """
+        try:
+            return response.json()
+        except ValueError as error:
+            msg = f"Failed to parse the response from Amazon: {error}"
+            raise RequestError(msg) from error
 
     def _build_authorization_header(self, token: str) -> str:
         """Build the version-appropriate Authorization header."""
         if self._version.startswith("3."):
             return f"Bearer {token}"
         return f"Bearer {token}, Version {self._version}"
-
-    def _handle_error_response(self, status_code: int, body: str) -> None:
-        """Handle API error responses and raise appropriate exceptions.
-
-        Args:
-            status_code: HTTP status code.
-            body: Response body text.
-
-        Raises:
-            ItemsNotFoundError: For 404 errors.
-            TooManyRequestsError: For 429 errors.
-            InvalidArgumentError: For validation errors.
-            AssociateValidationError: For invalid associate credentials.
-            RequestError: For other errors.
-
-        """
-        handle_api_error(status_code, body)
 
     def _deserialize_errors(self, response: dict[str, Any]) -> list[ErrorData]:
         """Deserialize the partial errors of a response to ErrorData models."""

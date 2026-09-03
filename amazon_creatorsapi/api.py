@@ -6,10 +6,16 @@ A Python wrapper for the Amazon Creators API.
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING, NoReturn
+from typing import TYPE_CHECKING, Any, Callable, NoReturn, TypeVar
+
+import urllib3
 
 from amazon_creatorsapi.core.auth import TimeoutOAuth2TokenManager
-from amazon_creatorsapi.core.constants import DEFAULT_THROTTLING, DEFAULT_TIMEOUT
+from amazon_creatorsapi.core.constants import (
+    DEFAULT_THROTTLING,
+    DEFAULT_TIMEOUT,
+    HTTP_UNAUTHORIZED,
+)
 from amazon_creatorsapi.core.error_handling import format_errors, handle_api_error
 from amazon_creatorsapi.core.items import (
     get_item_chunks,
@@ -19,12 +25,20 @@ from amazon_creatorsapi.core.items import (
 from amazon_creatorsapi.core.parsers import get_asin, get_items_ids
 from amazon_creatorsapi.core.resources import get_all_resources
 from amazon_creatorsapi.core.results import ResultList
+from amazon_creatorsapi.core.retry import DEFAULT_RETRIES, get_retry_delay, is_retryable
 from amazon_creatorsapi.core.validation import (
     build_request,
     validate_and_get_marketplace,
+    validate_retries,
     validate_timeout,
 )
-from amazon_creatorsapi.errors import InvalidArgumentError, ItemsNotFoundError
+from amazon_creatorsapi.errors import (
+    AmazonCreatorsApiError,
+    InvalidArgumentError,
+    ItemsNotFoundError,
+    RequestError,
+    ResourceNotFoundError,
+)
 from creatorsapi_python_sdk.api.default_api import DefaultApi
 from creatorsapi_python_sdk.api_client import ApiClient
 from creatorsapi_python_sdk.auth.oauth2_config import OAuth2Config
@@ -69,6 +83,8 @@ if TYPE_CHECKING:
     from creatorsapi_python_sdk.models.sort_by import SortBy
     from creatorsapi_python_sdk.models.variations_result import VariationsResult
 
+ResponseT = TypeVar("ResponseT")
+
 
 class AmazonCreatorsApi:
     """Provides methods to get information from Amazon using the Creators API.
@@ -83,10 +99,12 @@ class AmazonCreatorsApi:
         throttling: Wait time in seconds between API calls. Defaults to 1 second.
         timeout: Request timeout in seconds, or None to wait indefinitely.
             Defaults to 30 seconds.
+        retries: Extra attempts for the failures that Amazon asks to retry,
+            waiting longer before every attempt. Defaults to 3.
 
     Raises:
         InvalidArgumentError: If neither country nor marketplace is provided,
-            or if timeout is not greater than zero.
+            if timeout is not greater than zero, or if retries is negative.
 
     Example:
         >>> api = AmazonCreatorsApi(
@@ -110,6 +128,7 @@ class AmazonCreatorsApi:
         marketplace: str | None = None,
         throttling: float = DEFAULT_THROTTLING,
         timeout: float | None = DEFAULT_TIMEOUT,
+        retries: int = DEFAULT_RETRIES,
     ) -> None:
         """Initialize the Amazon Creators API client."""
         self._credential_id = credential_id
@@ -119,6 +138,7 @@ class AmazonCreatorsApi:
         self.tag = tag
         self.throttling = float(throttling)
         self.timeout = validate_timeout(timeout)
+        self.retries = validate_retries(retries)
 
         # Determine marketplace from country or direct value
         self.marketplace = validate_and_get_marketplace(country, marketplace)
@@ -196,16 +216,10 @@ class AmazonCreatorsApi:
                 resources=resources,
             )
 
-            self._throttle()
-
-            try:
-                response = self._api.get_items(
-                    x_marketplace=self.marketplace,
-                    get_items_request_content=request,
-                    _request_timeout=self.timeout,
-                )
-            except ApiException as exc:
-                self._handle_api_exception(exc)
+            response = self._call(
+                self._api.get_items,
+                get_items_request_content=request,
+            )
 
             errors.extend(response.errors or [])
 
@@ -306,16 +320,10 @@ class AmazonCreatorsApi:
             resources=resources,
         )
 
-        self._throttle()
-
-        try:
-            response = self._api.search_items(
-                x_marketplace=self.marketplace,
-                search_items_request_content=request,
-                _request_timeout=self.timeout,
-            )
-        except ApiException as exc:
-            self._handle_api_exception(exc)
+        response = self._call(
+            self._api.search_items,
+            search_items_request_content=request,
+        )
 
         if response.search_result is None:
             msg = f"No items have been found{format_errors(response.errors)}"
@@ -368,16 +376,10 @@ class AmazonCreatorsApi:
             resources=resources,
         )
 
-        self._throttle()
-
-        try:
-            response = self._api.get_variations(
-                x_marketplace=self.marketplace,
-                get_variations_request_content=request,
-                _request_timeout=self.timeout,
-            )
-        except ApiException as exc:
-            self._handle_api_exception(exc)
+        response = self._call(
+            self._api.get_variations,
+            get_variations_request_content=request,
+        )
 
         if response.variations_result is None:
             msg = f"No variations have been found{format_errors(response.errors)}"
@@ -417,16 +419,10 @@ class AmazonCreatorsApi:
             resources=resources,
         )
 
-        self._throttle()
-
-        try:
-            response = self._api.get_browse_nodes(
-                x_marketplace=self.marketplace,
-                get_browse_nodes_request_content=request,
-                _request_timeout=self.timeout,
-            )
-        except ApiException as exc:
-            self._handle_api_exception(exc)
+        response = self._call(
+            self._api.get_browse_nodes,
+            get_browse_nodes_request_content=request,
+        )
 
         if (
             response.browse_nodes_result is None
@@ -452,15 +448,10 @@ class AmazonCreatorsApi:
             RequestError: If the API request fails.
 
         """
-        self._throttle()
-
-        try:
-            response = self._api.list_feeds(
-                x_marketplace=self.marketplace,
-                _request_timeout=self.timeout,
-            )
-        except ApiException as exc:
-            self._handle_api_exception(exc)
+        response = self._call(
+            self._api.list_feeds,
+            not_found_error=ResourceNotFoundError,
+        )
 
         return response.feeds or []
 
@@ -485,16 +476,11 @@ class AmazonCreatorsApi:
             feedType=feed_type,
         )
 
-        self._throttle()
-
-        try:
-            response = self._api.get_feed(
-                x_marketplace=self.marketplace,
-                get_feed_request_content=request,
-                _request_timeout=self.timeout,
-            )
-        except ApiException as exc:
-            self._handle_api_exception(exc)
+        response = self._call(
+            self._api.get_feed,
+            not_found_error=ResourceNotFoundError,
+            get_feed_request_content=request,
+        )
 
         return response.url
 
@@ -510,15 +496,10 @@ class AmazonCreatorsApi:
             RequestError: If the API request fails.
 
         """
-        self._throttle()
-
-        try:
-            response = self._api.list_reports(
-                x_marketplace=self.marketplace,
-                _request_timeout=self.timeout,
-            )
-        except ApiException as exc:
-            self._handle_api_exception(exc)
+        response = self._call(
+            self._api.list_reports,
+            not_found_error=ResourceNotFoundError,
+        )
 
         return response.reports
 
@@ -543,16 +524,11 @@ class AmazonCreatorsApi:
             reportType=report_type,
         )
 
-        self._throttle()
-
-        try:
-            response = self._api.get_report(
-                x_marketplace=self.marketplace,
-                get_report_request_content=request,
-                _request_timeout=self.timeout,
-            )
-        except ApiException as exc:
-            self._handle_api_exception(exc)
+        response = self._call(
+            self._api.get_report,
+            not_found_error=ResourceNotFoundError,
+            get_report_request_content=request,
+        )
 
         return response.url
 
@@ -563,11 +539,78 @@ class AmazonCreatorsApi:
             time.sleep(wait_time)
         self._last_query_time = time.time()
 
-    def _handle_api_exception(self, error: ApiException) -> NoReturn:
+    def _call(
+        self,
+        operation: Callable[..., ResponseT],
+        *,
+        not_found_error: type[AmazonCreatorsApiError] = ItemsNotFoundError,
+        **kwargs: Any,
+    ) -> ResponseT:
+        """Call an operation of the SDK, retrying the failures worth retrying.
+
+        Throttled and server errors are retried waiting longer before every
+        attempt, honouring the Retry-After header when the API sends it. An
+        expired token is refreshed once and the request is sent again.
+
+        Args:
+            operation: Operation of the SDK to call.
+            not_found_error: Exception raised when the resource is missing.
+            kwargs: Arguments for the operation.
+
+        Returns:
+            The response of the operation.
+
+        Raises:
+            RequestError: If the request cannot be completed.
+
+        """
+        attempt = 0
+        token_refreshed = False
+
+        while True:
+            self._throttle()
+
+            try:
+                return operation(
+                    x_marketplace=self.marketplace,
+                    _request_timeout=self.timeout,
+                    **kwargs,
+                )
+            except ApiException as error:
+                if error.status == HTTP_UNAUTHORIZED and not token_refreshed:
+                    token_refreshed = True
+                    self._clear_token()
+                    continue
+
+                if not is_retryable(error.status) or attempt >= self.retries:
+                    self._handle_api_exception(error, not_found_error)
+
+                time.sleep(get_retry_delay(attempt, error.headers))
+            except urllib3.exceptions.HTTPError as error:
+                if attempt >= self.retries:
+                    msg = f"Request failed: {error}"
+                    raise RequestError(msg) from error
+
+                time.sleep(get_retry_delay(attempt))
+
+            attempt += 1
+
+    def _clear_token(self) -> None:
+        """Discard the cached token so the next request asks for a new one."""
+        token_manager = self._api_client.token_manager
+        if token_manager is not None:
+            token_manager.clear_token()
+
+    def _handle_api_exception(
+        self,
+        error: ApiException,
+        not_found_error: type[AmazonCreatorsApiError] = ItemsNotFoundError,
+    ) -> NoReturn:
         """Handle API exceptions and raise appropriate custom exceptions."""
-        error_body = str(error.body) if error.body else ""
+        body = error.body if isinstance(error.body, str) else ""
+
         try:
-            handle_api_error(error.status, error_body)
-        except Exception as exc:
+            handle_api_error(error.status, body, not_found_error)
+        except AmazonCreatorsApiError as exc:
             # Re-raise with original exception as cause for better stack traces
             raise exc from error
