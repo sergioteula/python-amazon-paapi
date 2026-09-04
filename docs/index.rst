@@ -1,34 +1,54 @@
-.. python-amazon-paapi documentation master file, created by
-   sphinx-quickstart on Mon Nov 22 18:33:43 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Python Amazon Creators API
+==========================
 
-Welcome to Python Amazon Creators API's documentation!
-======================================================
+A Python wrapper for the `Amazon Creators API
+<https://webservices.amazon.com/creatorsapi/documentation/>`_, which lets you search
+Amazon products, read their details, offers and variations, and list the feeds and
+reports of your account.
 
-A simple Python wrapper for the Amazon Creators API.
-This module allows interacting with Amazon using the official APIs in an easier way.
+Install it with:
+
+.. code-block:: bash
+
+   pip install python-amazon-paapi --upgrade
+
+Then create a client with the credentials of the Amazon Associates Creators API portal:
+
+.. code-block:: python
+
+   from amazon_creatorsapi import AmazonCreatorsApi, Country
+
+   api = AmazonCreatorsApi(
+       credential_id="your_credential_id",
+       credential_secret="your_credential_secret",
+       version="2.2",
+       tag="your-affiliate-tag",
+       country=Country.US,
+   )
+
+   items = api.get_items(["B01N5IB20Q"])
+   print(items[0].item_info.title.display_value)
+
+The usage guide covers every option of the client, the asynchronous version and the
+errors it raises.
 
 Introduction
----------------
-
-.. toctree::
-   :maxdepth: 1
-
-   ./pages/usage-guide.md
-
-API Reference
-----------------------
-
-.. toctree::
-
-   amazon_creatorsapi
-   amazon_creatorsapi.aio
-   amazon_creatorsapi.errors
+------------
 
 .. toctree::
    :maxdepth: 2
 
+   ./pages/usage-guide.md
+
+API Reference
+-------------
+
+.. toctree::
+   :maxdepth: 2
+
+   amazon_creatorsapi
+   amazon_creatorsapi.aio
+   amazon_creatorsapi.errors
    amazon_creatorsapi.core
 
 .. toctree::
@@ -51,3 +71,9 @@ Changelog
 ---------
 
 See the `changelog <https://github.com/sergioteula/python-amazon-paapi/blob/master/CHANGELOG.md>`_ for a detailed history of changes.
+
+Support
+-------
+
+Ask for help in the `Telegram group <https://t.me/PythonAmazonPAAPI>`_ or open an
+`issue <https://github.com/sergioteula/python-amazon-paapi/issues>`_ on GitHub.

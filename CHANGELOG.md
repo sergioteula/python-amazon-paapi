@@ -7,11 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- The values accepted by `version`, the countries and the marketplace each one maps to, and the `marketplace` argument are documented, instead of having to read the code to find them
+- `CONTRIBUTING.md`, with the setup of the project, the commands of the `Makefile`, the conventions of the code and the tests, and what a pull request is expected to carry
+
 ### Changed
 
 - A `version` of a family that the library cannot authenticate is rejected even when `auth_endpoint` is given, instead of being sent with the Cognito flow and rejected by Amazon without an explanation
 - The error of an unsupported version tells that a newer version of a known family can be used by providing its `auth_endpoint`
 - The auth flow of a version and the `Authorization` header it expects are decided in a single place, and the copies bundled in the SDK are pinned to them by tests, so a bump of the SDK cannot leave both halves disagreeing
+- The usage guide covers everything the README does, so the documentation does not have to be read in both places, and the README links to it
+
+### Fixed
+
+- The migration guide listed `include_unavailable`, `availability` and `delivery_flags` as removed by the Creators API, which accepts the three of them
+- The migration guide imported `get_asin` from `amazon_creatorsapi.core` and did not list `AuthenticationError`, `AccessDeniedError` and `ResourceNotFoundError` among the exceptions of the module
+- Documentation that promised the same methods in both clients without telling that `close` only exists in the synchronous one, as every request of an asynchronous client used outside `async with` closes its own connection
 
 ## [7.4.0] - 2026-09-04
 
