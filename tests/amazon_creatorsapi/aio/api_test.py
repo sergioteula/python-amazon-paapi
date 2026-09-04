@@ -205,23 +205,41 @@ class TestAsyncAmazonCreatorsApiInit(unittest.TestCase):
             AsyncAmazonCreatorsApi(
                 credential_id="test_id",
                 credential_secret="test_secret",
-                version="9.9",  # Invalid version
+                version="3.9",  # Version out of the list
                 tag="test-tag",
                 country="ES",
             )
 
-        self.assertIn("Unsupported version: 9.9", str(context.exception))
+        self.assertIn("Unsupported version: 3.9", str(context.exception))
         self.assertIn("Supported versions are:", str(context.exception))
 
     @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
-    def test_custom_endpoint_accepts_any_version(
+    def test_raises_error_for_unknown_family(
         self, mock_token_manager: MagicMock
     ) -> None:
-        """Test that a custom endpoint makes any version valid."""
+        """Test that a version with an unknown auth flow is always rejected."""
+        with self.assertRaises(ValueError) as context:
+            AsyncAmazonCreatorsApi(
+                credential_id="test_id",
+                credential_secret="test_secret",
+                version="9.9",  # Family with an unknown auth flow
+                tag="test-tag",
+                country="ES",
+                auth_endpoint="https://example.com/token",
+            )
+
+        self.assertIn("Unsupported version: 9.9", str(context.exception))
+        mock_token_manager.assert_not_called()
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    def test_custom_endpoint_accepts_a_new_version(
+        self, mock_token_manager: MagicMock
+    ) -> None:
+        """Test that a custom endpoint makes valid a version out of the list."""
         AsyncAmazonCreatorsApi(
             credential_id="test_id",
             credential_secret="test_secret",
-            version="9.9",
+            version="3.4",
             tag="test-tag",
             country="ES",
             auth_endpoint="https://example.com/token",

@@ -25,7 +25,7 @@ from amazon_creatorsapi.core.items import (
     get_unique_items,
     sort_items,
 )
-from amazon_creatorsapi.core.oauth import get_auth_endpoint
+from amazon_creatorsapi.core.oauth import build_authorization_header, get_auth_endpoint
 from amazon_creatorsapi.core.parsers import get_asin, get_items_ids
 from amazon_creatorsapi.core.requests import get_request_body
 from amazon_creatorsapi.core.resources import get_all_resources
@@ -180,8 +180,11 @@ class AsyncAmazonCreatorsApi:
         InvalidArgumentError: If neither country nor marketplace is provided,
             if timeout is not greater than zero, if throttling is negative or
             if retries is negative.
-        ValueError: If the version is not supported and no auth_endpoint is
-            given (valid versions: 2.1, 2.2, 2.3, 3.1, 3.2, 3.3).
+        ValueError: If the version is not one of the supported ones, which
+            the message of the error lists, and no auth_endpoint is given, or
+            if it belongs to a family that the library cannot authenticate
+            (2.x and 3.x are the supported ones), which no auth_endpoint
+            makes valid.
 
     """
 
@@ -778,9 +781,7 @@ class AsyncAmazonCreatorsApi:
 
     def _build_authorization_header(self, token: str) -> str:
         """Build the version-appropriate Authorization header."""
-        if self._version.startswith("3."):
-            return f"Bearer {token}"
-        return f"Bearer {token}, Version {self._version}"
+        return build_authorization_header(self._version, token)
 
     def _deserialize_errors(self, response: dict[str, Any]) -> list[ErrorData]:
         """Deserialize the partial errors of a response to ErrorData models."""

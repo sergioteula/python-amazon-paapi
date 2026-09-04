@@ -121,8 +121,11 @@ class AmazonCreatorsApi:
         InvalidArgumentError: If neither country nor marketplace is provided,
             if timeout is not greater than zero, if throttling is negative or
             if retries is negative.
-        ValueError: If the version is not supported and no auth_endpoint is
-            given (valid versions: 2.1, 2.2, 2.3, 3.1, 3.2, 3.3).
+        ValueError: If the version is not one of the supported ones, which
+            the message of the error lists, and no auth_endpoint is given, or
+            if it belongs to a family that the library cannot authenticate
+            (2.x and 3.x are the supported ones), which no auth_endpoint
+            makes valid.
 
     Example:
         >>> api = AmazonCreatorsApi(

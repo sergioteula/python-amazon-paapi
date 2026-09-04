@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- A `version` of a family that the library cannot authenticate is rejected even when `auth_endpoint` is given, instead of being sent with the Cognito flow and rejected by Amazon without an explanation
+- The error of an unsupported version tells that a newer version of a known family can be used by providing its `auth_endpoint`
+- The auth flow of a version and the `Authorization` header it expects are decided in a single place, and the copies bundled in the SDK are pinned to them by tests, so a bump of the SDK cannot leave both halves disagreeing
+
 ## [7.4.0] - 2026-09-04
 
 ### Added

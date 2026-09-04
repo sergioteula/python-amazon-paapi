@@ -205,7 +205,7 @@ amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, retries=0)  # Fail
 
 ### Custom Endpoints
 
-The base URL of the API and the one used to get the OAuth2 token can be replaced, which is useful to run the tests of a project against a mock server. Providing `auth_endpoint` also makes any `version` valid, so a new one can be used before the library knows about it:
+The base URL of the API and the one used to get the OAuth2 token can be replaced, which is useful to run the tests of a project against a mock server. Providing `auth_endpoint` also makes valid a `version` that is not in the list yet, so a new one can be used before the library knows about it, as long as it belongs to a family that the library can authenticate: `2.x` with Cognito and `3.x` with Login with Amazon. A version of any other family is rejected, as a new family brings a new authentication flow and not just another endpoint:
 
 ```python
 api = AmazonCreatorsApi(
