@@ -7,6 +7,7 @@ import unittest
 from amazon_creatorsapi.core.validation import (
     build_request,
     validate_retries,
+    validate_search_criteria,
     validate_timeout,
 )
 from amazon_creatorsapi.errors import InvalidArgumentError
@@ -75,3 +76,18 @@ class TestValidateRetries(unittest.TestCase):
         """Test that a negative amount of retries is rejected."""
         with self.assertRaises(InvalidArgumentError):
             validate_retries(-1)
+
+
+class TestValidateSearchCriteria(unittest.TestCase):
+    """Tests for validate_search_criteria function."""
+
+    def test_accepts_one_criterion(self) -> None:
+        """Test that a single criterion is enough to search."""
+        validate_search_criteria(keywords="laptop", brand=None)
+
+    def test_rejects_a_search_without_criteria(self) -> None:
+        """Test that a search without criteria is rejected."""
+        with self.assertRaises(InvalidArgumentError) as context:
+            validate_search_criteria(keywords=None, brand=None)
+
+        self.assertIn("keywords, brand", str(context.exception))

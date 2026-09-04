@@ -21,6 +21,7 @@ from amazon_creatorsapi.errors import (
     ResourceNotFoundError,
     TooManyRequestsError,
 )
+from creatorsapi_python_sdk.models.availability import Availability
 from creatorsapi_python_sdk.models.condition import Condition
 from creatorsapi_python_sdk.models.delivery_flag import DeliveryFlag
 from creatorsapi_python_sdk.models.feed_type import FeedType
@@ -2241,6 +2242,184 @@ class TestAsyncAmazonCreatorsApiRetries(unittest.IsolatedAsyncioTestCase):
         """Test that a negative amount of retries is rejected."""
         with self.assertRaises(InvalidArgumentError):
             self.build_api(retries=-1)
+
+
+class TestAsyncAmazonCreatorsApiOptions(unittest.IsolatedAsyncioTestCase):
+    """Tests for the options of AsyncAmazonCreatorsApi."""
+
+    def build_client(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+        payload: dict | None = None,
+    ) -> AsyncMock:
+        """Prepare the mocked HTTP client with a successful response."""
+        response = MagicMock()
+        response.status_code = 200
+        response.headers = {}
+        response.json.return_value = payload or {
+            "searchResult": {"totalResultCount": 1}
+        }
+
+        mock_client = AsyncMock()
+        mock_client.post.return_value = response
+        mock_client.__aenter__.return_value = mock_client
+        mock_http_client_class.return_value = mock_client
+
+        mock_token_manager = AsyncMock()
+        mock_token_manager.get_token.return_value = "test_token"
+        mock_token_manager.clear_token = MagicMock()
+        mock_token_manager_class.return_value = mock_token_manager
+
+        return mock_client
+
+    def build_api(self, **options: object) -> AsyncAmazonCreatorsApi:
+        """Build an async API client with the given options."""
+        return AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+            throttling=0,
+            retries=0,
+            **options,  # type: ignore[arg-type]
+        )
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_search_items_forwards_availability(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test that the availability filter is sent to the API."""
+        mock_client = self.build_client(
+            mock_http_client_class,
+            mock_token_manager_class,
+        )
+
+        await self.build_api().search_items(
+            keywords="laptop",
+            availability=Availability.INCLUDEOUTOFSTOCK,
+        )
+
+        body = mock_client.post.await_args.args[2]
+        self.assertEqual(body["availability"], "IncludeOutOfStock")
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_search_items_without_criteria(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test that a search without criteria does not reach the API."""
+        mock_client = self.build_client(
+            mock_http_client_class,
+            mock_token_manager_class,
+        )
+
+        with self.assertRaises(InvalidArgumentError):
+            await self.build_api().search_items()
+
+        mock_client.post.assert_not_awaited()
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_request_body_uses_the_names_of_the_api(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test that the body is built from the models of the SDK."""
+        mock_client = self.build_client(
+            mock_http_client_class,
+            mock_token_manager_class,
+        )
+
+        await self.build_api().search_items(
+            keywords="laptop",
+            browse_node_id="123",
+            sort_by=SortBy.PRICE_COLON_LOW_TO_HIGH,
+            resources=[SearchItemsResource.ITEM_INFO_DOT_TITLE],
+        )
+
+        body = mock_client.post.await_args.args[2]
+        self.assertEqual(body["browseNodeId"], "123")
+        self.assertEqual(body["sortBy"], "Price:LowToHigh")
+        self.assertEqual(body["resources"], ["itemInfo.title"])
+        self.assertNotIn("actor", body)
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_invalid_value_does_not_reach_the_api(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test that a value rejected by the API is caught before sending it."""
+        mock_client = self.build_client(
+            mock_http_client_class,
+            mock_token_manager_class,
+        )
+
+        with self.assertRaises(InvalidArgumentError):
+            await self.build_api().search_items(keywords="laptop", min_reviews_rating=5)
+
+        mock_client.post.assert_not_awaited()
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_errors_report_the_request_id(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test that the identifier given by Amazon is part of the error."""
+        response = MagicMock()
+        response.status_code = 400
+        response.headers = {"x-amzn-RequestId": "abc-123"}
+        response.text = '{"message": "invalid"}'
+
+        mock_client = AsyncMock()
+        mock_client.post.return_value = response
+        mock_client.__aenter__.return_value = mock_client
+        mock_http_client_class.return_value = mock_client
+
+        mock_token_manager = AsyncMock()
+        mock_token_manager.get_token.return_value = "test_token"
+        mock_token_manager_class.return_value = mock_token_manager
+
+        with self.assertRaises(InvalidArgumentError) as context:
+            await self.build_api().search_items(keywords="laptop")
+
+        self.assertIn("abc-123", str(context.exception))
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_custom_host_and_auth_endpoint(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test that the endpoints of the API can be replaced."""
+        self.build_client(mock_http_client_class, mock_token_manager_class)
+
+        api = self.build_api(
+            host="https://example.com",
+            auth_endpoint="https://example.com/token",
+        )
+        await api.search_items(keywords="laptop")
+
+        self.assertEqual(
+            mock_token_manager_class.call_args.kwargs["auth_endpoint"],
+            "https://example.com/token",
+        )
+        self.assertEqual(
+            mock_http_client_class.call_args.kwargs["host"],
+            "https://example.com",
+        )
 
 
 if __name__ == "__main__":

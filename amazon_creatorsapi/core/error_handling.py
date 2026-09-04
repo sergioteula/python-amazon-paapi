@@ -24,6 +24,8 @@ from amazon_creatorsapi.errors import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from creatorsapi_python_sdk.models.error_data import ErrorData
 
 # Reason returned by the API when the associate is not valid for the marketplace
@@ -31,6 +33,9 @@ INVALID_ASSOCIATE_REASON = "InvalidAssociate"
 
 # Amount of characters of the response body kept for unexpected errors
 MAX_BODY_LENGTH = 200
+
+# Headers holding the identifier Amazon gives to a request
+REQUEST_ID_HEADERS = ("x-amzn-requestid", "x-amzn-request-id", "x-amz-request-id")
 
 
 def parse_error_body(body: str) -> dict[str, Any]:
@@ -82,10 +87,32 @@ def get_error_detail(data: dict[str, Any], body: str) -> str:
     return f" - {'; '.join(parts)}" if parts else ""
 
 
+def get_request_id(headers: Mapping[str, str] | None) -> str | None:
+    """Return the identifier Amazon gave to the request, if it sent one.
+
+    Args:
+        headers: Headers of the response.
+
+    Returns:
+        The identifier of the request, useful to report an issue to Amazon,
+        or None when the response does not carry one.
+
+    """
+    if not headers:
+        return None
+
+    for name, value in headers.items():
+        if name.lower() in REQUEST_ID_HEADERS:
+            return str(value)
+
+    return None
+
+
 def handle_api_error(
     status_code: int,
     body: str,
     not_found_error: type[AmazonCreatorsApiError] = ItemsNotFoundError,
+    headers: Mapping[str, str] | None = None,
 ) -> NoReturn:
     """Handle API error responses and raise appropriate exceptions.
 
@@ -94,6 +121,8 @@ def handle_api_error(
         body: Response body text.
         not_found_error: Exception raised for a missing resource, so that
             operations tell apart items from feeds and reports.
+        headers: Headers of the response, used to report the identifier that
+            Amazon gave to the request.
 
     Raises:
         InvalidArgumentError: For requests rejected by the API.
@@ -108,6 +137,10 @@ def handle_api_error(
     data = parse_error_body(body)
     detail = get_error_detail(data, body)
     reason = data.get("reason")
+
+    request_id = get_request_id(headers)
+    if request_id:
+        detail = f"{detail} [request id: {request_id}]"
 
     if status_code == HTTP_BAD_REQUEST:
         if reason == INVALID_ASSOCIATE_REASON or (

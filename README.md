@@ -91,6 +91,17 @@ for item in results.items:
     print(item.item_info.title.display_value)
 ```
 
+A search needs at least one of `keywords`, `actor`, `artist`, `author`, `brand`, `title`, `browse_node_id` or `search_index`, and only returns the items available for purchase unless asked otherwise:
+
+```python
+from amazon_creatorsapi.models import Availability
+
+results = api.search_items(
+    keywords="nintendo switch",
+    availability=Availability.INCLUDEOUTOFSTOCK,
+)
+```
+
 ### Get Product Variations
 
 ```python
@@ -183,9 +194,25 @@ amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, retries=5)  # Up t
 amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, retries=0)  # Fail on the first error
 ```
 
+### Custom Endpoints
+
+The base URL of the API and the one used to get the OAuth2 token can be replaced, which is useful to run the tests of a project against a mock server:
+
+```python
+api = AmazonCreatorsApi(
+    ID,
+    SECRET,
+    VERSION,
+    TAG,
+    COUNTRY,
+    host="http://localhost:8080",
+    auth_endpoint="http://localhost:8080/token",
+)
+```
+
 ### Error Handling
 
-Every error raised by the library inherits from `AmazonCreatorsApiError`, so a single `except` covers them all:
+Every error raised by the library inherits from `AmazonCreatorsApiError`, so a single `except` covers them all. The message carries the reason given by Amazon, the fields that failed validation and the identifier of the request, which is what Amazon support asks for:
 
 | Exception | Raised when |
 | --- | --- |
@@ -262,11 +289,17 @@ from amazon_creatorsapi.models import (
 items = api.get_items(["B01N5IB20Q"], condition=Condition.NEW)
 
 # Use SortBy enum for search ordering
-results = api.search_items(keywords="laptop", sort_by=SortBy.PRICE_LOW_TO_HIGH)
+results = api.search_items(
+    keywords="laptop",
+    sort_by=SortBy.PRICE_COLON_LOW_TO_HIGH,
+)
 
 # Specify which resources to retrieve
 from amazon_creatorsapi.models import GetItemsResource
-resources = [GetItemsResource.ITEMINFO_TITLE, GetItemsResource.OFFERS_LISTINGS_PRICE]
+resources = [
+    GetItemsResource.ITEM_INFO_DOT_TITLE,
+    GetItemsResource.OFFERS_V2_DOT_LISTINGS_DOT_PRICE,
+]
 items = api.get_items(["B01N5IB20Q"], resources=resources)
 ```
 

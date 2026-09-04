@@ -5,7 +5,11 @@ from __future__ import annotations
 import json
 import unittest
 
-from amazon_creatorsapi.core.error_handling import handle_api_error, parse_error_body
+from amazon_creatorsapi.core.error_handling import (
+    get_request_id,
+    handle_api_error,
+    parse_error_body,
+)
 from amazon_creatorsapi.errors import (
     AccessDeniedError,
     AssociateValidationError,
@@ -131,3 +135,23 @@ class TestHandleApiError(unittest.TestCase):
             handle_api_error(502, "<html>Bad gateway</html>")
 
         self.assertIn("Bad gateway", str(context.exception))
+
+
+class TestGetRequestId(unittest.TestCase):
+    """Tests for get_request_id function."""
+
+    def test_reads_the_header(self) -> None:
+        """Test that the identifier of the request is found."""
+        self.assertEqual(get_request_id({"x-amzn-RequestId": "abc-123"}), "abc-123")
+
+    def test_missing_header(self) -> None:
+        """Test that a response without the header has no identifier."""
+        self.assertIsNone(get_request_id({"Content-Type": "application/json"}))
+        self.assertIsNone(get_request_id(None))
+
+    def test_request_id_is_reported(self) -> None:
+        """Test that the identifier is part of the message of the error."""
+        with self.assertRaises(RequestError) as context:
+            handle_api_error(500, "", headers={"x-amzn-requestid": "abc-123"})
+
+        self.assertIn("abc-123", str(context.exception))

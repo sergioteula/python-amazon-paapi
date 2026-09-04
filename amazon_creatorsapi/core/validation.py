@@ -107,3 +107,19 @@ def validate_retries(retries: int) -> int:
         msg = "Retries must be zero or greater"
         raise InvalidArgumentError(msg)
     return int(retries)
+
+
+def validate_search_criteria(**criteria: object) -> None:
+    """Validate that a search has at least one criterion to look for.
+
+    Args:
+        criteria: Arguments of the search, by name.
+
+    Raises:
+        InvalidArgumentError: If every criterion is missing.
+
+    """
+    if all(value is None for value in criteria.values()):
+        names = ", ".join(criteria)
+        msg = f"At least one of these arguments is required: {names}"
+        raise InvalidArgumentError(msg)

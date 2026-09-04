@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.4.0] - 2026-09-04
+
+### Added
+
+- `availability` parameter in `search_items` to include the items that are out of stock
+- `host` and `auth_endpoint` parameters in `AmazonCreatorsApi` and `AsyncAmazonCreatorsApi` to replace the endpoints of the API, useful to run tests against a mock server
+- `get_asin` and `errors` are available directly in `amazon_creatorsapi`
+- The identifier that Amazon gives to a request is part of the message of the error, so it can be reported to Amazon support
+- `py.typed` marker, so the type hints of the package are used by type checkers
+
+### Changed
+
+- `search_items` rejects a search without any criteria instead of sending it to the API
+- `AsyncAmazonCreatorsApi` builds its requests with the models of the SDK, so both clients validate the same values before sending a request
+- Every client uses its own configuration for the SDK instead of the one shared by the whole process
+- Throttling is measured with a monotonic clock and is safe to use from several threads
+
+### Fixed
+
+- Examples in the documentation that used names that do not exist, such as `SortBy.PRICE_LOW_TO_HIGH` or `GetItemsResource.ITEMINFO_TITLE`
+- Documented limits of `item_count`, `min_reviews_rating` and `variation_page`, which did not match the ones accepted by the API
+
+### Removed
+
+- `six` dependency, which was not used
+
 ## [7.3.0] - 2026-09-03
 
 ### Added

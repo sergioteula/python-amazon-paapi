@@ -24,6 +24,7 @@ from amazon_creatorsapi.errors import (
     TooManyRequestsError,
 )
 from creatorsapi_python_sdk.exceptions import ApiException
+from creatorsapi_python_sdk.models.availability import Availability
 from creatorsapi_python_sdk.models.browse_node import BrowseNode
 from creatorsapi_python_sdk.models.browse_nodes_result import BrowseNodesResult
 from creatorsapi_python_sdk.models.delivery_flag import DeliveryFlag
@@ -147,7 +148,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             country=self.country,
             throttling=0.2,
         )
-        api._last_query_time = time.time()
+        api._last_query_time = time.monotonic()
         start_time = time.time()
         api._throttle()
         elapsed_time = time.time() - start_time
@@ -1757,3 +1758,104 @@ class TestAmazonCreatorsApiRetries(unittest.TestCase):
         """Test that a negative amount of retries is rejected."""
         with self.assertRaises(InvalidArgumentError):
             self.build_api(retries=-1)
+
+
+class TestAmazonCreatorsApiOptions(unittest.TestCase):
+    """Tests for the options of AmazonCreatorsApi."""
+
+    def setUp(self) -> None:
+        self.credential_id = "test_credential_id"
+        self.credential_secret = "test_credential_secret"
+        self.version = "2.2"
+        self.tag = "test-tag"
+        self.country: CountryCode = "ES"
+
+    def build_api(self, **options: object) -> AmazonCreatorsApi:
+        """Build an API client with the given options."""
+        return AmazonCreatorsApi(
+            credential_id=self.credential_id,
+            credential_secret=self.credential_secret,
+            version=self.version,
+            tag=self.tag,
+            country=self.country,
+            throttling=0,
+            retries=0,
+            **options,  # type: ignore[arg-type]
+        )
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_search_items_forwards_availability(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that the availability filter reaches the SDK request."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.search_items.return_value = MagicMock(search_result=MagicMock())
+
+        self.build_api().search_items(
+            keywords="laptop",
+            availability=Availability.INCLUDEOUTOFSTOCK,
+        )
+
+        request = mock_api.search_items.call_args.kwargs["search_items_request_content"]
+        self.assertEqual(request.availability, Availability.INCLUDEOUTOFSTOCK)
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_search_items_without_criteria(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that a search without criteria does not reach the API."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+
+        with self.assertRaises(InvalidArgumentError):
+            self.build_api().search_items()
+
+        mock_api.search_items.assert_not_called()
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_errors_report_the_request_id(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that the identifier given by Amazon is part of the error."""
+        error = ApiException(status=400)
+        error.headers = {"x-amzn-RequestId": "abc-123"}
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.side_effect = error
+
+        with self.assertRaises(InvalidArgumentError) as context:
+            self.build_api().get_items(["B000000001"])
+
+        self.assertIn("abc-123", str(context.exception))
+
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_custom_host_and_auth_endpoint(self, mock_client_class: MagicMock) -> None:
+        """Test that the endpoints of the API can be replaced."""
+        self.build_api(
+            host="https://example.com",
+            auth_endpoint="https://example.com/token",
+        )
+
+        options = mock_client_class.call_args.kwargs
+        self.assertEqual(options["host"], "https://example.com")
+        self.assertEqual(options["auth_endpoint"], "https://example.com/token")
+
+    def test_every_client_has_its_own_configuration(self) -> None:
+        """Test that the configuration is not shared between clients."""
+        first = self.build_api()
+        second = self.build_api()
+
+        self.assertIsNot(
+            first._api_client.configuration,
+            second._api_client.configuration,
+        )

@@ -5,6 +5,7 @@ A Python wrapper for the Amazon Creators API.
 
 from __future__ import annotations
 
+import threading
 import time
 from typing import TYPE_CHECKING, Any, Callable, NoReturn, TypeVar
 
@@ -12,6 +13,7 @@ import urllib3
 
 from amazon_creatorsapi.core.auth import TimeoutOAuth2TokenManager
 from amazon_creatorsapi.core.constants import (
+    DEFAULT_HOST,
     DEFAULT_THROTTLING,
     DEFAULT_TIMEOUT,
     HTTP_UNAUTHORIZED,
@@ -30,6 +32,7 @@ from amazon_creatorsapi.core.validation import (
     build_request,
     validate_and_get_marketplace,
     validate_retries,
+    validate_search_criteria,
     validate_timeout,
 )
 from amazon_creatorsapi.errors import (
@@ -42,6 +45,7 @@ from amazon_creatorsapi.errors import (
 from creatorsapi_python_sdk.api.default_api import DefaultApi
 from creatorsapi_python_sdk.api_client import ApiClient
 from creatorsapi_python_sdk.auth.oauth2_config import OAuth2Config
+from creatorsapi_python_sdk.configuration import Configuration
 from creatorsapi_python_sdk.exceptions import ApiException
 from creatorsapi_python_sdk.models.get_browse_nodes_request_content import (
     GetBrowseNodesRequestContent,
@@ -70,6 +74,7 @@ from creatorsapi_python_sdk.models.search_items_resource import SearchItemsResou
 
 if TYPE_CHECKING:
     from amazon_creatorsapi.core.marketplaces import CountryCode
+    from creatorsapi_python_sdk.models.availability import Availability
     from creatorsapi_python_sdk.models.browse_node import BrowseNode
     from creatorsapi_python_sdk.models.condition import Condition
     from creatorsapi_python_sdk.models.delivery_flag import DeliveryFlag
@@ -101,6 +106,9 @@ class AmazonCreatorsApi:
             Defaults to 30 seconds.
         retries: Extra attempts for the failures that Amazon asks to retry,
             waiting longer before every attempt. Defaults to 3.
+        host: Base URL of the API. Defaults to the Amazon Creators API.
+        auth_endpoint: URL used to get the OAuth2 token. Defaults to the one
+            of the version in use.
 
     Raises:
         InvalidArgumentError: If neither country nor marketplace is provided,
@@ -129,12 +137,15 @@ class AmazonCreatorsApi:
         throttling: float = DEFAULT_THROTTLING,
         timeout: float | None = DEFAULT_TIMEOUT,
         retries: int = DEFAULT_RETRIES,
+        host: str = DEFAULT_HOST,
+        auth_endpoint: str | None = None,
     ) -> None:
         """Initialize the Amazon Creators API client."""
         self._credential_id = credential_id
         self._credential_secret = credential_secret
         self._version = version
-        self._last_query_time = time.time() - throttling
+        self._last_query_time = time.monotonic() - throttling
+        self._throttle_lock = threading.Lock()
         self.tag = tag
         self.throttling = float(throttling)
         self.timeout = validate_timeout(timeout)
@@ -143,16 +154,21 @@ class AmazonCreatorsApi:
         # Determine marketplace from country or direct value
         self.marketplace = validate_and_get_marketplace(country, marketplace)
 
+        # A new configuration for every client, as the default one of the
+        # SDK is shared by the whole process
         self._api_client = ApiClient(
+            configuration=Configuration(),
             credential_id=credential_id,
             credential_secret=credential_secret,
             version=version,
+            host=host,
+            auth_endpoint=auth_endpoint,
         )
         # The token manager bundled with the SDK requests the token without
         # any timeout, so it is replaced by one that honours the configured
         # value and reports failures as library errors.
         self._api_client._token_manager = TimeoutOAuth2TokenManager(  # noqa: SLF001
-            OAuth2Config(credential_id, credential_secret, version, None),
+            OAuth2Config(credential_id, credential_secret, version, auth_endpoint),
             self.timeout,
         )
         self._api = DefaultApi(self._api_client)
@@ -247,6 +263,7 @@ class AmazonCreatorsApi:
         search_index: str | None = None,
         item_count: int | None = None,
         item_page: int | None = None,
+        availability: Availability | None = None,
         condition: Condition | None = None,
         currency_of_preference: str | None = None,
         delivery_flags: list[DeliveryFlag] | None = None,
@@ -272,8 +289,10 @@ class AmazonCreatorsApi:
             title: Title associated with the item.
             browse_node_id: A unique ID for a product category.
             search_index: Product category to search. Defaults to All.
-            item_count: Number of items returned (1-10). Defaults to 10.
+            item_count: Number of items returned (1-100). Defaults to 10.
             item_page: Page of items to return (1-10). Defaults to 1.
+            availability: Filter results by availability. Defaults to
+                returning only the items available for purchase.
             condition: Filter offers by condition type.
             currency_of_preference: ISO 4217 currency code for prices.
             delivery_flags: Delivery programs to filter search results by.
@@ -281,7 +300,7 @@ class AmazonCreatorsApi:
             max_price: Max price in lowest currency denomination.
             min_price: Min price in lowest currency denomination.
             min_saving_percent: Min savings percentage (1-99).
-            min_reviews_rating: Min review rating (1-5).
+            min_reviews_rating: Min review rating (1-4).
             sort_by: Sort method for results.
             resources: List of resources to retrieve. Defaults to all.
 
@@ -292,6 +311,17 @@ class AmazonCreatorsApi:
             ItemsNotFoundError: If no items are found.
 
         """
+        validate_search_criteria(
+            keywords=keywords,
+            actor=actor,
+            artist=artist,
+            author=author,
+            brand=brand,
+            title=title,
+            browse_node_id=browse_node_id,
+            search_index=search_index,
+        )
+
         if resources is None:
             resources = get_all_resources(SearchItemsResource)
 
@@ -308,6 +338,7 @@ class AmazonCreatorsApi:
             searchIndex=search_index,
             itemCount=item_count,
             itemPage=item_page,
+            availability=availability,
             condition=condition,
             currencyOfPreference=currency_of_preference,
             deliveryFlags=delivery_flags,
@@ -346,7 +377,8 @@ class AmazonCreatorsApi:
         Args:
             asin: The ASIN or Amazon product URL of the product.
             variation_count: Number of variations to return (1-10). Defaults to 10.
-            variation_page: Page of variations to return (1-10). Defaults to 1.
+            variation_page: Page of variations to return (1 or above).
+                Defaults to 1.
             condition: Filter offers by condition type.
             currency_of_preference: ISO 4217 currency code for prices.
             languages_of_preference: Languages in order of preference.
@@ -533,11 +565,16 @@ class AmazonCreatorsApi:
         return response.url
 
     def _throttle(self) -> None:
-        """Wait for the throttling interval to elapse since the last API call."""
-        wait_time = self.throttling - (time.time() - self._last_query_time)
-        if wait_time > 0:
-            time.sleep(wait_time)
-        self._last_query_time = time.time()
+        """Wait for the throttling interval to elapse since the last API call.
+
+        Uses a lock to keep the interval between calls when the client is
+        shared by several threads.
+        """
+        with self._throttle_lock:
+            wait_time = self.throttling - (time.monotonic() - self._last_query_time)
+            if wait_time > 0:
+                time.sleep(wait_time)
+            self._last_query_time = time.monotonic()
 
     def _call(
         self,
@@ -610,7 +647,7 @@ class AmazonCreatorsApi:
         body = error.body if isinstance(error.body, str) else ""
 
         try:
-            handle_api_error(error.status, body, not_found_error)
+            handle_api_error(error.status, body, not_found_error, error.headers)
         except AmazonCreatorsApiError as exc:
             # Re-raise with original exception as cause for better stack traces
             raise exc from error
