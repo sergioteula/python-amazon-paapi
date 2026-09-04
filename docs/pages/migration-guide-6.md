@@ -15,17 +15,13 @@ Key benefits of the Creators API:
 - Simplified credential management
 - New features and improvements from Amazon
 
-## Changelog summary
-
-- New `amazon_creatorsapi` module for the Creators API
-- The `amazon_paapi` module is deprecated in 6.0.0 and removed in 7.0.0
-- Different authentication credentials required
-
 ## How to upgrade?
 
 Upgrading to the last version of this module is as easy as running this pip command:
 
-    pip install python-amazon-paapi --upgrade
+```bash
+pip install python-amazon-paapi --upgrade
+```
 
 ## Credential changes
 
@@ -40,6 +36,9 @@ The Creators API uses different credentials than PAAPI:
 | Country     | Country           |
 
 You will need to obtain new credentials from the Amazon Associates Creators API portal.
+The credentials are issued for a specific API version, which is a new value that PAAPI
+did not have and that every client has to provide. See
+[API versions](usage-guide.md#api-versions) for the accepted values.
 
 ## What should I change in my current code?
 
@@ -71,64 +70,51 @@ You will need to obtain new credentials from the Amazon Associates Creators API 
 
 ### Method signature changes
 
-While the main methods have the same names, there are important parameter differences:
+The main methods keep their names, but some parameters are gone and a `resources`
+parameter was added to every one of them, to choose which fields Amazon returns:
 
-#### `get_items`
+| Method             | Removed parameters      | Added parameters                          |
+| ------------------ | ----------------------- | ----------------------------------------- |
+| `get_items`        | `merchant`, `**kwargs`  | `resources: list[GetItemsResource]`        |
+| `search_items`     | `merchant`, `**kwargs`  | `resources: list[SearchItemsResource]`     |
+| `get_variations`   | `merchant`, `**kwargs`  | `resources: list[GetVariationsResource]`   |
+| `get_browse_nodes` | `**kwargs`              | `resources: list[GetBrowseNodesResource]`  |
 
-| Removed in Creators API | New in Creators API                 |
-| ----------------------- | ----------------------------------- |
-| `merchant`              | `resources: list[GetItemsResource]` |
-| `include_unavailable`   |                                     |
-| `**kwargs`              |                                     |
+The `merchant` filter has no equivalent in the Creators API. The `**kwargs` catch-all is
+gone on purpose: an unknown argument is now rejected by the signature instead of being
+forwarded to Amazon and silently ignored.
 
-#### `search_items`
-
-| Removed in Creators API | New in Creators API                    |
-| ----------------------- | -------------------------------------- |
-| `availability`          | `resources: list[SearchItemsResource]` |
-| `delivery_flags`        |                                        |
-| `merchant`              |                                        |
-| `**kwargs`              |                                        |
-
-#### `get_variations`
-
-| Removed in Creators API | New in Creators API                      |
-| ----------------------- | ---------------------------------------- |
-| `merchant`              | `resources: list[GetVariationsResource]` |
-| `**kwargs`              |                                          |
-
-#### `get_browse_nodes`
-
-| Removed in Creators API | New in Creators API                       |
-| ----------------------- | ----------------------------------------- |
-| `**kwargs`              | `resources: list[GetBrowseNodesResource]` |
+Parameters such as `include_unavailable` in `get_items`, or `availability` and
+`delivery_flags` in `search_items`, do exist in the Creators API and behave as they did
+in PAAPI. See the [usage guide](usage-guide.md) for the complete signatures.
 
 #### Basic usage examples
 
 ```python
 # Get items
-items = amazon.get_items(['B01N5IB20Q'])
+items = amazon.get_items(["B01N5IB20Q"])
 
 # Search items
-results = amazon.search_items(keywords='nintendo')
+results = amazon.search_items(keywords="nintendo")
 
 # Get variations
-variations = amazon.get_variations('B01N5IB20Q')
+variations = amazon.get_variations("B01N5IB20Q")
 
 # Get browse nodes
-nodes = amazon.get_browse_nodes(['667049031'])
+nodes = amazon.get_browse_nodes(["667049031"])
 ```
 
 ### Helper functions
 
 ```diff
 - from amazon_paapi import get_asin
-+ from amazon_creatorsapi.core import get_asin
++ from amazon_creatorsapi import get_asin
 ```
 
 ### Models module
 
-Version 6.0 introduces a new `models` module that re-exports all SDK models for convenient access:
+Version 6.0 introduced a `models` module that re-exports all SDK models for convenient
+access:
 
 ```python
 from amazon_creatorsapi.models import (
@@ -146,18 +132,24 @@ This allows you to import models directly without navigating the SDK structure.
 
 ### Exceptions
 
-Exception names have changed to use the `Error` suffix:
+Exception names have changed to use the `Error` suffix, and every one of them inherits
+from `AmazonCreatorsApiError`, so a single `except` covers them all:
 
 ```python
 from amazon_creatorsapi.errors import (
-    AmazonCreatorsApiError,      # Base exception
+    AmazonCreatorsApiError,  # Base exception
+    AccessDeniedError,
+    AssociateValidationError,
+    AuthenticationError,
     InvalidArgumentError,
     ItemsNotFoundError,
-    TooManyRequestsError,
-    AssociateValidationError,
     RequestError,
+    ResourceNotFoundError,
+    TooManyRequestsError,
 )
 ```
+
+See [Error handling](usage-guide.md#error-handling) for what raises each of them.
 
 ## I need more help
 

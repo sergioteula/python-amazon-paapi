@@ -10,15 +10,28 @@ A Python wrapper for the [Amazon Creators API](https://webservices.amazon.com/cr
 ## Features
 
 - 🎯 **Simple object-oriented interface** for easy integration
-- � **Async/await support** for high-performance applications
-- �🔍 **Product search** by keywords, categories, or browse nodes
+- ⚡ **Async/await support** for high-performance applications
+- 🔍 **Product search** by keywords, categories, or browse nodes
 - 📦 **Product details** via ASIN or Amazon URL
 - 🔄 **Item variations** support (size, color, etc.)
 - 📊 **Feeds and reports** listing and download URLs
 - 💰 **OffersV2 support** for enhanced pricing and offer details
-- 🌍 **20+ countries** supported
-- 🛡️ **Built-in throttling** to avoid API rate limits
+- 🌍 **20 marketplaces** supported
+- 🛡️ **Built-in throttling and retries** to avoid API rate limits
 - 📝 **Full type hints** for better IDE support
+
+## Table of contents
+
+- [Installation](#installation)
+- [Credentials](#credentials)
+- [Quick start](#quick-start)
+- [Usage examples](#usage-examples)
+- [Configuration](#configuration)
+- [Error handling](#error-handling)
+- [Async support](#async-support)
+- [Working with models](#working-with-models)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
 
 ## Installation
 
@@ -26,9 +39,36 @@ A Python wrapper for the [Amazon Creators API](https://webservices.amazon.com/cr
 pip install python-amazon-paapi --upgrade
 ```
 
----
+Python 3.9 or newer is required. Install the `async` extra to use the asynchronous
+client:
 
-## Quick Start
+```bash
+pip install python-amazon-paapi[async] --upgrade
+```
+
+## Credentials
+
+Four values are needed to create a client, and all of them come from the Amazon
+Associates Creators API portal:
+
+| Argument            | What it is                                                |
+| ------------------- | --------------------------------------------------------- |
+| `credential_id`     | Identifier of your Creators API credentials               |
+| `credential_secret` | Secret of your Creators API credentials                   |
+| `version`           | API version your credentials were issued for              |
+| `tag`               | Your affiliate tracking id, also known as the partner tag |
+
+`version` is the version of the Creators API, not of this library: it is the value Amazon
+gave you along with the credentials, and it also decides which endpoint issues the OAuth2
+token. The accepted values are `2.1`, `2.2`, `2.3`, `3.1`, `3.2` and `3.3`; any other one
+raises `ValueError` when the client is created.
+
+The marketplace is chosen with `country`, which accepts `AU`, `BE`, `BR`, `CA`, `DE`,
+`ES`, `FR`, `IN`, `IT`, `JP`, `MX`, `NL`, `PL`, `SA`, `SE`, `SG`, `TR`, `UK`, `US` and
+`AE`, either as a string or through the `Country` constants. Pass `marketplace` instead
+to give the host directly, such as `marketplace="www.amazon.es"`.
+
+## Quick start
 
 ```python
 from amazon_creatorsapi import AmazonCreatorsApi, Country
@@ -50,9 +90,12 @@ print(items[0].item_info.title.display_value)
 items = api.get_items(["https://www.amazon.com/dp/B01N5IB20Q"])
 ```
 
-## Usage Examples
+Every field of a response is optional, as Amazon only sends what it has for an item, so
+check a value before using it when the item may not carry it.
 
-### Get Multiple Items
+## Usage examples
+
+### Get multiple items
 
 ```python
 items = api.get_items(["B01N5IB20Q", "B01F9G43WU"])
@@ -61,7 +104,7 @@ for item in items:
 ```
 
 Items come back in the order they were requested, duplicates are asked for
-only once, and requests with more items than the API accepts at once are
+only once, and requests with more items than the API accepts at once (10) are
 split into as many calls as needed, so any amount of items can be requested:
 
 ```python
@@ -83,7 +126,7 @@ for item in items:
         print(f"{item.asin} is not available")
 ```
 
-### Search Products
+### Search products
 
 ```python
 results = api.search_items(keywords="nintendo switch")
@@ -91,7 +134,9 @@ for item in results.items:
     print(item.item_info.title.display_value)
 ```
 
-A search needs at least one of `keywords`, `actor`, `artist`, `author`, `brand`, `title`, `browse_node_id` or `search_index`, and only returns the items available for purchase unless asked otherwise:
+A search needs at least one of `keywords`, `actor`, `artist`, `author`, `brand`, `title`,
+`browse_node_id` or `search_index`, and only returns the items available for purchase
+unless asked otherwise:
 
 ```python
 from amazon_creatorsapi.models import Availability
@@ -102,7 +147,7 @@ results = api.search_items(
 )
 ```
 
-### Get Product Variations
+### Get product variations
 
 ```python
 # Using ASIN
@@ -115,7 +160,7 @@ for item in variations.items:
     print(item.detail_page_url)
 ```
 
-### Get Browse Node Information
+### Get browse node information
 
 ```python
 nodes = api.get_browse_nodes(["667049031"])
@@ -123,7 +168,7 @@ for node in nodes:
     print(node.display_name)
 ```
 
-### Feeds and Reports
+### Feeds and reports
 
 Feeds and reports are listed per marketplace, and downloaded through the
 temporary URL returned by the API:
@@ -154,7 +199,7 @@ from amazon_creatorsapi import get_asin
 asin = get_asin("https://www.amazon.com/dp/B01N5IB20Q")
 ```
 
-### Using OffersV2 Resources
+### Using OffersV2 resources
 
 ```python
 items = api.get_items(["B01N5IB20Q"])
@@ -165,47 +210,66 @@ if item.offers_v2 and item.offers_v2.listings:
     print(listing.merchant_info.name)
 ```
 
+## Configuration
+
 ### Throttling
 
-Throttling value represents the wait time in seconds between API calls, being the default value 1 second. Use it to avoid reaching Amazon request limits.
+Throttling value represents the wait time in seconds between API calls, being the default
+value 1 second. Use it to avoid reaching Amazon request limits.
 
 ```python
-amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, throttling=4)  # Makes 1 request every 4 seconds
-amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, throttling=0)  # No wait time between requests
+api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, throttling=4)  # Makes 1 request every 4 seconds
+api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, throttling=0)  # No wait time between requests
 ```
 
-### Closing the client
-
-The client keeps a pool of connections open, so it is meant to be created once and reused. Close it, or use it as a context manager, when it is not going to be used again:
-
-```python
-with AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY) as amazon:
-    items = amazon.get_items(["B01N5IB20Q"])
-```
+The interval is kept per client and is safe to share between threads.
 
 ### Timeout
 
-Timeout value represents the number of seconds to wait for a response before failing, being the default value 30 seconds. Use `None` to wait indefinitely.
+Timeout value represents the number of seconds to wait for a response before failing,
+being the default value 30 seconds. Use `None` to wait indefinitely.
 
 ```python
-amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, timeout=10)  # Fails after 10 seconds
-amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, timeout=0.5)  # Fails after half a second
+api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, timeout=10)  # Fails after 10 seconds
+api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, timeout=0.5)  # Fails after half a second
 ```
 
 It applies to every API request, including the OAuth2 token refresh.
 
 ### Retries
 
-Amazon asks clients to back off and try again when it throttles a request or fails to serve it. The client does that on its own, waiting longer before every attempt and honouring the `Retry-After` header when the API sends it. An expired token is refreshed once and the request is sent again.
+Amazon asks clients to back off and try again when it throttles a request or fails to
+serve it. The client does that on its own, waiting longer before every attempt and
+honouring the `Retry-After` header when the API sends it. An expired token is refreshed
+once and the request is sent again.
 
 ```python
-amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, retries=5)  # Up to 5 extra attempts
-amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, retries=0)  # Fail on the first error
+api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, retries=5)  # Up to 5 extra attempts
+api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, retries=0)  # Fail on the first error
 ```
 
-### Custom Endpoints
+The default is 3 extra attempts, and only the failures that Amazon asks to retry are
+retried: a rejected request fails right away.
 
-The base URL of the API and the one used to get the OAuth2 token can be replaced, which is useful to run the tests of a project against a mock server. Providing `auth_endpoint` also makes valid a `version` that is not in the list yet, so a new one can be used before the library knows about it, as long as it belongs to a family that the library can authenticate: `2.x` with Cognito and `3.x` with Login with Amazon. A version of any other family is rejected, as a new family brings a new authentication flow and not just another endpoint:
+### Closing the client
+
+The client keeps a pool of connections open, so it is meant to be created once and
+reused. Close it, or use it as a context manager, when it is not going to be used again:
+
+```python
+with AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY) as api:
+    items = api.get_items(["B01N5IB20Q"])
+```
+
+### Custom endpoints
+
+The base URL of the API and the one used to get the OAuth2 token can be replaced, which
+is useful to run the tests of a project against a mock server. Providing `auth_endpoint`
+also makes valid a `version` that is not in the list yet, so a new one can be used before
+the library knows about it, as long as it belongs to a family that the library can
+authenticate: `2.x` with Cognito and `3.x` with Login with Amazon. A version of any other
+family is rejected, as a new family brings a new authentication flow and not just another
+endpoint:
 
 ```python
 api = AmazonCreatorsApi(
@@ -219,9 +283,12 @@ api = AmazonCreatorsApi(
 )
 ```
 
-### Error Handling
+## Error handling
 
-Every error raised by the library inherits from `AmazonCreatorsApiError`, so a single `except` covers them all. The message carries the reason given by Amazon, the fields that failed validation and the identifier of the request, which is what Amazon support asks for:
+Every error raised by the library inherits from `AmazonCreatorsApiError`, so a single
+`except` covers them all. The message carries the reason given by Amazon, the fields that
+failed validation and the identifier of the request, which is what Amazon support asks
+for:
 
 | Exception | Raised when |
 | --- | --- |
@@ -245,7 +312,7 @@ except AmazonCreatorsApiError as error:
     print(error)
 ```
 
-### Async Support
+## Async support
 
 For async/await applications, use the async version of the API with `httpx`:
 
@@ -253,11 +320,12 @@ For async/await applications, use the async version of the API with `httpx`:
 pip install python-amazon-paapi[async] --upgrade
 ```
 
-The async API provides the same methods as the synchronous version, but they must be called with `await`:
+The async API provides the same methods, parameters and errors as the synchronous
+version, and they are called with `await`:
 
 ```python
-from amazon_creatorsapi.aio import AsyncAmazonCreatorsApi
 from amazon_creatorsapi import Country
+from amazon_creatorsapi.aio import AsyncAmazonCreatorsApi
 
 # Use as async context manager (recommended for connection pooling)
 async with AsyncAmazonCreatorsApi(
@@ -279,19 +347,21 @@ api = AsyncAmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY)
 items = await api.get_items(["B01N5IB20Q"])
 ```
 
-> **Note:** All synchronous methods and parameters work identically in async mode. Use `async with` for better performance when making multiple API calls.
+> **Note:** outside `async with`, every request opens and closes its own connection, so
+> there is nothing to release and the async client has no `close` method. Use
+> `async with` when making more than one call, to keep the connection open between them.
 
-### Working with Models
+## Working with models
 
 All SDK models are re-exported through `amazon_creatorsapi.models` for convenient access:
 
 ```python
 from amazon_creatorsapi.models import (
-    Item,
     Condition,
-    SortBy,
     GetItemsResource,
+    Item,
     SearchItemsResource,
+    SortBy,
 )
 
 # Use Condition enum for filtering
@@ -304,7 +374,6 @@ results = api.search_items(
 )
 
 # Specify which resources to retrieve
-from amazon_creatorsapi.models import GetItemsResource
 resources = [
     GetItemsResource.ITEM_INFO_DOT_TITLE,
     GetItemsResource.OFFERS_V2_DOT_LISTINGS_DOT_PRICE,
@@ -312,31 +381,34 @@ resources = [
 items = api.get_items(["B01N5IB20Q"], resources=resources)
 ```
 
+Every method asks for all the resources of its operation when `resources` is not given.
+Narrowing the list makes the response smaller and faster, and the fields left out come
+back as `None`.
+
 ---
 
 ## Documentation
 
-- 📖 [Full Documentation](https://python-amazon-paapi.readthedocs.io/)
+- 📖 [Full documentation](https://python-amazon-paapi.readthedocs.io/)
+- 📘 [Usage guide](https://python-amazon-paapi.readthedocs.io/en/latest/pages/usage-guide.html)
+- 🔀 [Migration guide from `amazon_paapi`](https://python-amazon-paapi.readthedocs.io/en/latest/pages/migration-guide-6.html)
 - 📋 [Changelog](https://github.com/sergioteula/python-amazon-paapi/blob/master/CHANGELOG.md)
-- 💬 [Telegram Support Group](https://t.me/PythonAmazonPAAPI)
+- 💬 [Telegram support group](https://t.me/PythonAmazonPAAPI)
 
 ## Contributing
 
-Contributions are welcome! To get started:
-
-1. Install [uv](https://docs.astral.sh/uv/) package manager
-2. Clone and set up the project:
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide, or
+get started with:
 
 ```bash
 git clone https://github.com/sergioteula/python-amazon-paapi.git
 cd python-amazon-paapi
-uv sync
-uv run pre-commit install
+uv sync --extra async
+make setup
+make test
 ```
 
-3. Copy `.env.template` to `.env` and add your API credentials for integration tests.
-
-Pre-commit hooks will automatically run Ruff, mypy, and tests before each commit.
+Pre-commit hooks run Ruff, mypy and the tests before each commit.
 
 ## License
 
