@@ -56,15 +56,17 @@ API Reference
 
    amazon_creatorsapi.models
 
-Migration guide
----------------
+Migration guides
+----------------
 
-If you are still using the removed ``amazon_paapi`` module, follow this guide to move to
-``amazon_creatorsapi``.
+Follow the version 7 guide to upgrade code written for ``amazon_creatorsapi`` on version
+6. If you are still using the removed ``amazon_paapi`` module, start with the Creators
+API guide instead.
 
 .. toctree::
    :maxdepth: 1
 
+   ./pages/migration-guide-7.md
    ./pages/migration-guide-6.md
 
 Changelog

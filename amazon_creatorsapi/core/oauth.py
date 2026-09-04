@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from amazon_creatorsapi.errors import InvalidArgumentError
+
 # Scopes and grant type accepted by the auth endpoints of Amazon
 COGNITO_SCOPE = "creatorsapi/default"
 LWA_SCOPE = "creatorsapi::default"
@@ -107,8 +109,8 @@ def get_auth_endpoint(version: str, auth_endpoint: str | None = None) -> str:
         The URL used to get the OAuth2 token.
 
     Raises:
-        ValueError: If the family of the version is unknown, or if the version
-            is not in the list and no endpoint is given.
+        InvalidArgumentError: If the family of the version is unknown, or if
+            the version is not in the list and no endpoint is given.
 
     """
     endpoint = auth_endpoint.strip() if auth_endpoint else ""
@@ -126,7 +128,7 @@ def get_auth_endpoint(version: str, auth_endpoint: str | None = None) -> str:
             f"authenticate the {families} versions, so a newer one needs "
             f"support added to the library and not just a custom auth_endpoint"
         )
-        raise ValueError(msg)
+        raise InvalidArgumentError(msg)
 
     if not endpoint:
         supported = ", ".join(VERSION_ENDPOINTS)
@@ -135,6 +137,6 @@ def get_auth_endpoint(version: str, auth_endpoint: str | None = None) -> str:
             f"{supported}. A newer version of a known family can be used by "
             f"providing its auth_endpoint"
         )
-        raise ValueError(msg)
+        raise InvalidArgumentError(msg)
 
     return endpoint

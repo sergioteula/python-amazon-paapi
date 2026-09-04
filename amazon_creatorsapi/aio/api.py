@@ -178,13 +178,12 @@ class AsyncAmazonCreatorsApi:
 
     Raises:
         InvalidArgumentError: If neither country nor marketplace is provided,
-            if timeout is not greater than zero, if throttling is negative or
-            if retries is negative.
-        ValueError: If the version is not one of the supported ones, which
-            the message of the error lists, and no auth_endpoint is given, or
-            if it belongs to a family that the library cannot authenticate
-            (2.x and 3.x are the supported ones), which no auth_endpoint
-            makes valid.
+            if timeout is not greater than zero, if throttling is negative,
+            if retries is negative, if the version is not one of the supported
+            ones, which the message of the error lists, and no auth_endpoint
+            is given, or if it belongs to a family that the library cannot
+            authenticate (2.x and 3.x are the supported ones), which no
+            auth_endpoint makes valid.
 
     """
 
@@ -346,7 +345,6 @@ class AsyncAmazonCreatorsApi:
         search_index: str | None = None,
         item_count: int | None = None,
         item_page: int | None = None,
-        availability: Availability | None = None,
         condition: Condition | None = None,
         currency_of_preference: str | None = None,
         delivery_flags: list[DeliveryFlag] | None = None,
@@ -357,6 +355,8 @@ class AsyncAmazonCreatorsApi:
         min_reviews_rating: int | None = None,
         sort_by: SortBy | None = None,
         resources: list[SearchItemsResource] | None = None,
+        *,
+        availability: Availability | None = None,
     ) -> SearchResult:
         """Search for items on Amazon based on a search query.
 
@@ -374,8 +374,6 @@ class AsyncAmazonCreatorsApi:
             search_index: Product category to search. Defaults to All.
             item_count: Number of items returned (1-100). Defaults to 10.
             item_page: Page of items to return (1-10). Defaults to 1.
-            availability: Filter results by availability. Defaults to
-                returning only the items available for purchase.
             condition: Filter offers by condition type.
             currency_of_preference: ISO 4217 currency code for prices.
             delivery_flags: Delivery programs to filter search results by.
@@ -386,6 +384,9 @@ class AsyncAmazonCreatorsApi:
             min_reviews_rating: Min review rating (1-4).
             sort_by: Sort method for results.
             resources: List of resources to retrieve. Defaults to all.
+            availability: Filter results by availability. Defaults to
+                returning only the items available for purchase. Keyword only,
+                so it does not shift the position of the other arguments.
 
         Returns:
             SearchResult containing the list of items.
