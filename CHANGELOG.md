@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The error of an unsupported version tells that a newer version of a known family can be used by providing its `auth_endpoint`
 - The auth flow of a version and the `Authorization` header it expects are decided in a single place, and the copies bundled in the SDK are pinned to them by tests, so a bump of the SDK cannot leave both halves disagreeing
 - The usage guide covers everything the README does, so the documentation does not have to be read in both places, and the README links to it
+- The integration tests reach every operation of the API, feeds and reports included, and both clients share the same assertions, so a difference between them is a failure instead of a gap
+- Every integration test reads the results of a single round of calls, which loads each request with as much as it can check, so the whole API is covered without spending more requests of the account
+- The async integration tests make their calls when the suite runs instead of when the module is imported, so they are not sent when the tests are deselected and a failure is reported as such
 
 ### Fixed
 
