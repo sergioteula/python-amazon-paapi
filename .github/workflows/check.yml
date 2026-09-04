@@ -7,18 +7,24 @@ on:
   pull_request:
 
 permissions:
-  pull-requests: read
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  changelog:
-    if: github.event_name == 'pull_request'
+  check:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+
     steps:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Check CHANGELOG was updated
+        if: github.event_name == 'pull_request'
         run: |
           if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q "^CHANGELOG.md$"; then
             echo "✅ CHANGELOG.md was updated"
@@ -28,33 +34,16 @@ jobs:
             exit 1
           fi
 
-  check:
-    runs-on: ubuntu-latest
-    env:
-      AFFILIATE_TAG: ${{ secrets.AFFILIATE_TAG }}
-      COUNTRY_CODE: ${{ secrets.COUNTRY_CODE }}
-      CREDENTIAL_ID: ${{ secrets.CREDENTIAL_ID }}
-      CREDENTIAL_SECRET: ${{ secrets.CREDENTIAL_SECRET }}
-      API_VERSION: ${{ secrets.API_VERSION }}
-
-    steps:
-      - uses: actions/checkout@v5
-
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: "3.13"
 
       - name: Install UV
-        run: curl -LsSf https://astral.sh/uv/install.sh | sh
-
-      - name: Cache UV dependencies
-        uses: actions/cache@v4
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
-          path: ~/.cache/uv
-          key: ${{ runner.os }}-uv-${{ hashFiles('pyproject.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-uv-
+          enable-cache: true
+          cache-dependency-glob: pyproject.toml
 
       - name: Cache pre-commit
         uses: actions/cache@v4
@@ -64,32 +53,48 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pre-commit-
 
+      # Tests are owned by the test job below, so the test hook is skipped here.
       - name: Run all checks
-        run: |
-          uv run --extra async pre-commit run --all-files --verbose
+        env:
+          SKIP: test
+        run: uv run --extra async pre-commit run --all-files --verbose
 
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 2
+    timeout-minutes: 5
 
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+        include:
+          # Only this leg has the credentials for the integration tests, so it
+          # is the one that can meet the coverage threshold.
+          - python-version: "3.13"
+            coverage: true
 
     steps:
       - uses: actions/checkout@v5
 
       - name: Install UV
-        run: curl -LsSf https://astral.sh/uv/install.sh | sh
-
-      - name: Cache UV dependencies
-        uses: actions/cache@v4
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
-          path: ~/.cache/uv
-          key: ${{ runner.os }}-uv-py${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-uv-py${{ matrix.python-version }}-
+          enable-cache: true
+          cache-dependency-glob: pyproject.toml
+          # Each version resolves to different wheels, so they cannot share one
+          # cache entry.
+          cache-suffix: py${{ matrix.python-version }}
 
       - name: Run tests
+        if: ${{ !matrix.coverage }}
         run: uv run --python "${{ matrix.python-version }}" --extra async pytest -rs --no-cov
+
+      - name: Run tests with coverage
+        if: ${{ matrix.coverage }}
+        env:
+          AFFILIATE_TAG: ${{ secrets.AFFILIATE_TAG }}
+          COUNTRY_CODE: ${{ secrets.COUNTRY_CODE }}
+          CREDENTIAL_ID: ${{ secrets.CREDENTIAL_ID }}
+          CREDENTIAL_SECRET: ${{ secrets.CREDENTIAL_SECRET }}
+          API_VERSION: ${{ secrets.API_VERSION }}
+        run: uv run --python "${{ matrix.python-version }}" --extra async pytest -rs --cov=amazon_creatorsapi

@@ -10,6 +10,7 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: github.ref == 'refs/heads/master'
     environment: pypi
     outputs:
@@ -19,6 +20,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+        with:
+          # Needed so the tag existence check below can see the tags.
+          fetch-depth: 0
 
       - name: Extract version and notes from CHANGELOG
         id: changelog
@@ -40,7 +44,7 @@ jobs:
       - name: Check if tag already exists
         id: check_tag
         run: |
-          if git rev-parse "v${{ steps.changelog.outputs.version }}" >/dev/null 2>&1; then
+          if git rev-parse -q --verify "refs/tags/${{ steps.changelog.outputs.version }}" >/dev/null; then
             echo "exists=true" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT
@@ -59,21 +63,17 @@ jobs:
       - name: Skip release (tag exists)
         if: steps.check_tag.outputs.exists == 'true'
         run: |
-          echo "⚠️ Tag v${{ steps.changelog.outputs.version }} already exists. Skipping release creation."
+          echo "⚠️ Tag ${{ steps.changelog.outputs.version }} already exists. Skipping release creation."
           exit 1
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Install UV
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
-          python-version: "3.x"
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install build
+          # uv build only needs the build backend, not the project dependencies.
+          enable-cache: false
 
       - name: Build package
-        run: python -m build
+        run: uv build
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
