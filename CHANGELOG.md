@@ -73,6 +73,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `AmazonCreatorsApi` API requests now time out after 30 seconds instead of waiting indefinitely, matching the timeout already used by `AsyncAmazonCreatorsApi`. Pass `timeout=None` to restore the previous behavior
 - `AsyncAmazonCreatorsApi` now applies `timeout` to the OAuth2 token refresh as well, which previously always used the 5 second default from `httpx`
+- The CI workflow now runs the test suite once per Python version instead of also running it inside the linter job, cancels superseded pull request runs and installs `uv` through a cached action
+- The release workflow now builds with `uv build`, and its check for an already existing tag now looks for the tag name that is actually created, which never matched before
 
 ## [7.0.0] - 2026-09-03
 
