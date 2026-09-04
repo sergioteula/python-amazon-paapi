@@ -9,11 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Migration guide from version 6, listing what can break in code written for `amazon_creatorsapi` and how to fix it
 - The values accepted by `version`, the countries and the marketplace each one maps to, and the `marketplace` argument are documented, instead of having to read the code to find them
 - `CONTRIBUTING.md`, with the setup of the project, the commands of the `Makefile`, the conventions of the code and the tests, and what a pull request is expected to carry
+- Tests pinning the signatures of both clients and the hierarchy of the errors, so a change that breaks the code of the users is noticed
 
 ### Changed
 
+- `availability` is a keyword only argument of `search_items`, placed after the rest, instead of sitting between `item_page` and `condition`, where it displaced every following argument of a caller not using keywords
+- `AuthenticationError` and `AccessDeniedError` are subclasses of `RequestError`, which is what a failed request raised before they got their own type
+- `InvalidArgumentError` is also a `ValueError`, as the `pydantic.ValidationError` and the plain `ValueError` it replaced were
+- An unsupported `version` raises `InvalidArgumentError` instead of a plain `ValueError`, like the rest of the arguments of the clients
 - A `version` of a family that the library cannot authenticate is rejected even when `auth_endpoint` is given, instead of being sent with the Cognito flow and rejected by Amazon without an explanation
 - The error of an unsupported version tells that a newer version of a known family can be used by providing its `auth_endpoint`
 - The auth flow of a version and the `Authorization` header it expects are decided in a single place, and the copies bundled in the SDK are pinned to them by tests, so a bump of the SDK cannot leave both halves disagreeing

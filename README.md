@@ -391,6 +391,7 @@ back as `None`.
 
 - 📖 [Full documentation](https://python-amazon-paapi.readthedocs.io/)
 - 📘 [Usage guide](https://python-amazon-paapi.readthedocs.io/en/latest/pages/usage-guide.html)
+- 🔀 [Migration guide from version 6](https://python-amazon-paapi.readthedocs.io/en/latest/pages/migration-guide-7.html)
 - 🔀 [Migration guide from `amazon_paapi`](https://python-amazon-paapi.readthedocs.io/en/latest/pages/migration-guide-6.html)
 - 📋 [Changelog](https://github.com/sergioteula/python-amazon-paapi/blob/master/CHANGELOG.md)
 - 💬 [Telegram support group](https://t.me/PythonAmazonPAAPI)

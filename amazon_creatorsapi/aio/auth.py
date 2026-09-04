@@ -100,7 +100,8 @@ class AsyncOAuth2TokenManager:
             The OAuth2 token endpoint URL.
 
         Raises:
-            ValueError: If version is not supported and no custom endpoint provided.
+            InvalidArgumentError: If version is not supported and no custom
+                endpoint provided.
 
         """
         return get_auth_endpoint(version, auth_endpoint)
