@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import threading
+import time
 import unittest
 from unittest import mock
 from unittest.mock import MagicMock
@@ -119,3 +121,45 @@ class TestTimeoutOAuth2TokenManager(unittest.TestCase):
             self.manager.refresh_token()
 
         self.assertIn("parse OAuth2 token response", str(context.exception))
+
+
+class TestTimeoutOAuth2TokenManagerThreads(unittest.TestCase):
+    """Tests for the token manager when it is shared by several threads."""
+
+    @mock.patch("amazon_creatorsapi.core.auth.requests.post")
+    def test_only_one_thread_requests_the_token(self, mock_post: MagicMock) -> None:
+        """Test that threads asking at once share a single token request."""
+        started = threading.Barrier(4)
+
+        def build_token(*_args: object, **_kwargs: object) -> MagicMock:
+            # The request takes long enough for the other threads to reach the
+            # cache while it is still empty
+            time.sleep(0.05)
+            response = MagicMock()
+            response.status_code = 200
+            response.json.return_value = {
+                "access_token": "test_token",
+                "expires_in": 3600,
+            }
+            return response
+
+        mock_post.side_effect = build_token
+
+        manager = TimeoutOAuth2TokenManager(
+            OAuth2Config("test_id", "test_secret", "2.2", None),
+            timeout=7.0,
+        )
+        tokens: list[str] = []
+
+        def get_token() -> None:
+            started.wait()
+            tokens.append(manager.get_token())
+
+        threads = [threading.Thread(target=get_token) for _ in range(4)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+        self.assertEqual(tokens, ["test_token"] * 4)
+        self.assertEqual(mock_post.call_count, 1)

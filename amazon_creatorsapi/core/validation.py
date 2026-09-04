@@ -59,10 +59,39 @@ def validate_timeout(timeout: float | None) -> float | None:
     """
     if timeout is None:
         return None
-    if timeout <= 0:
+    try:
+        value = float(timeout)
+    except (TypeError, ValueError) as error:
+        msg = f"Timeout must be a number of seconds, or None: {timeout!r}"
+        raise InvalidArgumentError(msg) from error
+    if value <= 0:
         msg = "Timeout must be greater than zero, or None to wait indefinitely"
         raise InvalidArgumentError(msg)
-    return float(timeout)
+    return value
+
+
+def validate_throttling(throttling: float) -> float:
+    """Validate the wait time between API calls.
+
+    Args:
+        throttling: Wait time in seconds between API calls.
+
+    Returns:
+        The wait time as a float.
+
+    Raises:
+        InvalidArgumentError: If the wait time is not a number or is negative.
+
+    """
+    try:
+        value = float(throttling)
+    except (TypeError, ValueError) as error:
+        msg = f"Throttling must be a number of seconds: {throttling!r}"
+        raise InvalidArgumentError(msg) from error
+    if value < 0:
+        msg = "Throttling must be zero or greater"
+        raise InvalidArgumentError(msg)
+    return value
 
 
 def build_request(request_class: type[RequestT], **fields: Any) -> RequestT:
@@ -100,13 +129,19 @@ def validate_retries(retries: int) -> int:
         The amount of retries as an integer.
 
     Raises:
-        InvalidArgumentError: If the amount of retries is negative.
+        InvalidArgumentError: If the amount of retries is not a whole number
+            or is negative.
 
     """
-    if retries < 0:
+    try:
+        value = int(retries)
+    except (TypeError, ValueError) as error:
+        msg = f"Retries must be a whole number: {retries!r}"
+        raise InvalidArgumentError(msg) from error
+    if value < 0:
         msg = "Retries must be zero or greater"
         raise InvalidArgumentError(msg)
-    return int(retries)
+    return value
 
 
 def validate_search_criteria(**criteria: object) -> None:

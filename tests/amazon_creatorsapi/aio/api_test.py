@@ -12,6 +12,7 @@ from amazon_creatorsapi.aio import (
 )
 from amazon_creatorsapi.aio.api import API_HOST
 from amazon_creatorsapi.core.constants import DEFAULT_TIMEOUT
+from amazon_creatorsapi.core.oauth import VERSION_ENDPOINTS
 from amazon_creatorsapi.errors import (
     AssociateValidationError,
     AuthenticationError,
@@ -211,6 +212,73 @@ class TestAsyncAmazonCreatorsApiInit(unittest.TestCase):
 
         self.assertIn("Unsupported version: 9.9", str(context.exception))
         self.assertIn("Supported versions are:", str(context.exception))
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    def test_custom_endpoint_accepts_any_version(
+        self, mock_token_manager: MagicMock
+    ) -> None:
+        """Test that a custom endpoint makes any version valid."""
+        AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="9.9",
+            tag="test-tag",
+            country="ES",
+            auth_endpoint="https://example.com/token",
+        )
+
+        self.assertEqual(
+            mock_token_manager.call_args.kwargs["auth_endpoint"],
+            "https://example.com/token",
+        )
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    def test_the_endpoint_of_the_version_is_used(
+        self, mock_token_manager: MagicMock
+    ) -> None:
+        """Test that the endpoint of the version reaches the token manager."""
+        AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+        )
+
+        self.assertEqual(
+            mock_token_manager.call_args.kwargs["auth_endpoint"],
+            VERSION_ENDPOINTS["2.2"],
+        )
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    def test_negative_throttling_is_rejected(
+        self, mock_token_manager: MagicMock
+    ) -> None:
+        """Test that a negative wait time between calls is rejected."""
+        with self.assertRaises(InvalidArgumentError):
+            AsyncAmazonCreatorsApi(
+                credential_id="test_id",
+                credential_secret="test_secret",
+                version="2.2",
+                tag="test-tag",
+                country="ES",
+                throttling=-1,
+            )
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    def test_throttling_that_is_not_a_number_is_rejected(
+        self, mock_token_manager: MagicMock
+    ) -> None:
+        """Test that a wait time that is not a number is rejected."""
+        with self.assertRaises(InvalidArgumentError):
+            AsyncAmazonCreatorsApi(
+                credential_id="test_id",
+                credential_secret="test_secret",
+                version="2.2",
+                tag="test-tag",
+                country="ES",
+                throttling="fast",  # type: ignore[arg-type]
+            )
 
 
 class TestAsyncAmazonCreatorsApiContextManager(unittest.IsolatedAsyncioTestCase):
@@ -713,8 +781,8 @@ class TestAsyncAmazonCreatorsApiThrottling(unittest.IsolatedAsyncioTestCase):
             country="ES",
             throttling=0.5,
         ) as api:
-            await api.get_items(["B0DLFMFBJ1"])
-            await api.get_items(["B0DLFMFBJ2"])
+            await api.get_items(["B0DLFMFBJZ"])
+            await api.get_items(["B0DLFMFBJZ"])
 
         # asyncio.sleep should have been called for throttling
         self.assertTrue(mock_sleep.called)
@@ -2420,6 +2488,47 @@ class TestAsyncAmazonCreatorsApiOptions(unittest.IsolatedAsyncioTestCase):
             mock_http_client_class.call_args.kwargs["host"],
             "https://example.com",
         )
+
+
+class TestAsyncAmazonCreatorsApiUnrequestedItems(unittest.IsolatedAsyncioTestCase):
+    """Tests for a response holding items that were not requested."""
+
+    @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
+    @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
+    async def test_items_of_other_asins_are_not_found(
+        self,
+        mock_http_client_class: MagicMock,
+        mock_token_manager_class: MagicMock,
+    ) -> None:
+        """Test that a response without any requested item is not found."""
+        response = MagicMock()
+        response.status_code = 200
+        response.headers = {}
+        response.json.return_value = {
+            "itemsResult": {"items": [{"asin": "B000000002"}]}
+        }
+
+        mock_client = AsyncMock()
+        mock_client.post.return_value = response
+        mock_client.__aenter__.return_value = mock_client
+        mock_http_client_class.return_value = mock_client
+
+        mock_token_manager = AsyncMock()
+        mock_token_manager.get_token.return_value = "test_token"
+        mock_token_manager_class.return_value = mock_token_manager
+
+        api = AsyncAmazonCreatorsApi(
+            credential_id="test_id",
+            credential_secret="test_secret",
+            version="2.2",
+            tag="test-tag",
+            country="ES",
+            throttling=0,
+            retries=0,
+        )
+
+        with self.assertRaises(ItemsNotFoundError):
+            await api.get_items(["B000000001"])
 
 
 if __name__ == "__main__":

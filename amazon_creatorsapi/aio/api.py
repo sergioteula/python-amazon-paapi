@@ -25,6 +25,7 @@ from amazon_creatorsapi.core.items import (
     get_unique_items,
     sort_items,
 )
+from amazon_creatorsapi.core.oauth import get_auth_endpoint
 from amazon_creatorsapi.core.parsers import get_asin, get_items_ids
 from amazon_creatorsapi.core.requests import get_request_body
 from amazon_creatorsapi.core.resources import get_all_resources
@@ -35,6 +36,7 @@ from amazon_creatorsapi.core.validation import (
     validate_and_get_marketplace,
     validate_retries,
     validate_search_criteria,
+    validate_throttling,
     validate_timeout,
 )
 from amazon_creatorsapi.errors import (
@@ -48,7 +50,7 @@ from amazon_creatorsapi.errors import (
 try:
     import httpx
 
-    from .auth import VERSION_ENDPOINTS, AsyncOAuth2TokenManager
+    from .auth import AsyncOAuth2TokenManager
     from .client import AsyncHttpClient, AsyncHttpResponse
 except ImportError as exc:  # pragma: no cover
     msg = (
@@ -176,9 +178,10 @@ class AsyncAmazonCreatorsApi:
 
     Raises:
         InvalidArgumentError: If neither country nor marketplace is provided,
-            if timeout is not greater than zero, or if retries is negative.
-        ValueError: If version is not supported (valid versions: 2.1, 2.2, 2.3,
-            3.1, 3.2, 3.3).
+            if timeout is not greater than zero, if throttling is negative or
+            if retries is negative.
+        ValueError: If the version is not supported and no auth_endpoint is
+            given (valid versions: 2.1, 2.2, 2.3, 3.1, 3.2, 3.3).
 
     """
 
@@ -197,19 +200,20 @@ class AsyncAmazonCreatorsApi:
         auth_endpoint: str | None = None,
     ) -> None:
         """Initialize the async Amazon Creators API client."""
-        # Validate version early to fail fast (before token manager initialization)
-        self._validate_version(version)
+        # Resolve the endpoint early to fail fast on an unsupported version,
+        # which a custom endpoint makes valid
+        endpoint = get_auth_endpoint(version, auth_endpoint)
 
         self._credential_id = credential_id
         self._credential_secret = credential_secret
         self._version = version
-        self._last_query_time = time.monotonic() - throttling
         self.host = host
         self._throttle_lock: asyncio.Lock | None = None
         self.tag = tag
-        self.throttling = float(throttling)
+        self.throttling = validate_throttling(throttling)
         self.timeout = validate_timeout(timeout)
         self.retries = validate_retries(retries)
+        self._last_query_time = time.monotonic() - self.throttling
 
         # Determine marketplace from country or direct value
         self.marketplace = validate_and_get_marketplace(country, marketplace)
@@ -220,25 +224,10 @@ class AsyncAmazonCreatorsApi:
             credential_id=credential_id,
             credential_secret=credential_secret,
             version=version,
-            auth_endpoint=auth_endpoint,
+            auth_endpoint=endpoint,
             timeout=self.timeout,
         )
         self._owns_client = False
-
-    def _validate_version(self, version: str) -> None:
-        """Validate that the API version is supported.
-
-        Args:
-            version: API version to validate.
-
-        Raises:
-            ValueError: If version is not in the list of supported versions.
-
-        """
-        if version not in VERSION_ENDPOINTS:
-            supported = ", ".join(VERSION_ENDPOINTS.keys())
-            msg = f"Unsupported version: {version}. Supported versions are: {supported}"
-            raise ValueError(msg)
 
     async def __aenter__(self) -> Self:
         """Enter async context manager, creating a persistent HTTP client."""
@@ -273,7 +262,8 @@ class AsyncAmazonCreatorsApi:
 
         Duplicated items are requested only once, and the request is split into
         as many API calls as needed when it goes over the limit of items that
-        Amazon accepts at once.
+        Amazon accepts at once. A call that keeps failing after the retries
+        raises, discarding the items returned by the previous calls.
 
         Args:
             items: One or more items, using ASIN or Amazon product URL.
@@ -329,14 +319,17 @@ class AsyncAmazonCreatorsApi:
             if items_result.get("items"):
                 found_items.extend(self._deserialize_items(items_result["items"]))
 
-        if not found_items and not include_unavailable:
+        sorted_items = sort_items(
+            found_items,
+            item_ids,
+            include_unavailable=include_unavailable,
+        )
+
+        if not sorted_items and not include_unavailable:
             msg = f"No items have been found{format_errors(errors)}"
             raise ItemsNotFoundError(msg)
 
-        return ResultList(
-            sort_items(found_items, item_ids, include_unavailable=include_unavailable),
-            errors=errors,
-        )
+        return ResultList(sorted_items, errors=errors)
 
     async def search_items(
         self,

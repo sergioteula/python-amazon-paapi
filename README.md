@@ -174,6 +174,15 @@ amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, throttling=4)  # M
 amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, throttling=0)  # No wait time between requests
 ```
 
+### Closing the client
+
+The client keeps a pool of connections open, so it is meant to be created once and reused. Close it, or use it as a context manager, when it is not going to be used again:
+
+```python
+with AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY) as amazon:
+    items = amazon.get_items(["B01N5IB20Q"])
+```
+
 ### Timeout
 
 Timeout value represents the number of seconds to wait for a response before failing, being the default value 30 seconds. Use `None` to wait indefinitely.
@@ -196,7 +205,7 @@ amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, retries=0)  # Fail
 
 ### Custom Endpoints
 
-The base URL of the API and the one used to get the OAuth2 token can be replaced, which is useful to run the tests of a project against a mock server:
+The base URL of the API and the one used to get the OAuth2 token can be replaced, which is useful to run the tests of a project against a mock server. Providing `auth_endpoint` also makes any `version` valid, so a new one can be used before the library knows about it:
 
 ```python
 api = AmazonCreatorsApi(

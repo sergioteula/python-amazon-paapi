@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `get_asin` and `errors` are available directly in `amazon_creatorsapi`
 - The identifier that Amazon gives to a request is part of the message of the error, so it can be reported to Amazon support
 - `py.typed` marker, so the type hints of the package are used by type checkers
+- `close` method and context manager support in `AmazonCreatorsApi`, to release the connections of a client that is not going to be reused
 
 ### Changed
 
@@ -21,11 +22,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `AsyncAmazonCreatorsApi` builds its requests with the models of the SDK, so both clients validate the same values before sending a request
 - Every client uses its own configuration for the SDK instead of the one shared by the whole process
 - Throttling is measured with a monotonic clock and is safe to use from several threads
+- `throttling` is validated like the rest of the options, so a negative or invalid value raises `InvalidArgumentError` instead of being accepted or failing with a `TypeError`
+- `Retry-After` is also honoured when Amazon sends it as a date instead of an amount of seconds
+- Both clients resolve the auth endpoint with the same list of versions, so a new version only has to be added once
 
 ### Fixed
 
 - Examples in the documentation that used names that do not exist, such as `SortBy.PRICE_LOW_TO_HIGH` or `GetItemsResource.ITEMINFO_TITLE`
 - Documented limits of `item_count`, `min_reviews_rating` and `variation_page`, which did not match the ones accepted by the API
+- `auth_endpoint` is enough to use a version that the library does not know about in `AsyncAmazonCreatorsApi`, which rejected it even with a custom endpoint
+- A token response that does not hold JSON raises `AuthenticationError` in `AsyncAmazonCreatorsApi`, instead of the error of the JSON parser
+- Errors reported by the transport, such as an invalid certificate, keep their reason instead of being reported as `Request failed with status 0`
+- An ASIN longer than ten characters in a URL is rejected instead of being trimmed to a different item
+- `get_items` raises `ItemsNotFoundError` when the response holds no requested item, instead of returning an empty list
+- Threads sharing a client ask for a single token when the cached one expires, instead of one for every thread
 
 ### Removed
 

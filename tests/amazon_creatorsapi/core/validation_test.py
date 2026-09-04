@@ -8,6 +8,7 @@ from amazon_creatorsapi.core.validation import (
     build_request,
     validate_retries,
     validate_search_criteria,
+    validate_throttling,
     validate_timeout,
 )
 from amazon_creatorsapi.errors import InvalidArgumentError
@@ -60,6 +61,11 @@ class TestValidateTimeout(unittest.TestCase):
         with self.assertRaises(InvalidArgumentError):
             validate_timeout(0)
 
+    def test_not_a_number_is_rejected(self) -> None:
+        """Test that a value that is not a number is rejected."""
+        with self.assertRaises(InvalidArgumentError):
+            validate_timeout("slow")  # type: ignore[arg-type]
+
 
 class TestValidateRetries(unittest.TestCase):
     """Tests for validate_retries function."""
@@ -76,6 +82,33 @@ class TestValidateRetries(unittest.TestCase):
         """Test that a negative amount of retries is rejected."""
         with self.assertRaises(InvalidArgumentError):
             validate_retries(-1)
+
+    def test_not_a_number_is_rejected(self) -> None:
+        """Test that a value that is not a whole number is rejected."""
+        with self.assertRaises(InvalidArgumentError):
+            validate_retries("many")  # type: ignore[arg-type]
+
+
+class TestValidateThrottling(unittest.TestCase):
+    """Tests for validate_throttling function."""
+
+    def test_accepts_a_wait_time(self) -> None:
+        """Test that a wait time is returned as a float."""
+        self.assertEqual(validate_throttling(2), 2.0)
+
+    def test_accepts_no_wait_time(self) -> None:
+        """Test that no wait between calls is accepted."""
+        self.assertEqual(validate_throttling(0), 0.0)
+
+    def test_negative_is_rejected(self) -> None:
+        """Test that a negative wait time is rejected."""
+        with self.assertRaises(InvalidArgumentError):
+            validate_throttling(-1)
+
+    def test_not_a_number_is_rejected(self) -> None:
+        """Test that a value that is not a number is rejected."""
+        with self.assertRaises(InvalidArgumentError):
+            validate_throttling("fast")  # type: ignore[arg-type]
 
 
 class TestValidateSearchCriteria(unittest.TestCase):

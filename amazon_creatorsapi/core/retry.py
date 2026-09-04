@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -41,7 +43,7 @@ def get_retry_after(headers: Mapping[str, str] | None) -> float | None:
 
     Returns:
         The amount of seconds to wait, or None when the header is missing or
-        does not hold an amount of seconds.
+        holds neither an amount of seconds nor a date.
 
     """
     if not headers:
@@ -53,9 +55,33 @@ def get_retry_after(headers: Mapping[str, str] | None) -> float | None:
         try:
             return max(float(value), 0.0)
         except (TypeError, ValueError):
-            return None
+            return get_seconds_until(value)
 
     return None
+
+
+def get_seconds_until(value: str) -> float | None:
+    """Return the seconds left until an HTTP date, which Retry-After allows.
+
+    Args:
+        value: Value of the header, expected to hold a date.
+
+    Returns:
+        The amount of seconds until the date, zero when it is already past,
+        or None when the value is not a date.
+
+    """
+    # Python 3.9 reports an unparseable value with a TypeError instead of the
+    # ValueError raised by the newer versions
+    try:
+        date = parsedate_to_datetime(value)
+    except (TypeError, ValueError):
+        return None
+
+    if date.tzinfo is None:
+        date = date.replace(tzinfo=timezone.utc)
+
+    return max((date - datetime.now(timezone.utc)).total_seconds(), 0.0)
 
 
 def get_retry_delay(attempt: int, headers: Mapping[str, str] | None = None) -> float:

@@ -13,6 +13,7 @@ import urllib3
 from amazon_creatorsapi import AmazonCreatorsApi
 from amazon_creatorsapi.core.auth import TimeoutOAuth2TokenManager
 from amazon_creatorsapi.core.constants import DEFAULT_TIMEOUT
+from amazon_creatorsapi.core.oauth import VERSION_ENDPOINTS
 from amazon_creatorsapi.errors import (
     AccessDeniedError,
     AssociateValidationError,
@@ -165,7 +166,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
         mock_api = MagicMock()
         mock_api_class.return_value = mock_api
         mock_response = MagicMock()
-        mock_response.items_result.items = [MagicMock()]
+        mock_response.items_result.items = [MagicMock(asin="B0DLFMFBJW")]
         mock_api.get_items.return_value = mock_response
 
         api = AmazonCreatorsApi(
@@ -774,7 +775,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
         mock_api = MagicMock()
         mock_api_class.return_value = mock_api
         mock_response = MagicMock()
-        mock_response.items_result.items = [MagicMock()]
+        mock_response.items_result.items = [MagicMock(asin="B0DLFMFBJW")]
         mock_api.get_items.return_value = mock_response
 
         api = AmazonCreatorsApi(
@@ -1107,7 +1108,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
         mock_api = MagicMock()
         mock_api_class.return_value = mock_api
         mock_response = MagicMock()
-        mock_response.items_result.items = [MagicMock()]
+        mock_response.items_result.items = [MagicMock(asin="B0DLFMFBJW")]
         mock_api.get_items.return_value = mock_response
 
         api = AmazonCreatorsApi(
@@ -1138,7 +1139,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
         mock_api = MagicMock()
         mock_api_class.return_value = mock_api
         mock_response = MagicMock()
-        mock_response.items_result.items = [MagicMock()]
+        mock_response.items_result.items = [MagicMock(asin="B0DLFMFBJW")]
         mock_api.get_items.return_value = mock_response
 
         api = AmazonCreatorsApi(
@@ -1169,7 +1170,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
         mock_api = MagicMock()
         mock_api_class.return_value = mock_api
         mock_response = MagicMock()
-        mock_response.items_result.items = [MagicMock()]
+        mock_response.items_result.items = [MagicMock(asin="B0DLFMFBJW")]
         mock_api.get_items.return_value = mock_response
 
         api = AmazonCreatorsApi(
@@ -1859,3 +1860,116 @@ class TestAmazonCreatorsApiOptions(unittest.TestCase):
             first._api_client.configuration,
             second._api_client.configuration,
         )
+
+    def build_api_with(self, **options: object) -> AmazonCreatorsApi:
+        """Build an API client overriding any of its options."""
+        return AmazonCreatorsApi(
+            **{  # type: ignore[arg-type]
+                "credential_id": self.credential_id,
+                "credential_secret": self.credential_secret,
+                "version": self.version,
+                "tag": self.tag,
+                "country": self.country,
+                "throttling": 0,
+                "retries": 0,
+                **options,
+            }
+        )
+
+    def test_unsupported_version_is_rejected(self) -> None:
+        """Test that a version out of the list needs a custom endpoint."""
+        with self.assertRaises(ValueError) as context:
+            self.build_api_with(version="4.0")
+
+        self.assertIn("Unsupported version: 4.0", str(context.exception))
+
+    def test_custom_endpoint_accepts_any_version(self) -> None:
+        """Test that a custom endpoint makes any version valid."""
+        api = self.build_api_with(
+            version="4.0",
+            auth_endpoint="https://example.com/token",
+        )
+
+        token_manager = api._api_client.token_manager
+        assert token_manager is not None
+        self.assertEqual(
+            token_manager.config.get_cognito_endpoint(),
+            "https://example.com/token",
+        )
+
+    def test_the_endpoint_of_the_version_is_used(self) -> None:
+        """Test that the endpoint of the version reaches the token manager."""
+        api = self.build_api()
+
+        token_manager = api._api_client.token_manager
+        assert token_manager is not None
+        self.assertEqual(
+            token_manager.config.get_cognito_endpoint(),
+            VERSION_ENDPOINTS["2.2"],
+        )
+
+    def test_negative_throttling_is_rejected(self) -> None:
+        """Test that a negative wait time between calls is rejected."""
+        with self.assertRaises(InvalidArgumentError):
+            self.build_api_with(throttling=-1)
+
+    def test_throttling_that_is_not_a_number_is_rejected(self) -> None:
+        """Test that a wait time that is not a number is rejected."""
+        with self.assertRaises(InvalidArgumentError):
+            self.build_api_with(throttling="fast")
+
+    def test_close_releases_the_connections(self) -> None:
+        """Test that closing the client clears the pool of connections."""
+        api = self.build_api()
+        api._api_client.rest_client.pool_manager = MagicMock()
+
+        api.close()
+
+        api._api_client.rest_client.pool_manager.clear.assert_called_once()
+
+    def test_context_manager_closes_the_client(self) -> None:
+        """Test that leaving the context manager closes the client."""
+        api = self.build_api()
+        api._api_client.rest_client.pool_manager = MagicMock()
+
+        with api as client:
+            self.assertIs(client, api)
+
+        api._api_client.rest_client.pool_manager.clear.assert_called_once()
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_transport_error_keeps_its_reason(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that an error without a body is reported with its reason."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.side_effect = ApiException(
+            status=0,
+            reason="SSL error: certificate verify failed",
+        )
+
+        with self.assertRaises(RequestError) as context:
+            self.build_api().get_items(["B000000001"])
+
+        self.assertIn("certificate verify failed", str(context.exception))
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_items_of_other_asins_are_not_found(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that a response without any requested item is not found."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.return_value = GetItemsResponseContent(
+            itemsResult=ItemsResult(items=[Item(asin="B000000002")]),
+        )
+
+        with self.assertRaises(ItemsNotFoundError):
+            self.build_api().get_items(["B000000001"])

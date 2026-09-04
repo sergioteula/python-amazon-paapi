@@ -24,6 +24,7 @@ from amazon_creatorsapi.core.items import (
     get_unique_items,
     sort_items,
 )
+from amazon_creatorsapi.core.oauth import get_auth_endpoint
 from amazon_creatorsapi.core.parsers import get_asin, get_items_ids
 from amazon_creatorsapi.core.resources import get_all_resources
 from amazon_creatorsapi.core.results import ResultList
@@ -33,6 +34,7 @@ from amazon_creatorsapi.core.validation import (
     validate_and_get_marketplace,
     validate_retries,
     validate_search_criteria,
+    validate_throttling,
     validate_timeout,
 )
 from amazon_creatorsapi.errors import (
@@ -73,6 +75,8 @@ from creatorsapi_python_sdk.models.search_items_request_content import (
 from creatorsapi_python_sdk.models.search_items_resource import SearchItemsResource
 
 if TYPE_CHECKING:
+    from types import TracebackType
+
     from amazon_creatorsapi.core.marketplaces import CountryCode
     from creatorsapi_python_sdk.models.availability import Availability
     from creatorsapi_python_sdk.models.browse_node import BrowseNode
@@ -89,6 +93,9 @@ if TYPE_CHECKING:
     from creatorsapi_python_sdk.models.variations_result import VariationsResult
 
 ResponseT = TypeVar("ResponseT")
+# typing.Self needs Python 3.11 and typing_extensions is only required by the
+# async extra, so the client is typed with a TypeVar bound to itself
+ClientT = TypeVar("ClientT", bound="AmazonCreatorsApi")
 
 
 class AmazonCreatorsApi:
@@ -112,7 +119,10 @@ class AmazonCreatorsApi:
 
     Raises:
         InvalidArgumentError: If neither country nor marketplace is provided,
-            if timeout is not greater than zero, or if retries is negative.
+            if timeout is not greater than zero, if throttling is negative or
+            if retries is negative.
+        ValueError: If the version is not supported and no auth_endpoint is
+            given (valid versions: 2.1, 2.2, 2.3, 3.1, 3.2, 3.3).
 
     Example:
         >>> api = AmazonCreatorsApi(
@@ -123,6 +133,10 @@ class AmazonCreatorsApi:
         ...     country="ES"
         ... )
         >>> items = api.get_items(["B0DLFMFBJW"])
+
+    The client keeps a pool of connections open, so it is meant to be reused.
+    Call close, or use it as a context manager, to release the connections of
+    a client that is not going to be used again.
 
     """
 
@@ -144,15 +158,19 @@ class AmazonCreatorsApi:
         self._credential_id = credential_id
         self._credential_secret = credential_secret
         self._version = version
-        self._last_query_time = time.monotonic() - throttling
         self._throttle_lock = threading.Lock()
         self.tag = tag
-        self.throttling = float(throttling)
+        self.throttling = validate_throttling(throttling)
         self.timeout = validate_timeout(timeout)
         self.retries = validate_retries(retries)
+        self._last_query_time = time.monotonic() - self.throttling
 
         # Determine marketplace from country or direct value
         self.marketplace = validate_and_get_marketplace(country, marketplace)
+
+        # The endpoint is resolved here, so both clients share the same list
+        # of versions instead of relying on the one bundled with the SDK
+        endpoint = get_auth_endpoint(version, auth_endpoint)
 
         # A new configuration for every client, as the default one of the
         # SDK is shared by the whole process
@@ -162,16 +180,38 @@ class AmazonCreatorsApi:
             credential_secret=credential_secret,
             version=version,
             host=host,
-            auth_endpoint=auth_endpoint,
+            auth_endpoint=endpoint,
         )
         # The token manager bundled with the SDK requests the token without
         # any timeout, so it is replaced by one that honours the configured
         # value and reports failures as library errors.
         self._api_client._token_manager = TimeoutOAuth2TokenManager(  # noqa: SLF001
-            OAuth2Config(credential_id, credential_secret, version, auth_endpoint),
+            OAuth2Config(credential_id, credential_secret, version, endpoint),
             self.timeout,
         )
         self._api = DefaultApi(self._api_client)
+
+    def __enter__(self: ClientT) -> ClientT:  # noqa: PYI019
+        """Return the client, which closes its connections when leaving."""
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        """Close the connections of the client."""
+        self.close()
+
+    def close(self) -> None:
+        """Release the connections kept open by the client.
+
+        The client stays usable after closing it, opening a new connection on
+        the next request. Calling it is only needed for clients that are not
+        reused, as the ones created for a single request.
+        """
+        self._api_client.rest_client.pool_manager.clear()
 
     def get_items(
         self,
@@ -187,7 +227,8 @@ class AmazonCreatorsApi:
 
         Duplicated items are requested only once, and the request is split into
         as many API calls as needed when it goes over the limit of items that
-        Amazon accepts at once.
+        Amazon accepts at once. A call that keeps failing after the retries
+        raises, discarding the items returned by the previous calls.
 
         Args:
             items: One or more items, using ASIN or Amazon product URL.
@@ -242,14 +283,17 @@ class AmazonCreatorsApi:
             if response.items_result is not None and response.items_result.items:
                 found_items.extend(response.items_result.items)
 
-        if not found_items and not include_unavailable:
+        sorted_items = sort_items(
+            found_items,
+            item_ids,
+            include_unavailable=include_unavailable,
+        )
+
+        if not sorted_items and not include_unavailable:
             msg = f"No items have been found{format_errors(errors)}"
             raise ItemsNotFoundError(msg)
 
-        return ResultList(
-            sort_items(found_items, item_ids, include_unavailable=include_unavailable),
-            errors=errors,
-        )
+        return ResultList(sorted_items, errors=errors)
 
     def search_items(
         self,
@@ -645,9 +689,16 @@ class AmazonCreatorsApi:
     ) -> NoReturn:
         """Handle API exceptions and raise appropriate custom exceptions."""
         body = error.body if isinstance(error.body, str) else ""
+        reason = str(error.reason) if error.reason else None
 
         try:
-            handle_api_error(error.status, body, not_found_error, error.headers)
+            handle_api_error(
+                error.status,
+                body,
+                not_found_error,
+                error.headers,
+                reason,
+            )
         except AmazonCreatorsApiError as exc:
             # Re-raise with original exception as cause for better stack traces
             raise exc from error
