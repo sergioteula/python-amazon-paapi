@@ -28,6 +28,8 @@ repos:
       - id: check-merge-conflict
       - id: debug-statements
       - id: name-tests-test
+        # Support shared by the integration tests, which holds no test of its own
+        exclude: ^tests/integration_support\.py$
 
   - repo: https://github.com/lk16/detect-missing-init
     rev: v0.1.6
