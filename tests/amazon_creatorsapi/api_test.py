@@ -1879,14 +1879,24 @@ class TestAmazonCreatorsApiOptions(unittest.TestCase):
     def test_unsupported_version_is_rejected(self) -> None:
         """Test that a version out of the list needs a custom endpoint."""
         with self.assertRaises(ValueError) as context:
-            self.build_api_with(version="4.0")
+            self.build_api_with(version="3.4")
+
+        self.assertIn("Unsupported version: 3.4", str(context.exception))
+
+    def test_unknown_family_is_rejected_with_a_custom_endpoint(self) -> None:
+        """Test that a version with an unknown auth flow is always rejected."""
+        with self.assertRaises(ValueError) as context:
+            self.build_api_with(
+                version="4.0",
+                auth_endpoint="https://example.com/token",
+            )
 
         self.assertIn("Unsupported version: 4.0", str(context.exception))
 
-    def test_custom_endpoint_accepts_any_version(self) -> None:
-        """Test that a custom endpoint makes any version valid."""
+    def test_custom_endpoint_accepts_a_new_version(self) -> None:
+        """Test that a custom endpoint makes valid a version out of the list."""
         api = self.build_api_with(
-            version="4.0",
+            version="3.4",
             auth_endpoint="https://example.com/token",
         )
 
