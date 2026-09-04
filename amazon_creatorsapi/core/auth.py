@@ -2,21 +2,19 @@
 
 from __future__ import annotations
 
+import threading
 import time
 from typing import TYPE_CHECKING, Any
 
 import requests
 
+from amazon_creatorsapi.core.constants import HTTP_OK
+from amazon_creatorsapi.core.oauth import DEFAULT_EXPIRATION, TOKEN_EXPIRATION_BUFFER
 from amazon_creatorsapi.errors import AuthenticationError
 from creatorsapi_python_sdk.auth.oauth2_token_manager import OAuth2TokenManager
 
 if TYPE_CHECKING:
     from creatorsapi_python_sdk.auth.oauth2_config import OAuth2Config
-
-# Token expiration buffer in seconds (refresh before the actual expiration)
-TOKEN_EXPIRATION_BUFFER = 30
-DEFAULT_EXPIRATION = 3600
-HTTP_OK = 200
 
 
 class TimeoutOAuth2TokenManager(OAuth2TokenManager):
@@ -24,7 +22,9 @@ class TimeoutOAuth2TokenManager(OAuth2TokenManager):
 
     The token manager bundled with the SDK requests the token without any
     timeout, so an unresponsive auth endpoint blocks the call indefinitely
-    even when a timeout is set for the API requests themselves.
+    even when a timeout is set for the API requests themselves. It also asks
+    for a token without any lock, so every thread sharing a client requests
+    its own token as soon as the cached one expires.
 
     Args:
         config: OAuth2 configuration with the credentials and the endpoint.
@@ -37,6 +37,25 @@ class TimeoutOAuth2TokenManager(OAuth2TokenManager):
         """Initialize the token manager with its timeout."""
         super().__init__(config)
         self._timeout = timeout
+        self._lock = threading.Lock()
+
+    def get_token(self) -> str:
+        """Return a valid token, asking for a new one only once at a time.
+
+        Returns:
+            A valid access token.
+
+        Raises:
+            AuthenticationError: If the token cannot be obtained.
+
+        """
+        if self.is_token_valid():
+            return str(self.access_token)
+
+        with self._lock:
+            if self.is_token_valid():
+                return str(self.access_token)
+            return self.refresh_token()
 
     def refresh_token(self) -> str:
         """Refresh the OAuth2 access token using the client credentials grant.

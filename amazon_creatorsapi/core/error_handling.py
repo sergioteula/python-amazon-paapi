@@ -113,6 +113,7 @@ def handle_api_error(
     body: str,
     not_found_error: type[AmazonCreatorsApiError] = ItemsNotFoundError,
     headers: Mapping[str, str] | None = None,
+    reason: str | None = None,
 ) -> NoReturn:
     """Handle API error responses and raise appropriate exceptions.
 
@@ -123,6 +124,8 @@ def handle_api_error(
             operations tell apart items from feeds and reports.
         headers: Headers of the response, used to report the identifier that
             Amazon gave to the request.
+        reason: Reason of the failure, used when the response has no body,
+            as happens for the errors reported by the transport itself.
 
     Raises:
         InvalidArgumentError: For requests rejected by the API.
@@ -135,16 +138,16 @@ def handle_api_error(
 
     """
     data = parse_error_body(body)
-    detail = get_error_detail(data, body)
-    reason = data.get("reason")
+    detail = get_error_detail(data, body) or (f" - {reason}" if reason else "")
+    error_reason = data.get("reason")
 
     request_id = get_request_id(headers)
     if request_id:
         detail = f"{detail} [request id: {request_id}]"
 
     if status_code == HTTP_BAD_REQUEST:
-        if reason == INVALID_ASSOCIATE_REASON or (
-            reason is None and INVALID_ASSOCIATE_REASON in body
+        if error_reason == INVALID_ASSOCIATE_REASON or (
+            error_reason is None and INVALID_ASSOCIATE_REASON in body
         ):
             msg = f"Credentials are not valid for the selected marketplace{detail}"
             raise AssociateValidationError(msg)

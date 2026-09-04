@@ -49,6 +49,12 @@ class TestGetAsin(unittest.TestCase):
         url = "https://www.amazon.com/Product-Name-Description/dp/B0DLFMFBJW/ref=sr_1_1"
         self.assertEqual(get_asin(url), "B0DLFMFBJW")
 
+    def test_get_asin_with_a_longer_identifier_raises_error(self) -> None:
+        """Test that an identifier longer than an ASIN is not trimmed."""
+        url = "https://www.amazon.es/dp/B0DLFMFBJW1234"
+        with self.assertRaises(InvalidArgumentError):
+            get_asin(url)
+
     def test_get_asin_with_invalid_input_raises_error(self) -> None:
         """Test that invalid input raises InvalidArgumentError."""
         with self.assertRaises(InvalidArgumentError):

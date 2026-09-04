@@ -354,6 +354,29 @@ class TestAsyncOAuth2TokenManagerRefreshToken(unittest.IsolatedAsyncioTestCase):
         self.assertIn("token request failed", str(context.exception))
 
 
+class TestAsyncOAuth2TokenManagerInvalidJson(unittest.IsolatedAsyncioTestCase):
+    """Tests for a token response that does not hold JSON."""
+
+    async def test_invalid_json_raises_authentication_error(self) -> None:
+        """Test that an unparseable response is reported as a library error."""
+        response = MagicMock()
+        response.status_code = 200
+        response.json.side_effect = ValueError("Expecting value")
+
+        client = AsyncMock()
+        client.post.return_value = response
+        client.__aenter__.return_value = client
+
+        manager = AsyncOAuth2TokenManager("test_id", "test_secret", "2.2")
+
+        with patch("httpx.AsyncClient", return_value=client):
+            with self.assertRaises(AuthenticationError) as context:
+                await manager.refresh_token()
+
+        self.assertIn("Failed to parse OAuth2 token response", str(context.exception))
+        self.assertIsNone(manager._access_token)
+
+
 class TestAsyncOAuth2TokenManagerTimeout(unittest.IsolatedAsyncioTestCase):
     """Tests for the timeout applied to token refresh requests."""
 

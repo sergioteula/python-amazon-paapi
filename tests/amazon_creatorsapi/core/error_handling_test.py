@@ -137,6 +137,29 @@ class TestHandleApiError(unittest.TestCase):
         self.assertIn("Bad gateway", str(context.exception))
 
 
+class TestHandleApiErrorReason(unittest.TestCase):
+    """Tests for the reason reported when the response has no body."""
+
+    def test_reason_is_reported(self) -> None:
+        """Test that the reason is kept when the response has no body."""
+        with self.assertRaises(RequestError) as context:
+            handle_api_error(0, "", reason="SSL error: certificate verify failed")
+
+        self.assertIn("certificate verify failed", str(context.exception))
+
+    def test_body_wins_over_the_reason(self) -> None:
+        """Test that the body of the response is preferred to the reason."""
+        with self.assertRaises(RequestError) as context:
+            handle_api_error(
+                500,
+                '{"message": "Internal failure"}',
+                reason="Internal Server Error",
+            )
+
+        self.assertIn("Internal failure", str(context.exception))
+        self.assertNotIn("Internal Server Error", str(context.exception))
+
+
 class TestGetRequestId(unittest.TestCase):
     """Tests for get_request_id function."""
 

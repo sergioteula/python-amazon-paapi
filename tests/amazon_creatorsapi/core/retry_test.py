@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import unittest
+from datetime import datetime, timedelta, timezone
+from email.utils import format_datetime
 
 from amazon_creatorsapi.core.retry import (
     MAX_BACKOFF,
@@ -43,9 +45,37 @@ class TestGetRetryAfter(unittest.TestCase):
         self.assertIsNone(get_retry_after(None))
         self.assertIsNone(get_retry_after({"Content-Type": "application/json"}))
 
-    def test_date_header_is_ignored(self) -> None:
-        """Test that a header holding a date is ignored."""
-        self.assertIsNone(get_retry_after({"Retry-After": "Wed, 21 Oct 2026 07:28:00"}))
+    def test_reads_a_date_header(self) -> None:
+        """Test that a header holding a date is read as the seconds left."""
+        date = datetime.now(timezone.utc) + timedelta(seconds=120)
+        seconds = get_retry_after({"Retry-After": format_datetime(date, usegmt=True)})
+
+        self.assertIsNotNone(seconds)
+        assert seconds is not None
+        self.assertAlmostEqual(seconds, 120, delta=5)
+
+    def test_date_header_in_the_past(self) -> None:
+        """Test that a date already past asks for no wait at all."""
+        date = datetime.now(timezone.utc) - timedelta(seconds=120)
+
+        self.assertEqual(
+            get_retry_after({"Retry-After": format_datetime(date, usegmt=True)}),
+            0.0,
+        )
+
+    def test_date_header_without_timezone(self) -> None:
+        """Test that a date without timezone is read as UTC."""
+        date = datetime.now(timezone.utc) + timedelta(seconds=120)
+        header = date.strftime("%a, %d %b %Y %H:%M:%S")
+        seconds = get_retry_after({"Retry-After": header})
+
+        self.assertIsNotNone(seconds)
+        assert seconds is not None
+        self.assertAlmostEqual(seconds, 120, delta=5)
+
+    def test_invalid_header_is_ignored(self) -> None:
+        """Test that a header holding neither seconds nor a date is ignored."""
+        self.assertIsNone(get_retry_after({"Retry-After": "soon"}))
 
 
 class TestGetRetryDelay(unittest.TestCase):

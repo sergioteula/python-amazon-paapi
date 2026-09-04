@@ -24,8 +24,13 @@ def get_asin(text: str) -> str:
     if re.search(r"^[a-zA-Z0-9]{10}$", text):
         return text.upper()
 
-    # Extract ASIN from URL searching for common Amazon URL patterns
-    asin = re.search(r"(dp|gp/product|gp/aw/d|dp/product)/([a-zA-Z0-9]{10})", text)
+    # Extract ASIN from URL searching for common Amazon URL patterns. The
+    # identifier has to end after ten characters, so a longer one is reported
+    # instead of silently trimmed to something that looks like a valid ASIN.
+    asin = re.search(
+        r"(dp|gp/product|gp/aw/d|dp/product)/([a-zA-Z0-9]{10})(?![a-zA-Z0-9])",
+        text,
+    )
     if asin:
         return asin.group(2).upper()
 
