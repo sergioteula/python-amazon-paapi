@@ -33,9 +33,17 @@ release = "7.4.0"
 # ones.
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "myst_parser"]
 
+# Generate anchors for the headings of the Markdown pages, so they can be
+# linked to across pages, as the migration guide does with the usage guide
+myst_heading_anchors = 3
+
 # Don't show type hints in the signature - that just makes it hardly readable
 # and we document the types anyway
 autodoc_typehints = "none"
+
+# Keep the members in the order they are written instead of alphabetically, so
+# the methods of the clients are read in the order they are usually called
+autodoc_member_order = "bysource"
 
 # Add any paths that contain templates here, relative to this directory.
 # templates_path = ["_templates"]
@@ -83,8 +91,3 @@ html_logo = "_static/pa-paapi-logo.png"
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
 html_favicon = "_static/pa-paapi-icon.ico"
-
-
-# -- script stuff --------------------------------------------------------
-
-# No custom events needed
