@@ -12,19 +12,44 @@ from typing import TYPE_CHECKING, Any, TypeVar
 
 from typing_extensions import Self
 
-from amazon_creatorsapi.core.constants import DEFAULT_THROTTLING, DEFAULT_TIMEOUT
-from amazon_creatorsapi.core.error_handling import handle_api_error
+from amazon_creatorsapi.core.constants import (
+    DEFAULT_HOST,
+    DEFAULT_THROTTLING,
+    DEFAULT_TIMEOUT,
+    HTTP_OK,
+    HTTP_UNAUTHORIZED,
+)
+from amazon_creatorsapi.core.error_handling import format_errors, handle_api_error
+from amazon_creatorsapi.core.items import (
+    get_item_chunks,
+    get_unique_items,
+    sort_items,
+)
 from amazon_creatorsapi.core.parsers import get_asin, get_items_ids
+from amazon_creatorsapi.core.requests import get_request_body
 from amazon_creatorsapi.core.resources import get_all_resources
+from amazon_creatorsapi.core.results import ResultList
+from amazon_creatorsapi.core.retry import DEFAULT_RETRIES, get_retry_delay, is_retryable
 from amazon_creatorsapi.core.validation import (
+    build_request,
     validate_and_get_marketplace,
+    validate_retries,
+    validate_search_criteria,
     validate_timeout,
 )
-from amazon_creatorsapi.errors import ItemsNotFoundError
+from amazon_creatorsapi.errors import (
+    AmazonCreatorsApiError,
+    InvalidArgumentError,
+    ItemsNotFoundError,
+    RequestError,
+    ResourceNotFoundError,
+)
 
 try:
+    import httpx
+
     from .auth import VERSION_ENDPOINTS, AsyncOAuth2TokenManager
-    from .client import AsyncHttpClient
+    from .client import AsyncHttpClient, AsyncHttpResponse
 except ImportError as exc:  # pragma: no cover
     msg = (
         "httpx is required for async support. "
@@ -32,17 +57,36 @@ except ImportError as exc:  # pragma: no cover
     )
     raise ImportError(msg) from exc
 
+from creatorsapi_python_sdk.models.get_browse_nodes_request_content import (
+    GetBrowseNodesRequestContent,
+)
 from creatorsapi_python_sdk.models.get_browse_nodes_resource import (
     GetBrowseNodesResource,
 )
+from creatorsapi_python_sdk.models.get_feed_request_content import (
+    GetFeedRequestContent,
+)
+from creatorsapi_python_sdk.models.get_items_request_content import (
+    GetItemsRequestContent,
+)
 from creatorsapi_python_sdk.models.get_items_resource import GetItemsResource
+from creatorsapi_python_sdk.models.get_report_request_content import (
+    GetReportRequestContent,
+)
+from creatorsapi_python_sdk.models.get_variations_request_content import (
+    GetVariationsRequestContent,
+)
 from creatorsapi_python_sdk.models.get_variations_resource import GetVariationsResource
+from creatorsapi_python_sdk.models.search_items_request_content import (
+    SearchItemsRequestContent,
+)
 from creatorsapi_python_sdk.models.search_items_resource import SearchItemsResource
 
 if TYPE_CHECKING:
     from types import TracebackType
 
     from amazon_creatorsapi.core.marketplaces import CountryCode
+    from creatorsapi_python_sdk.models.availability import Availability
     from creatorsapi_python_sdk.models.condition import Condition
     from creatorsapi_python_sdk.models.delivery_flag import DeliveryFlag
     from creatorsapi_python_sdk.models.feed_type import FeedType
@@ -50,6 +94,7 @@ if TYPE_CHECKING:
     from creatorsapi_python_sdk.models.sort_by import SortBy
 
 from creatorsapi_python_sdk.models.browse_node import BrowseNode
+from creatorsapi_python_sdk.models.error_data import ErrorData
 from creatorsapi_python_sdk.models.feed import Feed
 from creatorsapi_python_sdk.models.get_feed_response_content import (
     GetFeedResponseContent,
@@ -63,7 +108,7 @@ from creatorsapi_python_sdk.models.search_result import SearchResult
 from creatorsapi_python_sdk.models.variations_result import VariationsResult
 
 # API endpoints
-API_HOST = "https://creatorsapi.amazon"
+API_HOST = DEFAULT_HOST
 ENDPOINT_GET_ITEMS = "/catalog/v1/getItems"
 ENDPOINT_SEARCH_ITEMS = "/catalog/v1/searchItems"
 ENDPOINT_GET_VARIATIONS = "/catalog/v1/getVariations"
@@ -123,10 +168,15 @@ class AsyncAmazonCreatorsApi:
         throttling: Wait time in seconds between API calls. Defaults to 1 second.
         timeout: Request timeout in seconds, or None to wait indefinitely.
             Defaults to 30 seconds.
+        retries: Extra attempts for the failures that Amazon asks to retry,
+            waiting longer before every attempt. Defaults to 3.
+        host: Base URL of the API. Defaults to the Amazon Creators API.
+        auth_endpoint: URL used to get the OAuth2 token. Defaults to the one
+            of the version in use.
 
     Raises:
         InvalidArgumentError: If neither country nor marketplace is provided,
-            or if timeout is not greater than zero.
+            if timeout is not greater than zero, or if retries is negative.
         ValueError: If version is not supported (valid versions: 2.1, 2.2, 2.3,
             3.1, 3.2, 3.3).
 
@@ -142,6 +192,9 @@ class AsyncAmazonCreatorsApi:
         marketplace: str | None = None,
         throttling: float = DEFAULT_THROTTLING,
         timeout: float | None = DEFAULT_TIMEOUT,
+        retries: int = DEFAULT_RETRIES,
+        host: str = DEFAULT_HOST,
+        auth_endpoint: str | None = None,
     ) -> None:
         """Initialize the async Amazon Creators API client."""
         # Validate version early to fail fast (before token manager initialization)
@@ -150,11 +203,13 @@ class AsyncAmazonCreatorsApi:
         self._credential_id = credential_id
         self._credential_secret = credential_secret
         self._version = version
-        self._last_query_time = time.time() - throttling
+        self._last_query_time = time.monotonic() - throttling
+        self.host = host
         self._throttle_lock: asyncio.Lock | None = None
         self.tag = tag
         self.throttling = float(throttling)
         self.timeout = validate_timeout(timeout)
+        self.retries = validate_retries(retries)
 
         # Determine marketplace from country or direct value
         self.marketplace = validate_and_get_marketplace(country, marketplace)
@@ -165,6 +220,7 @@ class AsyncAmazonCreatorsApi:
             credential_id=credential_id,
             credential_secret=credential_secret,
             version=version,
+            auth_endpoint=auth_endpoint,
             timeout=self.timeout,
         )
         self._owns_client = False
@@ -186,7 +242,7 @@ class AsyncAmazonCreatorsApi:
 
     async def __aenter__(self) -> Self:
         """Enter async context manager, creating a persistent HTTP client."""
-        self._http_client = AsyncHttpClient(host=API_HOST, timeout=self.timeout)
+        self._http_client = AsyncHttpClient(host=self.host, timeout=self.timeout)
         await self._http_client.__aenter__()
         self._owns_client = True
         return self
@@ -210,8 +266,14 @@ class AsyncAmazonCreatorsApi:
         currency_of_preference: str | None = None,
         languages_of_preference: list[str] | None = None,
         resources: list[GetItemsResource] | None = None,
-    ) -> list[Item]:
+        *,
+        include_unavailable: bool = False,
+    ) -> ResultList[Item]:
         """Get items information from Amazon.
+
+        Duplicated items are requested only once, and the request is split into
+        as many API calls as needed when it goes over the limit of items that
+        Amazon accepts at once.
 
         Args:
             items: One or more items, using ASIN or Amazon product URL.
@@ -220,9 +282,13 @@ class AsyncAmazonCreatorsApi:
             currency_of_preference: ISO 4217 currency code for prices.
             languages_of_preference: Languages in order of preference.
             resources: List of resources to retrieve. Defaults to all.
+            include_unavailable: Add an item holding only the ASIN for every
+                requested item missing from the response. Defaults to False.
 
         Returns:
-            List of Item objects with Amazon information.
+            List of Item objects with Amazon information, in the order of the
+            requested items, exposing the partial errors of the response in
+            its errors attribute.
 
         Raises:
             ItemsNotFoundError: If no items are found.
@@ -232,30 +298,47 @@ class AsyncAmazonCreatorsApi:
         if resources is None:
             resources = get_all_resources(GetItemsResource)
 
-        item_ids = get_items_ids(items)
+        item_ids = get_unique_items(get_items_ids(items))
 
-        request_body = {
-            "partnerTag": self.tag,
-            "itemIds": item_ids,
-            "resources": [r.value for r in resources],
-        }
-        if condition is not None:
-            request_body["condition"] = condition.value
-        if currency_of_preference is not None:
-            request_body["currencyOfPreference"] = currency_of_preference
-        if languages_of_preference is not None:
-            request_body["languagesOfPreference"] = languages_of_preference
+        if not item_ids:
+            msg = "At least one item is required"
+            raise InvalidArgumentError(msg)
 
-        response = await self._make_request(ENDPOINT_GET_ITEMS, request_body)
+        found_items: list[Item] = []
+        errors: list[ErrorData] = []
 
-        items_result = response.get("itemsResult")
-        if items_result is None or items_result.get("items") is None:
-            msg = "No items have been found"
+        for chunk in get_item_chunks(item_ids):
+            request = build_request(
+                GetItemsRequestContent,
+                partnerTag=self.tag,
+                itemIds=chunk,
+                condition=condition,
+                currencyOfPreference=currency_of_preference,
+                languagesOfPreference=languages_of_preference,
+                resources=resources,
+            )
+
+            response = await self._make_request(
+                ENDPOINT_GET_ITEMS,
+                get_request_body(request),
+            )
+
+            errors.extend(self._deserialize_errors(response))
+
+            items_result = response.get("itemsResult") or {}
+            if items_result.get("items"):
+                found_items.extend(self._deserialize_items(items_result["items"]))
+
+        if not found_items and not include_unavailable:
+            msg = f"No items have been found{format_errors(errors)}"
             raise ItemsNotFoundError(msg)
 
-        return self._deserialize_items(items_result["items"])
+        return ResultList(
+            sort_items(found_items, item_ids, include_unavailable=include_unavailable),
+            errors=errors,
+        )
 
-    async def search_items(  # noqa: PLR0912, C901
+    async def search_items(
         self,
         keywords: str | None = None,
         actor: str | None = None,
@@ -267,6 +350,7 @@ class AsyncAmazonCreatorsApi:
         search_index: str | None = None,
         item_count: int | None = None,
         item_page: int | None = None,
+        availability: Availability | None = None,
         condition: Condition | None = None,
         currency_of_preference: str | None = None,
         delivery_flags: list[DeliveryFlag] | None = None,
@@ -292,8 +376,10 @@ class AsyncAmazonCreatorsApi:
             title: Title associated with the item.
             browse_node_id: A unique ID for a product category.
             search_index: Product category to search. Defaults to All.
-            item_count: Number of items returned (1-10). Defaults to 10.
+            item_count: Number of items returned (1-100). Defaults to 10.
             item_page: Page of items to return (1-10). Defaults to 1.
+            availability: Filter results by availability. Defaults to
+                returning only the items available for purchase.
             condition: Filter offers by condition type.
             currency_of_preference: ISO 4217 currency code for prices.
             delivery_flags: Delivery programs to filter search results by.
@@ -301,7 +387,7 @@ class AsyncAmazonCreatorsApi:
             max_price: Max price in lowest currency denomination.
             min_price: Min price in lowest currency denomination.
             min_saving_percent: Min savings percentage (1-99).
-            min_reviews_rating: Min review rating (1-5).
+            min_reviews_rating: Min review rating (1-4).
             sort_by: Sort method for results.
             resources: List of resources to retrieve. Defaults to all.
 
@@ -312,59 +398,55 @@ class AsyncAmazonCreatorsApi:
             ItemsNotFoundError: If no items are found.
 
         """
+        validate_search_criteria(
+            keywords=keywords,
+            actor=actor,
+            artist=artist,
+            author=author,
+            brand=brand,
+            title=title,
+            browse_node_id=browse_node_id,
+            search_index=search_index,
+        )
+
         if resources is None:
             resources = get_all_resources(SearchItemsResource)
 
-        request_body: dict[str, Any] = {
-            "partnerTag": self.tag,
-            "resources": [r.value for r in resources],
-        }
+        request = build_request(
+            SearchItemsRequestContent,
+            partnerTag=self.tag,
+            keywords=keywords,
+            actor=actor,
+            artist=artist,
+            author=author,
+            brand=brand,
+            title=title,
+            browseNodeId=browse_node_id,
+            searchIndex=search_index,
+            itemCount=item_count,
+            itemPage=item_page,
+            availability=availability,
+            condition=condition,
+            currencyOfPreference=currency_of_preference,
+            deliveryFlags=delivery_flags,
+            languagesOfPreference=languages_of_preference,
+            maxPrice=max_price,
+            minPrice=min_price,
+            minSavingPercent=min_saving_percent,
+            minReviewsRating=min_reviews_rating,
+            sortBy=sort_by,
+            resources=resources,
+        )
 
-        # Add optional parameters
-        if keywords is not None:
-            request_body["keywords"] = keywords
-        if actor is not None:
-            request_body["actor"] = actor
-        if artist is not None:
-            request_body["artist"] = artist
-        if author is not None:
-            request_body["author"] = author
-        if brand is not None:
-            request_body["brand"] = brand
-        if title is not None:
-            request_body["title"] = title
-        if browse_node_id is not None:
-            request_body["browseNodeId"] = browse_node_id
-        if search_index is not None:
-            request_body["searchIndex"] = search_index
-        if item_count is not None:
-            request_body["itemCount"] = item_count
-        if item_page is not None:
-            request_body["itemPage"] = item_page
-        if condition is not None:
-            request_body["condition"] = condition.value
-        if currency_of_preference is not None:
-            request_body["currencyOfPreference"] = currency_of_preference
-        if delivery_flags is not None:
-            request_body["deliveryFlags"] = [flag.value for flag in delivery_flags]
-        if languages_of_preference is not None:
-            request_body["languagesOfPreference"] = languages_of_preference
-        if max_price is not None:
-            request_body["maxPrice"] = max_price
-        if min_price is not None:
-            request_body["minPrice"] = min_price
-        if min_saving_percent is not None:
-            request_body["minSavingPercent"] = min_saving_percent
-        if min_reviews_rating is not None:
-            request_body["minReviewsRating"] = min_reviews_rating
-        if sort_by is not None:
-            request_body["sortBy"] = sort_by.value
-
-        response = await self._make_request(ENDPOINT_SEARCH_ITEMS, request_body)
+        response = await self._make_request(
+            ENDPOINT_SEARCH_ITEMS,
+            get_request_body(request),
+        )
 
         search_result = response.get("searchResult")
         if search_result is None:
-            msg = "No items have been found"
+            errors = self._deserialize_errors(response)
+            msg = f"No items have been found{format_errors(errors)}"
             raise ItemsNotFoundError(msg)
 
         return self._deserialize_search_result(search_result)
@@ -384,7 +466,8 @@ class AsyncAmazonCreatorsApi:
         Args:
             asin: The ASIN or Amazon product URL of the product.
             variation_count: Number of variations to return (1-10). Defaults to 10.
-            variation_page: Page of variations to return (1-10). Defaults to 1.
+            variation_page: Page of variations to return (1 or above).
+                Defaults to 1.
             condition: Filter offers by condition type.
             currency_of_preference: ISO 4217 currency code for prices.
             languages_of_preference: Languages in order of preference.
@@ -400,30 +483,27 @@ class AsyncAmazonCreatorsApi:
         if resources is None:
             resources = get_all_resources(GetVariationsResource)
 
-        asin = get_asin(asin)
+        request = build_request(
+            GetVariationsRequestContent,
+            partnerTag=self.tag,
+            asin=get_asin(asin),
+            variationCount=variation_count,
+            variationPage=variation_page,
+            condition=condition,
+            currencyOfPreference=currency_of_preference,
+            languagesOfPreference=languages_of_preference,
+            resources=resources,
+        )
 
-        request_body: dict[str, Any] = {
-            "partnerTag": self.tag,
-            "asin": asin,
-            "resources": [r.value for r in resources],
-        }
-
-        if variation_count is not None:
-            request_body["variationCount"] = variation_count
-        if variation_page is not None:
-            request_body["variationPage"] = variation_page
-        if condition is not None:
-            request_body["condition"] = condition.value
-        if currency_of_preference is not None:
-            request_body["currencyOfPreference"] = currency_of_preference
-        if languages_of_preference is not None:
-            request_body["languagesOfPreference"] = languages_of_preference
-
-        response = await self._make_request(ENDPOINT_GET_VARIATIONS, request_body)
+        response = await self._make_request(
+            ENDPOINT_GET_VARIATIONS,
+            get_request_body(request),
+        )
 
         variations_result = response.get("variationsResult")
         if variations_result is None:
-            msg = "No variations have been found"
+            errors = self._deserialize_errors(response)
+            msg = f"No variations have been found{format_errors(errors)}"
             raise ItemsNotFoundError(msg)
 
         return self._deserialize_variations_result(variations_result)
@@ -433,7 +513,7 @@ class AsyncAmazonCreatorsApi:
         browse_node_ids: list[str],
         languages_of_preference: list[str] | None = None,
         resources: list[GetBrowseNodesResource] | None = None,
-    ) -> list[BrowseNode]:
+    ) -> ResultList[BrowseNode]:
         """Return browse node information including name, children, and ancestors.
 
         Args:
@@ -442,7 +522,8 @@ class AsyncAmazonCreatorsApi:
             resources: List of resources to retrieve. Defaults to all.
 
         Returns:
-            List of BrowseNode objects.
+            List of BrowseNode objects, exposing the partial errors of the
+            response in its errors attribute.
 
         Raises:
             ItemsNotFoundError: If no browse nodes are found.
@@ -451,26 +532,32 @@ class AsyncAmazonCreatorsApi:
         if resources is None:
             resources = get_all_resources(GetBrowseNodesResource)
 
-        request_body: dict[str, Any] = {
-            "partnerTag": self.tag,
-            "browseNodeIds": browse_node_ids,
-            "resources": [r.value for r in resources],
-        }
+        request = build_request(
+            GetBrowseNodesRequestContent,
+            partnerTag=self.tag,
+            browseNodeIds=browse_node_ids,
+            languagesOfPreference=languages_of_preference,
+            resources=resources,
+        )
 
-        if languages_of_preference is not None:
-            request_body["languagesOfPreference"] = languages_of_preference
+        response = await self._make_request(
+            ENDPOINT_GET_BROWSE_NODES,
+            get_request_body(request),
+        )
 
-        response = await self._make_request(ENDPOINT_GET_BROWSE_NODES, request_body)
-
+        errors = self._deserialize_errors(response)
         browse_nodes_result = response.get("browseNodesResult")
         if (
             browse_nodes_result is None
             or browse_nodes_result.get("browseNodes") is None
         ):
-            msg = "No browse nodes have been found"
+            msg = f"No browse nodes have been found{format_errors(errors)}"
             raise ItemsNotFoundError(msg)
 
-        return self._deserialize_browse_nodes(browse_nodes_result["browseNodes"])
+        return ResultList(
+            self._deserialize_browse_nodes(browse_nodes_result["browseNodes"]),
+            errors=errors,
+        )
 
     async def list_feeds(self) -> list[Feed]:
         """Return the feeds available for your account.
@@ -484,7 +571,10 @@ class AsyncAmazonCreatorsApi:
             RequestError: If the API request fails.
 
         """
-        response = await self._make_request(ENDPOINT_LIST_FEEDS)
+        response = await self._make_request(
+            ENDPOINT_LIST_FEEDS,
+            not_found_error=ResourceNotFoundError,
+        )
 
         return self._deserialize_feeds(response.get("feeds") or [])
 
@@ -503,12 +593,17 @@ class AsyncAmazonCreatorsApi:
             RequestError: If the API request fails.
 
         """
-        request_body: dict[str, Any] = {"feedName": feed_name}
+        request = build_request(
+            GetFeedRequestContent,
+            feedName=feed_name,
+            feedType=feed_type,
+        )
 
-        if feed_type is not None:
-            request_body["feedType"] = feed_type.value
-
-        response = await self._make_request(ENDPOINT_GET_FEED, request_body)
+        response = await self._make_request(
+            ENDPOINT_GET_FEED,
+            get_request_body(request),
+            not_found_error=ResourceNotFoundError,
+        )
 
         return GetFeedResponseContent.model_validate(response).url
 
@@ -524,7 +619,10 @@ class AsyncAmazonCreatorsApi:
             RequestError: If the API request fails.
 
         """
-        response = await self._make_request(ENDPOINT_LIST_REPORTS)
+        response = await self._make_request(
+            ENDPOINT_LIST_REPORTS,
+            not_found_error=ResourceNotFoundError,
+        )
 
         return self._deserialize_reports(response.get("reports") or [])
 
@@ -547,12 +645,17 @@ class AsyncAmazonCreatorsApi:
             RequestError: If the API request fails.
 
         """
-        request_body: dict[str, Any] = {"filename": filename}
+        request = build_request(
+            GetReportRequestContent,
+            filename=filename,
+            reportType=report_type,
+        )
 
-        if report_type is not None:
-            request_body["reportType"] = report_type.value
-
-        response = await self._make_request(ENDPOINT_GET_REPORT, request_body)
+        response = await self._make_request(
+            ENDPOINT_GET_REPORT,
+            get_request_body(request),
+            not_found_error=ResourceNotFoundError,
+        )
 
         return GetReportResponseContent.model_validate(response).url
 
@@ -567,32 +670,85 @@ class AsyncAmazonCreatorsApi:
             self._throttle_lock = asyncio.Lock()
 
         async with self._throttle_lock:
-            wait_time = self.throttling - (time.time() - self._last_query_time)
+            wait_time = self.throttling - (time.monotonic() - self._last_query_time)
             if wait_time > 0:
                 await asyncio.sleep(wait_time)
-            self._last_query_time = time.time()
+            self._last_query_time = time.monotonic()
 
     async def _make_request(
         self,
         endpoint: str,
         body: dict[str, Any] | None = None,
+        not_found_error: type[AmazonCreatorsApiError] = ItemsNotFoundError,
     ) -> dict[str, Any]:
-        """Make an API request with authentication and throttling.
+        """Make an API request with authentication, throttling and retries.
+
+        Throttled and server errors are retried waiting longer before every
+        attempt, honouring the Retry-After header when the API sends it. An
+        expired token is refreshed once and the request is sent again.
+
+        Args:
+            endpoint: API endpoint path.
+            body: Request body, omitted for operations that take no payload.
+            not_found_error: Exception raised when the resource is missing.
+
+        Returns:
+            Parsed JSON response.
+
+        Raises:
+            RequestError: If the request cannot be completed.
+
+        """
+        attempt = 0
+        token_refreshed = False
+
+        while True:
+            await self._throttle()
+
+            try:
+                response = await self._post(endpoint, body)
+            except httpx.HTTPError as error:
+                if attempt >= self.retries:
+                    msg = f"Request failed: {error}"
+                    raise RequestError(msg) from error
+                await asyncio.sleep(get_retry_delay(attempt))
+                attempt += 1
+                continue
+
+            if response.status_code == HTTP_OK:
+                return self._parse_response(response)
+
+            if response.status_code == HTTP_UNAUTHORIZED and not token_refreshed:
+                token_refreshed = True
+                self._token_manager.clear_token()
+                continue
+
+            if not is_retryable(response.status_code) or attempt >= self.retries:
+                handle_api_error(
+                    response.status_code,
+                    response.text,
+                    not_found_error,
+                    response.headers,
+                )
+
+            await asyncio.sleep(get_retry_delay(attempt, response.headers))
+            attempt += 1
+
+    async def _post(
+        self,
+        endpoint: str,
+        body: dict[str, Any] | None,
+    ) -> AsyncHttpResponse:
+        """Send an authenticated request to the API.
 
         Args:
             endpoint: API endpoint path.
             body: Request body, omitted for operations that take no payload.
 
         Returns:
-            Parsed JSON response.
-
-        Raises:
-            Various exceptions based on API errors.
+            The response of the API.
 
         """
-        await self._throttle()
-
-        # Get auth token
         token = await self._token_manager.get_token()
 
         headers = {
@@ -603,16 +759,29 @@ class AsyncAmazonCreatorsApi:
 
         # Use persistent client if available, otherwise create a new one
         if self._http_client is not None:
-            response = await self._http_client.post(endpoint, headers, body)
-        else:
-            async with AsyncHttpClient(host=API_HOST, timeout=self.timeout) as client:
-                response = await client.post(endpoint, headers, body)
+            return await self._http_client.post(endpoint, headers, body)
 
-        # Handle errors
-        if response.status_code != 200:  # noqa: PLR2004
-            self._handle_error_response(response.status_code, response.text)
+        async with AsyncHttpClient(host=self.host, timeout=self.timeout) as client:
+            return await client.post(endpoint, headers, body)
 
-        return response.json()
+    def _parse_response(self, response: AsyncHttpResponse) -> dict[str, Any]:
+        """Parse a successful response as JSON.
+
+        Args:
+            response: Response of the API.
+
+        Returns:
+            The parsed response body.
+
+        Raises:
+            RequestError: If the response is not valid JSON.
+
+        """
+        try:
+            return response.json()
+        except ValueError as error:
+            msg = f"Failed to parse the response from Amazon: {error}"
+            raise RequestError(msg) from error
 
     def _build_authorization_header(self, token: str) -> str:
         """Build the version-appropriate Authorization header."""
@@ -620,22 +789,11 @@ class AsyncAmazonCreatorsApi:
             return f"Bearer {token}"
         return f"Bearer {token}, Version {self._version}"
 
-    def _handle_error_response(self, status_code: int, body: str) -> None:
-        """Handle API error responses and raise appropriate exceptions.
-
-        Args:
-            status_code: HTTP status code.
-            body: Response body text.
-
-        Raises:
-            ItemsNotFoundError: For 404 errors.
-            TooManyRequestsError: For 429 errors.
-            InvalidArgumentError: For validation errors.
-            AssociateValidationError: For invalid associate credentials.
-            RequestError: For other errors.
-
-        """
-        handle_api_error(status_code, body)
+    def _deserialize_errors(self, response: dict[str, Any]) -> list[ErrorData]:
+        """Deserialize the partial errors of a response to ErrorData models."""
+        return [
+            ErrorData.model_validate(error) for error in response.get("errors") or []
+        ]
 
     def _deserialize_items(self, items_data: list[dict[str, Any]]) -> list[Item]:
         """Deserialize item data from API response to Item models."""

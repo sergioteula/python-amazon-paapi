@@ -8,23 +8,41 @@ from typing import TYPE_CHECKING
 from unittest import mock
 from unittest.mock import MagicMock
 
+import urllib3
+
 from amazon_creatorsapi import AmazonCreatorsApi
+from amazon_creatorsapi.core.auth import TimeoutOAuth2TokenManager
 from amazon_creatorsapi.core.constants import DEFAULT_TIMEOUT
 from amazon_creatorsapi.errors import (
+    AccessDeniedError,
     AssociateValidationError,
+    AuthenticationError,
     InvalidArgumentError,
     ItemsNotFoundError,
     RequestError,
+    ResourceNotFoundError,
     TooManyRequestsError,
 )
 from creatorsapi_python_sdk.exceptions import ApiException
+from creatorsapi_python_sdk.models.availability import Availability
+from creatorsapi_python_sdk.models.browse_node import BrowseNode
+from creatorsapi_python_sdk.models.browse_nodes_result import BrowseNodesResult
 from creatorsapi_python_sdk.models.delivery_flag import DeliveryFlag
+from creatorsapi_python_sdk.models.error_data import ErrorData
 from creatorsapi_python_sdk.models.feed_type import FeedType
 from creatorsapi_python_sdk.models.get_browse_nodes_resource import (
     GetBrowseNodesResource,
 )
+from creatorsapi_python_sdk.models.get_browse_nodes_response_content import (
+    GetBrowseNodesResponseContent,
+)
 from creatorsapi_python_sdk.models.get_items_resource import GetItemsResource
+from creatorsapi_python_sdk.models.get_items_response_content import (
+    GetItemsResponseContent,
+)
 from creatorsapi_python_sdk.models.get_variations_resource import GetVariationsResource
+from creatorsapi_python_sdk.models.item import Item
+from creatorsapi_python_sdk.models.items_result import ItemsResult
 from creatorsapi_python_sdk.models.report_type import ReportType
 from creatorsapi_python_sdk.models.search_items_resource import SearchItemsResource
 
@@ -112,6 +130,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         start_time = time.time()
         api._throttle()
@@ -129,7 +148,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             country=self.country,
             throttling=0.2,
         )
-        api._last_query_time = time.time()
+        api._last_query_time = time.monotonic()
         start_time = time.time()
         api._throttle()
         elapsed_time = time.time() - start_time
@@ -156,6 +175,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         result = api.get_items(["B0DLFMFBJW"])
         self.assertIsInstance(result, list)
@@ -182,6 +202,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         result = api.search_items(keywords="laptop")
         self.assertIsNotNone(result)
@@ -208,6 +229,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
 
         result = api.search_items(
@@ -243,6 +265,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         with self.assertRaises(ItemsNotFoundError):
             api.get_items(["B0DLFMFBJW"])
@@ -268,6 +291,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         with self.assertRaises(ItemsNotFoundError):
             api.get_items(["B0DLFMFBJW"])
@@ -291,6 +315,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         with self.assertRaises(RequestError):
             api.get_items(["B0DLFMFBJW"])
@@ -316,6 +341,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         with self.assertRaises(ItemsNotFoundError):
             api.search_items(keywords="nonexistent")
@@ -341,6 +367,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         with self.assertRaises(RequestError):
             api.search_items(keywords="laptop")
@@ -366,6 +393,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         result = api.get_variations("B0DLFMFBJW")
         self.assertIsNotNone(result)
@@ -392,6 +420,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         with self.assertRaises(ItemsNotFoundError):
             api.get_variations("B0DLFMFBJW")
@@ -417,6 +446,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         with self.assertRaises(RequestError):
             api.get_variations("B0DLFMFBJW")
@@ -442,6 +472,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         result = api.get_browse_nodes(["123456"])
         self.assertIsInstance(result, list)
@@ -468,6 +499,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         with self.assertRaises(ItemsNotFoundError):
             api.get_browse_nodes(["123456"])
@@ -493,6 +525,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         with self.assertRaises(ItemsNotFoundError):
             api.get_browse_nodes(["123456"])
@@ -518,6 +551,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         with self.assertRaises(RequestError):
             api.get_browse_nodes(["123456"])
@@ -541,6 +575,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         with self.assertRaises(ItemsNotFoundError):
             api.get_items(["B0DLFMFBJW"])
@@ -566,6 +601,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         with self.assertRaises(TooManyRequestsError):
             api.get_items(["B0DLFMFBJW"])
@@ -591,6 +627,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         with self.assertRaises(InvalidArgumentError):
             api.get_items(["B0DLFMFBJW"])
@@ -616,6 +653,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         with self.assertRaises(InvalidArgumentError):
             api.get_items(["B0DLFMFBJW"])
@@ -641,6 +679,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         with self.assertRaises(AssociateValidationError):
             api.get_items(["B0DLFMFBJW"])
@@ -666,6 +705,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         with self.assertRaises(RequestError):
             api.get_items(["B0DLFMFBJW"])
@@ -691,6 +731,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         with self.assertRaises(RequestError):
             api.get_items(["B0DLFMFBJW"])
@@ -717,6 +758,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         with self.assertRaises(RequestError):
             api.get_items(["B0DLFMFBJW"])
@@ -742,6 +784,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         result = api.get_items(
             ["B0DLFMFBJW"],
@@ -770,6 +813,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         result = api.search_items(
             keywords="laptop",
@@ -798,6 +842,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         result = api.get_variations(
             "B0DLFMFBJW",
@@ -826,6 +871,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         result = api.get_browse_nodes(
             ["123456"],
@@ -842,6 +888,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
 
     @mock.patch("amazon_creatorsapi.api.DefaultApi")
@@ -942,7 +989,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
         mock_api_class.return_value = mock_api
         mock_api.get_feed.side_effect = ApiException(status=404)
 
-        with self.assertRaises(ItemsNotFoundError):
+        with self.assertRaises(ResourceNotFoundError):
             self._build_api().get_feed("missing-feed")
 
     @mock.patch("amazon_creatorsapi.api.DefaultApi")
@@ -1070,6 +1117,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
         )
         api.get_items(["B0DLFMFBJW"])
 
@@ -1100,6 +1148,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
             timeout=15.0,
         )
         api.get_items(["B0DLFMFBJW"])
@@ -1130,6 +1179,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
             timeout=None,
         )
         api.get_items(["B0DLFMFBJW"])
@@ -1157,6 +1207,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
             timeout=5.0,
         )
         api.search_items(keywords="laptop")
@@ -1187,6 +1238,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
             timeout=3.5,
         )
         api.get_variations("B0DLFMFBJW")
@@ -1217,6 +1269,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
             timeout=7.5,
         )
         api.get_browse_nodes(["123456"])
@@ -1244,6 +1297,7 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
+            retries=0,
             timeout=9.0,
         )
         api.list_feeds()
@@ -1258,3 +1312,550 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             mock_api.get_report,
         ):
             self.assertEqual(call.call_args.kwargs["_request_timeout"], 9.0)
+
+
+class TestAmazonCreatorsApiItems(unittest.TestCase):
+    """Tests for the items returned by AmazonCreatorsApi."""
+
+    def setUp(self) -> None:
+        self.credential_id = "test_credential_id"
+        self.credential_secret = "test_credential_secret"
+        self.version = "2.2"
+        self.tag = "test-tag"
+        self.country: CountryCode = "ES"
+
+    def build_api(self, mock_api_class: MagicMock) -> AmazonCreatorsApi:
+        """Build an API client with a mocked SDK."""
+        return AmazonCreatorsApi(
+            credential_id=self.credential_id,
+            credential_secret=self.credential_secret,
+            version=self.version,
+            tag=self.tag,
+            country=self.country,
+            throttling=0,
+            retries=0,
+        )
+
+    def build_response(
+        self,
+        asins: list[str],
+        errors: list[ErrorData] | None = None,
+    ) -> GetItemsResponseContent:
+        """Build a get items response holding the given items and errors."""
+        return GetItemsResponseContent(
+            itemsResult=ItemsResult(items=[Item(asin=asin) for asin in asins]),
+            errors=errors,
+        )
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_items_keeps_requested_order(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that items are returned in the order they were requested."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.return_value = self.build_response(
+            ["B000000002", "B000000001"],
+        )
+
+        api = self.build_api(mock_api_class)
+        result = api.get_items(["B000000001", "B000000002"])
+
+        self.assertEqual([item.asin for item in result], ["B000000001", "B000000002"])
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_items_splits_requests_over_the_limit(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that more items than the limit are split into several calls."""
+        item_ids = [f"B0000000{index:02d}" for index in range(12)]
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.side_effect = [
+            self.build_response(item_ids[:10]),
+            self.build_response(item_ids[10:]),
+        ]
+
+        api = self.build_api(mock_api_class)
+        result = api.get_items(item_ids)
+
+        self.assertEqual(mock_api.get_items.call_count, 2)
+        self.assertEqual([item.asin for item in result], item_ids)
+        requests = [
+            call.kwargs["get_items_request_content"].item_ids
+            for call in mock_api.get_items.call_args_list
+        ]
+        self.assertEqual([len(request) for request in requests], [10, 2])
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_items_removes_duplicates(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that duplicated items are requested and returned only once."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.return_value = self.build_response(["B000000001"])
+
+        api = self.build_api(mock_api_class)
+        result = api.get_items(["B000000001", "B000000001"])
+
+        request = mock_api.get_items.call_args.kwargs["get_items_request_content"]
+        self.assertEqual(request.item_ids, ["B000000001"])
+        self.assertEqual([item.asin for item in result], ["B000000001"])
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_items_exposes_partial_errors(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that the partial errors of the response are available."""
+        error = ErrorData(code="ItemNotFound", message="Item not found")
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.return_value = self.build_response(
+            ["B000000001"],
+            errors=[error],
+        )
+
+        api = self.build_api(mock_api_class)
+        result = api.get_items(["B000000001", "B000000002"])
+
+        self.assertEqual(result.errors, [error])
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_items_include_unavailable(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that missing items are returned when they are requested."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.return_value = self.build_response(["B000000001"])
+
+        api = self.build_api(mock_api_class)
+        result = api.get_items(
+            ["B000000001", "B000000002"],
+            include_unavailable=True,
+        )
+
+        self.assertEqual([item.asin for item in result], ["B000000001", "B000000002"])
+        self.assertIsNone(result[1].item_info)
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_items_not_found_reports_partial_errors(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that partial errors are reported when nothing is found."""
+        error = ErrorData(code="InvalidItemId", message="Item id is invalid")
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.return_value = GetItemsResponseContent(errors=[error])
+
+        api = self.build_api(mock_api_class)
+
+        with self.assertRaises(ItemsNotFoundError) as context:
+            api.get_items(["B000000001"])
+
+        self.assertIn("InvalidItemId", str(context.exception))
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_items_invalid_parameter_raises_library_error(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that a value rejected by the API raises a library error."""
+        api = self.build_api(mock_api_class)
+
+        with self.assertRaises(InvalidArgumentError):
+            api.get_items(["B000000001"], languages_of_preference=["es_ES", "en_US"])
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_browse_nodes_exposes_partial_errors(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that browse nodes expose the partial errors of the response."""
+        error = ErrorData(code="InvalidBrowseNodeId", message="Invalid browse node")
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_browse_nodes.return_value = GetBrowseNodesResponseContent(
+            browseNodesResult=BrowseNodesResult(browseNodes=[BrowseNode(id="123")]),
+            errors=[error],
+        )
+
+        api = self.build_api(mock_api_class)
+        result = api.get_browse_nodes(["123", "456"])
+
+        self.assertEqual([node.id for node in result], ["123"])
+        self.assertEqual(result.errors, [error])
+
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_token_manager_receives_the_timeout(
+        self,
+        mock_client_class: MagicMock,
+    ) -> None:
+        """Test that the token manager is replaced by one with a timeout."""
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+
+        api = AmazonCreatorsApi(
+            credential_id=self.credential_id,
+            credential_secret=self.credential_secret,
+            version=self.version,
+            tag=self.tag,
+            country=self.country,
+            timeout=12.0,
+        )
+
+        token_manager = mock_client._token_manager
+        self.assertIsInstance(token_manager, TimeoutOAuth2TokenManager)
+        self.assertEqual(token_manager._timeout, 12.0)
+        self.assertEqual(api.timeout, 12.0)
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_items_without_items_raises_library_error(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that requesting no items raises an invalid argument error."""
+        api = self.build_api(mock_api_class)
+
+        with self.assertRaises(InvalidArgumentError):
+            api.get_items([])
+
+
+class TestAmazonCreatorsApiRetries(unittest.TestCase):
+    """Tests for the retries of AmazonCreatorsApi."""
+
+    def setUp(self) -> None:
+        self.credential_id = "test_credential_id"
+        self.credential_secret = "test_credential_secret"
+        self.version = "2.2"
+        self.tag = "test-tag"
+        self.country: CountryCode = "ES"
+
+    def build_api(self, retries: int = 2) -> AmazonCreatorsApi:
+        """Build an API client with the given amount of retries."""
+        return AmazonCreatorsApi(
+            credential_id=self.credential_id,
+            credential_secret=self.credential_secret,
+            version=self.version,
+            tag=self.tag,
+            country=self.country,
+            throttling=0,
+            retries=retries,
+        )
+
+    def build_response(self) -> GetItemsResponseContent:
+        """Build a successful get items response."""
+        return GetItemsResponseContent(
+            itemsResult=ItemsResult(items=[Item(asin="B000000001")]),
+        )
+
+    @mock.patch("amazon_creatorsapi.api.get_retry_delay", return_value=0)
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_retries_server_errors(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+        _mock_delay: MagicMock,
+    ) -> None:
+        """Test that a server error is retried until it succeeds."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.side_effect = [
+            ApiException(status=500),
+            self.build_response(),
+        ]
+
+        result = self.build_api().get_items(["B000000001"])
+
+        self.assertEqual(mock_api.get_items.call_count, 2)
+        self.assertEqual([item.asin for item in result], ["B000000001"])
+
+    @mock.patch("amazon_creatorsapi.api.get_retry_delay", return_value=0)
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_stops_after_the_configured_retries(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+        _mock_delay: MagicMock,
+    ) -> None:
+        """Test that the error is raised once the retries are exhausted."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.side_effect = ApiException(status=429)
+
+        with self.assertRaises(TooManyRequestsError):
+            self.build_api(retries=2).get_items(["B000000001"])
+
+        self.assertEqual(mock_api.get_items.call_count, 3)
+
+    @mock.patch("amazon_creatorsapi.api.get_retry_delay", return_value=0)
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_honours_the_retry_after_header(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+        mock_delay: MagicMock,
+    ) -> None:
+        """Test that the headers of the response reach the delay."""
+        error = ApiException(status=429)
+        error.headers = {"Retry-After": "5"}
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.side_effect = [error, self.build_response()]
+
+        self.build_api().get_items(["B000000001"])
+
+        mock_delay.assert_called_once_with(0, {"Retry-After": "5"})
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_does_not_retry_client_errors(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that a rejected request is not retried."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.side_effect = ApiException(status=400)
+
+        with self.assertRaises(InvalidArgumentError):
+            self.build_api().get_items(["B000000001"])
+
+        mock_api.get_items.assert_called_once()
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_refreshes_the_token_once(
+        self,
+        mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that an expired token is refreshed and the request repeated."""
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.side_effect = [
+            ApiException(status=401),
+            self.build_response(),
+        ]
+
+        result = self.build_api(retries=0).get_items(["B000000001"])
+
+        mock_client.token_manager.clear_token.assert_called_once()
+        self.assertEqual([item.asin for item in result], ["B000000001"])
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_unauthorized_twice_raises_authentication_error(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that a token that stays invalid raises an authentication error."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.side_effect = ApiException(status=401)
+
+        with self.assertRaises(AuthenticationError):
+            self.build_api(retries=0).get_items(["B000000001"])
+
+        self.assertEqual(mock_api.get_items.call_count, 2)
+
+    @mock.patch("amazon_creatorsapi.api.get_retry_delay", return_value=0)
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_connection_errors_are_wrapped(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+        _mock_delay: MagicMock,
+    ) -> None:
+        """Test that a connection failure raises a request error."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.side_effect = urllib3.exceptions.TimeoutError(
+            "Read timed out",
+        )
+
+        with self.assertRaises(RequestError):
+            self.build_api(retries=1).get_items(["B000000001"])
+
+        self.assertEqual(mock_api.get_items.call_count, 2)
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_forbidden_raises_access_denied(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that a forbidden request raises an access denied error."""
+        error = ApiException(status=403)
+        error.body = '{"message": "Not eligible", "reason": "AssociateNotEligible"}'
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.side_effect = error
+
+        with self.assertRaises(AccessDeniedError):
+            self.build_api().get_items(["B000000001"])
+
+        mock_api.get_items.assert_called_once()
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_unauthorized_without_token_manager(
+        self,
+        mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that the request is repeated even without a cached token."""
+        mock_client = MagicMock()
+        mock_client.token_manager = None
+        mock_client_class.return_value = mock_client
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.side_effect = [
+            ApiException(status=401),
+            self.build_response(),
+        ]
+
+        result = self.build_api(retries=0).get_items(["B000000001"])
+
+        self.assertEqual([item.asin for item in result], ["B000000001"])
+
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_negative_retries_are_rejected(self, _mock_client: MagicMock) -> None:
+        """Test that a negative amount of retries is rejected."""
+        with self.assertRaises(InvalidArgumentError):
+            self.build_api(retries=-1)
+
+
+class TestAmazonCreatorsApiOptions(unittest.TestCase):
+    """Tests for the options of AmazonCreatorsApi."""
+
+    def setUp(self) -> None:
+        self.credential_id = "test_credential_id"
+        self.credential_secret = "test_credential_secret"
+        self.version = "2.2"
+        self.tag = "test-tag"
+        self.country: CountryCode = "ES"
+
+    def build_api(self, **options: object) -> AmazonCreatorsApi:
+        """Build an API client with the given options."""
+        return AmazonCreatorsApi(
+            credential_id=self.credential_id,
+            credential_secret=self.credential_secret,
+            version=self.version,
+            tag=self.tag,
+            country=self.country,
+            throttling=0,
+            retries=0,
+            **options,  # type: ignore[arg-type]
+        )
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_search_items_forwards_availability(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that the availability filter reaches the SDK request."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.search_items.return_value = MagicMock(search_result=MagicMock())
+
+        self.build_api().search_items(
+            keywords="laptop",
+            availability=Availability.INCLUDEOUTOFSTOCK,
+        )
+
+        request = mock_api.search_items.call_args.kwargs["search_items_request_content"]
+        self.assertEqual(request.availability, Availability.INCLUDEOUTOFSTOCK)
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_search_items_without_criteria(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that a search without criteria does not reach the API."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+
+        with self.assertRaises(InvalidArgumentError):
+            self.build_api().search_items()
+
+        mock_api.search_items.assert_not_called()
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_errors_report_the_request_id(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test that the identifier given by Amazon is part of the error."""
+        error = ApiException(status=400)
+        error.headers = {"x-amzn-RequestId": "abc-123"}
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_api.get_items.side_effect = error
+
+        with self.assertRaises(InvalidArgumentError) as context:
+            self.build_api().get_items(["B000000001"])
+
+        self.assertIn("abc-123", str(context.exception))
+
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_custom_host_and_auth_endpoint(self, mock_client_class: MagicMock) -> None:
+        """Test that the endpoints of the API can be replaced."""
+        self.build_api(
+            host="https://example.com",
+            auth_endpoint="https://example.com/token",
+        )
+
+        options = mock_client_class.call_args.kwargs
+        self.assertEqual(options["host"], "https://example.com")
+        self.assertEqual(options["auth_endpoint"], "https://example.com/token")
+
+    def test_every_client_has_its_own_configuration(self) -> None:
+        """Test that the configuration is not shared between clients."""
+        first = self.build_api()
+        second = self.build_api()
+
+        self.assertIsNot(
+            first._api_client.configuration,
+            second._api_client.configuration,
+        )

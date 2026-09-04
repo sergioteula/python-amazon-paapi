@@ -39,12 +39,46 @@ for item in items:
     print(item.images.primary.large.url)
 ```
 
+Items come back in the order they were requested, duplicates are asked for
+only once, and requests with more items than the API accepts at once are
+split into as many calls as needed, so any amount of items can be requested:
+
+```python
+items = api.get_items(asins)  # Any amount of items, split into several calls
+```
+
+Amazon can answer with only some of the requested items, describing the
+missing ones as partial errors. Those errors are available in the returned
+list, and unavailable items can be included as an item holding only the ASIN:
+
+```python
+items = api.get_items(["B01N5IB20Q", "0000000000"], include_unavailable=True)
+
+for error in items.errors:
+    print(error.code, error.message)
+
+for item in items:
+    if item.item_info is None:
+        print(f"{item.asin} is not available")
+```
+
 ## Search Products
 
 ```python
 results = api.search_items(keywords="nintendo switch")
 for item in results.items:
     print(item.item_info.title.display_value)
+```
+
+A search needs at least one of `keywords`, `actor`, `artist`, `author`, `brand`, `title`, `browse_node_id` or `search_index`, and only returns the items available for purchase unless asked otherwise:
+
+```python
+from amazon_creatorsapi.models import Availability
+
+results = api.search_items(
+    keywords="nintendo switch",
+    availability=Availability.INCLUDEOUTOFSTOCK,
+)
 ```
 
 ## Get Product Variations
@@ -130,7 +164,58 @@ api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, timeout=10)  # Fails 
 api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, timeout=0.5)  # Fails after half a second
 ```
 
-It applies to every API request. In `AmazonCreatorsApi` the OAuth2 token refresh is handled by the bundled SDK and is not covered by this value, while `AsyncAmazonCreatorsApi` applies it to the token refresh as well.
+It applies to every API request, including the OAuth2 token refresh.
+
+## Retries
+
+Amazon asks clients to back off and try again when it throttles a request or fails to serve it. The client does that on its own, waiting longer before every attempt and honouring the `Retry-After` header when the API sends it. An expired token is refreshed once and the request is sent again.
+
+```python
+amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, retries=5)  # Up to 5 extra attempts
+amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, retries=0)  # Fail on the first error
+```
+
+## Custom Endpoints
+
+The base URL of the API and the one used to get the OAuth2 token can be replaced, which is useful to run the tests of a project against a mock server:
+
+```python
+api = AmazonCreatorsApi(
+    ID,
+    SECRET,
+    VERSION,
+    TAG,
+    COUNTRY,
+    host="http://localhost:8080",
+    auth_endpoint="http://localhost:8080/token",
+)
+```
+
+## Error Handling
+
+Every error raised by the library inherits from `AmazonCreatorsApiError`, so a single `except` covers them all. The message carries the reason given by Amazon, the fields that failed validation and the identifier of the request, which is what Amazon support asks for:
+
+| Exception | Raised when |
+| --- | --- |
+| `InvalidArgumentError` | An argument is not valid or the request is rejected by Amazon |
+| `AssociateValidationError` | The credentials are not valid for the selected marketplace |
+| `AuthenticationError` | The credentials are missing, invalid or expired |
+| `AccessDeniedError` | The credentials cannot perform the requested operation |
+| `ItemsNotFoundError` | No items are found for the request |
+| `ResourceNotFoundError` | The requested feed or report does not exist |
+| `TooManyRequestsError` | The rate limit is exceeded and the retries are exhausted |
+| `RequestError` | The request fails for any other reason |
+
+```python
+from amazon_creatorsapi.errors import AmazonCreatorsApiError, ItemsNotFoundError
+
+try:
+    items = api.get_items(["B01N5IB20Q"])
+except ItemsNotFoundError:
+    print("The item is not available")
+except AmazonCreatorsApiError as error:
+    print(error)
+```
 
 ## Async Support
 
@@ -186,10 +271,16 @@ from amazon_creatorsapi.models import (
 items = api.get_items(["B01N5IB20Q"], condition=Condition.NEW)
 
 # Use SortBy enum for search ordering
-results = api.search_items(keywords="laptop", sort_by=SortBy.PRICE_LOW_TO_HIGH)
+results = api.search_items(
+    keywords="laptop",
+    sort_by=SortBy.PRICE_COLON_LOW_TO_HIGH,
+)
 
 # Specify which resources to retrieve
 from amazon_creatorsapi.models import GetItemsResource
-resources = [GetItemsResource.ITEMINFO_TITLE, GetItemsResource.OFFERS_LISTINGS_PRICE]
+resources = [
+    GetItemsResource.ITEM_INFO_DOT_TITLE,
+    GetItemsResource.OFFERS_V2_DOT_LISTINGS_DOT_PRICE,
+]
 items = api.get_items(["B01N5IB20Q"], resources=resources)
 ```

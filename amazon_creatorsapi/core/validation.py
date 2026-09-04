@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, TypeVar
+
+from pydantic import BaseModel, ValidationError
 
 from amazon_creatorsapi.core.marketplaces import MARKETPLACES
 from amazon_creatorsapi.errors import InvalidArgumentError
 
 if TYPE_CHECKING:
     from amazon_creatorsapi.core.marketplaces import CountryCode
+
+RequestT = TypeVar("RequestT", bound=BaseModel)
 
 
 def validate_and_get_marketplace(
@@ -59,3 +63,63 @@ def validate_timeout(timeout: float | None) -> float | None:
         msg = "Timeout must be greater than zero, or None to wait indefinitely"
         raise InvalidArgumentError(msg)
     return float(timeout)
+
+
+def build_request(request_class: type[RequestT], **fields: Any) -> RequestT:
+    """Build a request for the SDK, validating the values it receives.
+
+    Args:
+        request_class: Request model from the SDK.
+        fields: Values for the request, using the names of the API.
+
+    Returns:
+        The request model filled with the provided values.
+
+    Raises:
+        InvalidArgumentError: If any value is rejected by the API constraints.
+
+    """
+    try:
+        return request_class(**fields)
+    except ValidationError as error:
+        details = "; ".join(
+            f"{'.'.join(str(location) for location in issue['loc'])}: {issue['msg']}"
+            for issue in error.errors()
+        )
+        msg = f"Invalid parameters for the request: {details}"
+        raise InvalidArgumentError(msg) from error
+
+
+def validate_retries(retries: int) -> int:
+    """Validate the amount of retries for a failed request.
+
+    Args:
+        retries: Amount of extra attempts for a failure that can be retried.
+
+    Returns:
+        The amount of retries as an integer.
+
+    Raises:
+        InvalidArgumentError: If the amount of retries is negative.
+
+    """
+    if retries < 0:
+        msg = "Retries must be zero or greater"
+        raise InvalidArgumentError(msg)
+    return int(retries)
+
+
+def validate_search_criteria(**criteria: object) -> None:
+    """Validate that a search has at least one criterion to look for.
+
+    Args:
+        criteria: Arguments of the search, by name.
+
+    Raises:
+        InvalidArgumentError: If every criterion is missing.
+
+    """
+    if all(value is None for value in criteria.values()):
+        names = ", ".join(criteria)
+        msg = f"At least one of these arguments is required: {names}"
+        raise InvalidArgumentError(msg)

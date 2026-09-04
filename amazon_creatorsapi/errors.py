@@ -29,12 +29,22 @@ class AuthenticationError(AmazonCreatorsApiError):
     """Raised when OAuth2 authentication fails."""
 
 
+class AccessDeniedError(AmazonCreatorsApiError):
+    """Raised when the credentials cannot perform the requested operation."""
+
+
+class ResourceNotFoundError(AmazonCreatorsApiError):
+    """Raised when the requested feed or report does not exist."""
+
+
 __all__ = [
+    "AccessDeniedError",
     "AmazonCreatorsApiError",
     "AssociateValidationError",
     "AuthenticationError",
     "InvalidArgumentError",
     "ItemsNotFoundError",
     "RequestError",
+    "ResourceNotFoundError",
     "TooManyRequestsError",
 ]

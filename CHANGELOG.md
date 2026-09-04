@@ -5,6 +5,64 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.4.0] - 2026-09-04
+
+### Added
+
+- `availability` parameter in `search_items` to include the items that are out of stock
+- `host` and `auth_endpoint` parameters in `AmazonCreatorsApi` and `AsyncAmazonCreatorsApi` to replace the endpoints of the API, useful to run tests against a mock server
+- `get_asin` and `errors` are available directly in `amazon_creatorsapi`
+- The identifier that Amazon gives to a request is part of the message of the error, so it can be reported to Amazon support
+- `py.typed` marker, so the type hints of the package are used by type checkers
+
+### Changed
+
+- `search_items` rejects a search without any criteria instead of sending it to the API
+- `AsyncAmazonCreatorsApi` builds its requests with the models of the SDK, so both clients validate the same values before sending a request
+- Every client uses its own configuration for the SDK instead of the one shared by the whole process
+- Throttling is measured with a monotonic clock and is safe to use from several threads
+
+### Fixed
+
+- Examples in the documentation that used names that do not exist, such as `SortBy.PRICE_LOW_TO_HIGH` or `GetItemsResource.ITEMINFO_TITLE`
+- Documented limits of `item_count`, `min_reviews_rating` and `variation_page`, which did not match the ones accepted by the API
+
+### Removed
+
+- `six` dependency, which was not used
+
+## [7.3.0] - 2026-09-03
+
+### Added
+
+- `retries` parameter in `AmazonCreatorsApi` and `AsyncAmazonCreatorsApi` to retry the throttled and failed requests that Amazon asks to retry, waiting longer before every attempt and honouring the `Retry-After` header
+- `AccessDeniedError`, raised when the credentials cannot perform the requested operation
+- `ResourceNotFoundError`, raised when a feed or report does not exist, telling it apart from missing items
+
+### Changed
+
+- Errors are mapped from the response of the Creators API instead of the codes of the old Product Advertising API, so the reason and the fields that failed are part of the message
+- A rejected request raises `InvalidArgumentError`, missing or expired credentials raise `AuthenticationError` and a forbidden request raises `AccessDeniedError`, instead of a generic `RequestError`
+- An expired token is refreshed once and the request is sent again instead of failing
+- Connection failures and unparseable responses raise `RequestError` instead of leaking the errors of the HTTP client
+
+## [7.2.0] - 2026-09-03
+
+### Added
+
+- `get_items` splits a request with more items than the API accepts into as many calls as needed, so any amount of items can be requested at once
+- `include_unavailable` parameter in `get_items` to get an item holding only the ASIN for every requested item missing from the response
+- Partial errors of a response are available in the `errors` attribute of the lists returned by `get_items` and `get_browse_nodes`, and are reported in the message of `ItemsNotFoundError`
+- `ErrorData` and `ResultList` available in `amazon_creatorsapi.models`
+
+### Changed
+
+- `get_items` returns the items in the order they were requested, and asks for duplicated items only once
+- `AmazonCreatorsApi` applies the timeout to the OAuth2 token refresh as well, which previously waited indefinitely, and reports its failures as `AuthenticationError`
+- `AmazonCreatorsApi` validates the version when it is created, as `AsyncAmazonCreatorsApi` already did, instead of failing on the first request
+- Values rejected by the API constraints raise `InvalidArgumentError` instead of a `pydantic.ValidationError`
+- `get_items` raises `ItemsNotFoundError` when the response holds no items, as documented, instead of returning an empty list
+
 ## [7.1.0] - 2026-09-03
 
 ### Added
