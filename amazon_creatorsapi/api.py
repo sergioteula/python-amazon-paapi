@@ -112,7 +112,7 @@ class AmazonCreatorsApi:
         throttling: Wait time in seconds between API calls. Defaults to 1 second.
         timeout: Request timeout in seconds, a pair of ``(connect, read)``
             seconds bounding each leg on its own, or None to wait
-            indefinitely. Defaults to 30 seconds.
+            indefinitely. Defaults to 5 seconds to connect and 25 to read.
         retries: Extra attempts for the failures that Amazon asks to retry,
             waiting longer before every attempt. Defaults to 3.
         host: Base URL of the API. Defaults to the Amazon Creators API.

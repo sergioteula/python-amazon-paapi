@@ -1555,6 +1555,23 @@ class TestAmazonCreatorsApiItems(unittest.TestCase):
         with self.assertRaises(InvalidArgumentError):
             self.build_api_with_timeouts(timeout=(0, 12.0))
 
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_default_timeout_bounds_connect_and_read_apart(
+        self,
+        mock_client_class: MagicMock,
+    ) -> None:
+        """Test that the default bounds each leg, and still adds up to 30.
+
+        A single value is spent on the connect leg once per address the host
+        resolves to, so the default splits the thirty seconds it has always
+        documented rather than applying them twice over.
+        """
+        mock_client_class.return_value = MagicMock()
+
+        api = self.build_api_with_timeouts()
+
+        self.assertEqual(api.timeout, (5.0, 25.0))
+
     def build_api_with_timeouts(
         self,
         timeout: TimeoutValue | None = DEFAULT_TIMEOUT,

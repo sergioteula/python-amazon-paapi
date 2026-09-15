@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `timeout` in `AmazonCreatorsApi` and `AsyncAmazonCreatorsApi` accepts a pair of `(connect, read)` seconds, bounding each leg of a request on its own, so a host resolving to several addresses cannot spend a read-sized timeout on every one of them
 
+### Changed
+
+- The default timeout is `(5, 25)` rather than `30`, bounding the connect leg at five seconds and the read at twenty-five. It still adds up to the thirty seconds it has always documented, and a host resolving to several addresses no longer spends a read-sized timeout on each of them. It also makes the documented thirty seconds true of the token request and of the async client, where a single value was applied to the connect and the read leg separately and allowed sixty
+
 ## [7.0.0] - 2026-09-04
 
 ### Added

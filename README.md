@@ -226,8 +226,11 @@ The interval is kept per client and is safe to share between threads.
 
 ### Timeout
 
-Timeout value represents the number of seconds to wait for a response before failing,
-being the default value 30 seconds. Use `None` to wait indefinitely.
+Timeout value represents the number of seconds to wait for a response before failing.
+Use `None` to wait indefinitely.
+
+The default is `(5, 25)`: five seconds to establish the connection and twenty-five to
+read the response, thirty in total.
 
 ```python
 api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, timeout=10)  # Fails after 10 seconds

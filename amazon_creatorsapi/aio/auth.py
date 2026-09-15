@@ -67,7 +67,8 @@ class AsyncOAuth2TokenManager:
         auth_endpoint: Optional custom auth endpoint URL.
         timeout: Token request timeout in seconds, a pair of
             ``(connect, read)`` seconds bounding each leg on its own, or None
-            to wait indefinitely. Defaults to 30 seconds.
+            to wait indefinitely. Defaults to 5 seconds to connect and
+            25 to read.
 
     """
 
