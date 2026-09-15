@@ -12,10 +12,13 @@ from typing import TYPE_CHECKING, Any
 
 from typing_extensions import Self
 
+from amazon_creatorsapi.aio.timeouts import build_httpx_timeout
 from amazon_creatorsapi.core.constants import DEFAULT_TIMEOUT
 
 if TYPE_CHECKING:
     from types import TracebackType
+
+    from amazon_creatorsapi.core.constants import TimeoutValue
 
 try:
     import httpx
@@ -65,15 +68,16 @@ class AsyncHttpClient:
 
     Args:
         host: Base URL for API requests. Defaults to Amazon Creators API.
-        timeout: Request timeout in seconds, or None to wait indefinitely.
-            Defaults to 30.
+        timeout: Request timeout in seconds, a pair of ``(connect, read)``
+            seconds bounding each leg on its own, or None to wait
+            indefinitely. Defaults to 30.
 
     """
 
     def __init__(
         self,
         host: str = DEFAULT_HOST,
-        timeout: float | None = DEFAULT_TIMEOUT,
+        timeout: TimeoutValue | None = DEFAULT_TIMEOUT,
     ) -> None:
         """Initialize the async HTTP client."""
         self._host = host
@@ -85,7 +89,7 @@ class AsyncHttpClient:
         """Enter async context manager, creating a persistent client."""
         self._client = httpx.AsyncClient(
             base_url=self._host,
-            timeout=self._timeout,
+            timeout=build_httpx_timeout(self._timeout),
             headers={"User-Agent": USER_AGENT},
         )
         self._owns_client = True
@@ -134,7 +138,7 @@ class AsyncHttpClient:
             # Create a new client for this request (standalone mode)
             async with httpx.AsyncClient(
                 base_url=self._host,
-                timeout=self._timeout,
+                timeout=build_httpx_timeout(self._timeout),
             ) as client:
                 response = await client.post(
                     path,

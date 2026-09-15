@@ -268,6 +268,16 @@ api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, timeout=0.5)  # Fails
 
 It applies to every API request, including the OAuth2 token refresh.
 
+A pair of `(connect, read)` seconds bounds each leg of the request on its own. This
+matters for a host resolving to several addresses: the connect leg is spent once per
+address, so a single value generous enough to read a slow response is also spent on
+every address that fails to answer.
+
+```python
+# Gives up on an unresponsive address after 1 second, and still reads for 10
+api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, timeout=(1, 10))
+```
+
 ## Retries
 
 Amazon asks clients to back off and try again when it throttles a request or fails to

@@ -1,5 +1,17 @@
 """Constants for the Amazon Creators API."""
 
+from __future__ import annotations
+
+from typing import Union
+
+TimeoutValue = Union[float, "tuple[float, float]"]
+"""Seconds for the whole request, or ``(connect, read)`` seconds per leg.
+
+The pair matters for a host that resolves to several addresses: the connect
+leg is spent once per address, so a single value generous enough to read a
+slow response is also spent on every address that fails to answer.
+"""
+
 DEFAULT_HOST = "https://creatorsapi.amazon"
 DEFAULT_THROTTLING = 1
 DEFAULT_TIMEOUT = 30.0

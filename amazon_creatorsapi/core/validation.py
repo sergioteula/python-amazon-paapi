@@ -10,6 +10,7 @@ from amazon_creatorsapi.core.marketplaces import MARKETPLACES
 from amazon_creatorsapi.errors import InvalidArgumentError
 
 if TYPE_CHECKING:
+    from amazon_creatorsapi.core.constants import TimeoutValue
     from amazon_creatorsapi.core.marketplaces import CountryCode
 
 RequestT = TypeVar("RequestT", bound=BaseModel)
@@ -44,21 +45,47 @@ def validate_and_get_marketplace(
     raise InvalidArgumentError(msg)
 
 
-def validate_timeout(timeout: float | None) -> float | None:
+def validate_timeout(timeout: TimeoutValue | None) -> TimeoutValue | None:
     """Validate the request timeout value.
 
     Args:
-        timeout: Request timeout in seconds, or None to wait indefinitely.
+        timeout: Request timeout in seconds, a pair of ``(connect, read)``
+            seconds bounding each leg on its own, or None to wait
+            indefinitely.
 
     Returns:
-        The timeout as a float, or None when disabled.
+        The timeout as a float, as a pair of floats, or None when disabled.
 
     Raises:
-        InvalidArgumentError: If the timeout is not greater than zero.
+        InvalidArgumentError: If a timeout is not greater than zero, or if a
+            pair does not hold exactly two of them.
 
     """
     if timeout is None:
         return None
+    if not isinstance(timeout, tuple):
+        return _validate_seconds(timeout)
+    try:
+        connect, read = timeout
+    except ValueError as error:
+        msg = f"Timeout must be a pair of (connect, read) seconds: {timeout!r}"
+        raise InvalidArgumentError(msg) from error
+    return _validate_seconds(connect), _validate_seconds(read)
+
+
+def _validate_seconds(timeout: float) -> float:
+    """Validate a number of seconds used as a timeout.
+
+    Args:
+        timeout: Timeout in seconds, whether on its own or one leg of a pair.
+
+    Returns:
+        The timeout as a float.
+
+    Raises:
+        InvalidArgumentError: If it is not a number greater than zero.
+
+    """
     try:
         value = float(timeout)
     except (TypeError, ValueError) as error:
