@@ -226,8 +226,11 @@ The interval is kept per client and is safe to share between threads.
 
 ### Timeout
 
-Timeout value represents the number of seconds to wait for a response before failing,
-being the default value 30 seconds. Use `None` to wait indefinitely.
+Timeout value represents the number of seconds to wait for a response before failing.
+Use `None` to wait indefinitely.
+
+The default is `(5, 25)`: five seconds to establish the connection and twenty-five to
+read the response, thirty in total.
 
 ```python
 api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, timeout=10)  # Fails after 10 seconds
@@ -235,6 +238,16 @@ api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, timeout=0.5)  # Fails
 ```
 
 It applies to every API request, including the OAuth2 token refresh.
+
+A pair of `(connect, read)` seconds bounds each leg of the request on its own. This
+matters for a host resolving to several addresses: the connect leg is spent once per
+address, so a single value generous enough to read a slow response is also spent on
+every address that fails to answer.
+
+```python
+# Gives up on an unresponsive address after 1 second, and still reads for 10
+api = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, timeout=(1, 10))
+```
 
 ### Retries
 

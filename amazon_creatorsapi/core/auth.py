@@ -14,6 +14,7 @@ from amazon_creatorsapi.errors import AuthenticationError
 from creatorsapi_python_sdk.auth.oauth2_token_manager import OAuth2TokenManager
 
 if TYPE_CHECKING:
+    from amazon_creatorsapi.core.constants import TimeoutValue
     from creatorsapi_python_sdk.auth.oauth2_config import OAuth2Config
 
 
@@ -28,12 +29,17 @@ class TimeoutOAuth2TokenManager(OAuth2TokenManager):
 
     Args:
         config: OAuth2 configuration with the credentials and the endpoint.
-        timeout: Token request timeout in seconds, or None to wait
-            indefinitely.
+        timeout: Token request timeout in seconds, a pair of
+            ``(connect, read)`` seconds bounding each leg on its own, or None
+            to wait indefinitely.
 
     """
 
-    def __init__(self, config: OAuth2Config, timeout: float | None) -> None:
+    def __init__(
+        self,
+        config: OAuth2Config,
+        timeout: TimeoutValue | None,
+    ) -> None:
         """Initialize the token manager with its timeout."""
         super().__init__(config)
         self._timeout = timeout

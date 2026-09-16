@@ -12,7 +12,7 @@ import urllib3
 
 from amazon_creatorsapi import AmazonCreatorsApi
 from amazon_creatorsapi.core.auth import TimeoutOAuth2TokenManager
-from amazon_creatorsapi.core.constants import DEFAULT_TIMEOUT
+from amazon_creatorsapi.core.constants import DEFAULT_TIMEOUT, TimeoutValue
 from amazon_creatorsapi.core.oauth import VERSION_ENDPOINTS
 from amazon_creatorsapi.errors import (
     AccessDeniedError,
@@ -1532,6 +1532,59 @@ class TestAmazonCreatorsApiItems(unittest.TestCase):
         self.assertIsInstance(token_manager, TimeoutOAuth2TokenManager)
         self.assertEqual(token_manager._timeout, 12.0)
         self.assertEqual(api.timeout, 12.0)
+
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_timeout_accepts_a_pair(self, mock_client_class: MagicMock) -> None:
+        """Test that a pair reaches the SDK and the token request alike."""
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+
+        api = self.build_api_with_timeouts(timeout=(1.0, 12.0))
+
+        self.assertEqual(api.timeout, (1.0, 12.0))
+        self.assertEqual(mock_client._token_manager._timeout, (1.0, 12.0))
+
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_invalid_pair_raises_library_error(
+        self,
+        mock_client_class: MagicMock,
+    ) -> None:
+        """Test that a pair is validated like a single value."""
+        mock_client_class.return_value = MagicMock()
+
+        with self.assertRaises(InvalidArgumentError):
+            self.build_api_with_timeouts(timeout=(0, 12.0))
+
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_default_timeout_bounds_connect_and_read_apart(
+        self,
+        mock_client_class: MagicMock,
+    ) -> None:
+        """Test that the default bounds each leg, and still adds up to 30.
+
+        A single value is spent on the connect leg once per address the host
+        resolves to, so the default splits the thirty seconds it has always
+        documented rather than applying them twice over.
+        """
+        mock_client_class.return_value = MagicMock()
+
+        api = self.build_api_with_timeouts()
+
+        self.assertEqual(api.timeout, (5.0, 25.0))
+
+    def build_api_with_timeouts(
+        self,
+        timeout: TimeoutValue | None = DEFAULT_TIMEOUT,
+    ) -> AmazonCreatorsApi:
+        """Build an API client with the given timeout."""
+        return AmazonCreatorsApi(
+            credential_id=self.credential_id,
+            credential_secret=self.credential_secret,
+            version=self.version,
+            tag=self.tag,
+            country=self.country,
+            timeout=timeout,
+        )
 
     @mock.patch("amazon_creatorsapi.api.DefaultApi")
     @mock.patch("amazon_creatorsapi.api.ApiClient")

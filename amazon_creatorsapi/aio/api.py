@@ -87,6 +87,7 @@ from creatorsapi_python_sdk.models.search_items_resource import SearchItemsResou
 if TYPE_CHECKING:
     from types import TracebackType
 
+    from amazon_creatorsapi.core.constants import TimeoutValue
     from amazon_creatorsapi.core.marketplaces import CountryCode
     from creatorsapi_python_sdk.models.availability import Availability
     from creatorsapi_python_sdk.models.condition import Condition
@@ -168,8 +169,9 @@ class AsyncAmazonCreatorsApi:
         country: Country code (e.g., "ES", "US"). Used to determine marketplace.
         marketplace: Marketplace URL (e.g., "www.amazon.es"). Overrides country.
         throttling: Wait time in seconds between API calls. Defaults to 1 second.
-        timeout: Request timeout in seconds, or None to wait indefinitely.
-            Defaults to 30 seconds.
+        timeout: Request timeout in seconds, a pair of ``(connect, read)``
+            seconds bounding each leg on its own, or None to wait
+            indefinitely. Defaults to 5 seconds to connect and 25 to read.
         retries: Extra attempts for the failures that Amazon asks to retry,
             waiting longer before every attempt. Defaults to 3.
         host: Base URL of the API. Defaults to the Amazon Creators API.
@@ -196,7 +198,7 @@ class AsyncAmazonCreatorsApi:
         country: CountryCode | None = None,
         marketplace: str | None = None,
         throttling: float = DEFAULT_THROTTLING,
-        timeout: float | None = DEFAULT_TIMEOUT,
+        timeout: TimeoutValue | None = DEFAULT_TIMEOUT,
         retries: int = DEFAULT_RETRIES,
         host: str = DEFAULT_HOST,
         auth_endpoint: str | None = None,

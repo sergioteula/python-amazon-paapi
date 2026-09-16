@@ -7,8 +7,9 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
+from amazon_creatorsapi.aio.timeouts import build_httpx_timeout
 from amazon_creatorsapi.core.constants import DEFAULT_TIMEOUT, HTTP_OK
 from amazon_creatorsapi.core.oauth import (
     COGNITO_SCOPE,
@@ -22,6 +23,9 @@ from amazon_creatorsapi.core.oauth import (
     is_lwa,
 )
 from amazon_creatorsapi.errors import AuthenticationError
+
+if TYPE_CHECKING:
+    from amazon_creatorsapi.core.constants import TimeoutValue
 
 try:
     import httpx
@@ -61,8 +65,10 @@ class AsyncOAuth2TokenManager:
         credential_secret: OAuth2 credential secret.
         version: API version (determines auth endpoint).
         auth_endpoint: Optional custom auth endpoint URL.
-        timeout: Token request timeout in seconds, or None to wait
-            indefinitely. Defaults to 30 seconds.
+        timeout: Token request timeout in seconds, a pair of
+            ``(connect, read)`` seconds bounding each leg on its own, or None
+            to wait indefinitely. Defaults to 5 seconds to connect and
+            25 to read.
 
     """
 
@@ -72,7 +78,7 @@ class AsyncOAuth2TokenManager:
         credential_secret: str,
         version: str,
         auth_endpoint: str | None = None,
-        timeout: float | None = DEFAULT_TIMEOUT,
+        timeout: TimeoutValue | None = DEFAULT_TIMEOUT,
     ) -> None:
         """Initialize the async OAuth2 token manager."""
         self._credential_id = credential_id
@@ -189,7 +195,9 @@ class AsyncOAuth2TokenManager:
         }
 
         try:
-            async with httpx.AsyncClient(timeout=self._timeout) as client:
+            async with httpx.AsyncClient(
+                timeout=build_httpx_timeout(self._timeout),
+            ) as client:
                 if self.is_lwa():
                     response = await client.post(
                         self._auth_endpoint,
