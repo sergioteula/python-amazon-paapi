@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [7.1.0] - 2026-09-16
 
 ### Added
 
@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- The default timeout is `(5, 25)` rather than `30`, bounding the connect leg at five seconds and the read at twenty-five. It still adds up to the thirty seconds it has always documented, and a host resolving to several addresses no longer spends a read-sized timeout on each of them. It also makes the documented thirty seconds true of the token request and of the async client, where a single value was applied to the connect and the read leg separately and allowed sixty
+- The default timeout is `(5, 25)` rather than `30`, five seconds to connect and twenty-five to read. It adds up to the thirty seconds that have always been documented and makes them true of the token request and of the async client too, where a single value was applied to each leg separately and allowed sixty. A response taking between twenty-five and thirty seconds now times out where it used to arrive
 
 ## [7.0.0] - 2026-09-04
 
