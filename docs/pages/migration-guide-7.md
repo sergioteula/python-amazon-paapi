@@ -18,7 +18,7 @@ the changes that look breaking and are not.
 | `search_items` needs a criterion | A search with only filters | Add `keywords` or any other criterion |
 | `get_items` raises when nothing is found | `if not items:` | Catch `ItemsNotFoundError`, or use `include_unavailable` |
 | `get_items` returns the requested order | Reading the response by position | Read it by position, or match by `asin` |
-| The synchronous client times out | Requests above 30 seconds | Pass `timeout` |
+| The synchronous client times out | Requests above 5 seconds to connect or 25 to read | Pass `timeout` |
 | Failed requests are retried | Handling a `429` yourself | Pass `retries=0` |
 | `get_asin` rejects a long identifier | Malformed URLs | Fix the URLs |
 | The version is validated on creation | An unsupported `version` | Use a supported one, or pass `auth_endpoint` |
@@ -156,8 +156,9 @@ every ten items, each one waiting for the configured `throttling`.
 
 ## Timeouts
 
-The synchronous client waited indefinitely for a response. It now uses the same 30
-second timeout that the asynchronous one already had:
+The synchronous client waited indefinitely for a response. It now uses the same default
+timeout as the asynchronous one, five seconds to establish the connection and
+twenty-five to read the response:
 
 ```python
 api = AmazonCreatorsApi(..., timeout=60)    # Wait up to a minute

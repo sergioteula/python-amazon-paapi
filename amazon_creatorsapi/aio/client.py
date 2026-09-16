@@ -70,7 +70,7 @@ class AsyncHttpClient:
         host: Base URL for API requests. Defaults to Amazon Creators API.
         timeout: Request timeout in seconds, a pair of ``(connect, read)``
             seconds bounding each leg on its own, or None to wait
-            indefinitely. Defaults to 30.
+            indefinitely. Defaults to 5 seconds to connect and 25 to read.
 
     """
 
