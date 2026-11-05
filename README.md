@@ -63,6 +63,10 @@ gave you along with the credentials, and it also decides which endpoint issues t
 token. The accepted values are `2.1`, `2.2`, `2.3`, `3.1`, `3.2` and `3.3`; any other one
 raises `ValueError` when the client is created.
 
+If you are not sure whether a set of credentials works, you can test it in the browser with
+[AMZ Scratchpad](https://amzscratchpad.com/). It checks the token, the API access and the partner tag separately and
+explains the error codes Amazon returns.
+
 The marketplace is chosen with `country`, which accepts `AU`, `BE`, `BR`, `CA`, `DE`,
 `ES`, `FR`, `IN`, `IT`, `JP`, `MX`, `NL`, `PL`, `SA`, `SE`, `SG`, `TR`, `UK`, `US` and
 `AE`, either as a string or through the `Country` constants. Pass `marketplace` instead
